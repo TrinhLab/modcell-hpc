@@ -1,1 +1,4 @@
 notes
+*.o
+src/modcell
+test.sh
