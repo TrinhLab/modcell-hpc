@@ -1,9 +1,9 @@
-objective=wgcp
+objective_type=wgcp
 alpha=5
 beta=1
-popsize=100
-ngen=200
-ncores=4
+population_size=100
+n_generations=200
+n_cores=4
 seed=4
 pcross_bin=0.1
 pmut_bin=0.1
