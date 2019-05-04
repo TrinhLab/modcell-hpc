@@ -14,6 +14,21 @@ get_file_extension(const char *fspec) {
     return ++e; /* pointer increased to avoid . in extension */
 }
 
+char *
+remove_file_extension(char* mystr) {
+    char *retstr;
+    char *lastdot;
+    if (mystr == NULL)
+         return NULL;
+    if ((retstr = malloc (strlen (mystr) + 1)) == NULL)
+        return NULL;
+    strcpy (retstr, mystr);
+    lastdot = strrchr (retstr, '.');
+    if (lastdot != NULL)
+        *lastdot = '\0';
+    return retstr;
+}
+
 int
 is_extension(char *file_name, char *extension){
     if(strcmp(get_file_extension(file_name), extension) == 0)
@@ -64,7 +79,7 @@ void free_charlist(Charlist c){
 Charlist
 read_dir(const char *dir_path){
 	Charlist charlist = {NULL, 0};
-    	size_t it = 0;              /* general iterator variable        */
+    	size_t it = 0;
     	size_t lmax = LMAX;         /* current array pointer allocation */
     	DIR *d;
     	struct dirent *dir;
@@ -78,7 +93,6 @@ read_dir(const char *dir_path){
 	alloc_charlist(&charlist);
     	while ((dir = readdir(d)) != NULL) {
         	charlist.array[charlist.n++] = strdup(dir->d_name);
-
 		lmax = realloc_charlist(&charlist, &lmax);
     	}
     	closedir(d);
@@ -88,12 +102,12 @@ read_dir(const char *dir_path){
 Charlist
 read_file(const char *file_path){
 	Charlist charlist = {NULL, 0};
-	char *ln = NULL;            /* NULL forces getline to allocate  */
+	char *ln = NULL;
     	size_t n = 0;               /* buf size, 0 use getline default  */
     	ssize_t nchr = 0;           /* number of chars actually read    */
-    	size_t it = 0;              /* general iterator variable        */
+    	size_t it = 0;
     	size_t lmax = LMAX;         /* current array pointer allocation */
-    	FILE *fp = NULL;            /* file pointer                     */
+    	FILE *fp = NULL;
 
 
 	if (!(fp = fopen (file_path, "r"))) {
@@ -105,14 +119,14 @@ read_file(const char *file_path){
     	while ((nchr = getline (&ln, &n, fp)) != -1)  /* Note:- ssize_t getline (char **ln, size_t *n, FILE *fp) */
     	{
         	while (nchr > 0 && (ln[nchr-1] == '\n' || ln[nchr-1] == '\r'))
-            	ln[--nchr] = 0;     /* strip newline or carriage rtn    */
+            		ln[--nchr] = 0;     /* strip newline or carriage rtn    */
 
         	charlist.array[charlist.n++] = strdup (ln);
 		lmax = realloc_charlist(&charlist, &lmax);
     	}
 
-    	if (fp) fclose (fp);        /* close file */
-    	if (ln) free (ln);          /* free memory allocated to ln  */
+    	if (fp) fclose (fp);
+    	if (ln) free (ln);
 
     	return charlist;
 }

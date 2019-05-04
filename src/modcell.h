@@ -29,6 +29,8 @@ typedef struct MCproblem
 	unsigned int alpha;
 	unsigned int beta;
 	unsigned int n_models;
+	char **model_names;
+
       	glp_prob **Ps;//[nmodels];
 	// refbounds *rbounds; This can be added later if glp query has too much overhead
 	unsigned int **individual2glp; //[nmodels][nvars] Contains model index that individual maps to or NOT_CANDIDATE if module is fixed.
@@ -65,3 +67,8 @@ void free_population(MCproblem *mcp, Population *pop);
 void allocate_individual(MCproblem *mcp, Individual *indv);
 void free_individual(MCproblem *mcp, Individual *indv);
 
+/* functions.c */
+double calculate_objectives(MCproblem *mcp, Individual *indv);
+
+/* moea.c */
+Population run_moea(MCproblem *mcp, Population *initial_population);

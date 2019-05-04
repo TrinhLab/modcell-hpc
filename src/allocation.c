@@ -20,6 +20,9 @@ allocate_individual_designvars(MCproblem *mcp,  Individual *indv){
         for (int k = 0; k < mcp->n_models; k++)
             indv->modules[k] = malloc(mcp->n_vars * sizeof( **(indv->modules) ));
     }
+
+        indv->objectives = (double *)malloc(mcp->n_models * sizeof(double));
+        indv->penalty_objectives = (double *)malloc(mcp->n_models * sizeof(double));
 }
 
 void
@@ -67,7 +70,4 @@ free_individual(MCproblem *mcp, Individual *indv){
         glp_delete_prob(indv->Ps[k]);
     free(indv->Ps);
 }
-
-
-
 
