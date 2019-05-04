@@ -6,79 +6,114 @@
 
 #define LMAX 255
 
-/* Get the extension of a file */
-const char *getExt (const char *fspec) {
+const char *
+get_file_extension(const char *fspec) {
     char *e = strrchr (fspec, '.');
     if (e == NULL)
-        e = ""; // fast method, could also use &(fspec[strlen(fspec)]).
-    return e;
+        e = "";
+    return ++e; /* pointer increased to avoid . in extension */
 }
 
-/* Read each line of a text file of arbitrary size into an array*/
-struct file {
-	char **array; /* array of pointers to char        */
-	size_t nlines;
-};
-struct file readFile(const char *filepath){
-	struct file myfile = {NULL, 0};
-	char *ln = NULL;            /* NULL forces getline to allocate  */
-    size_t n = 0;               /* buf size, 0 use getline default  */
-    ssize_t nchr = 0;           /* number of chars actually read    */
-    size_t it = 0;              /* general iterator variable        */
-    size_t lmax = LMAX;         /* current array pointer allocation */
-    FILE *fp = NULL;            /* file pointer                     */
+int
+is_extension(char *file_name, char *extension){
+    if(strcmp(get_file_extension(file_name), extension) == 0)
+        return 1;
+    return 0;
+}
 
+void
+set_full_path(char *full_path, const char *parent_path, const char *file_path) {
+    	    strcpy(full_path, parent_path);
+    	    strcat(full_path, file_path);
+}
 
-    if (!(fp = fopen (filepath, "r"))) { /* open file for reading    */
-        fprintf (stderr, "error: file open failed '%s'.", filepath);
+/* A dynamic array of char* to get file or directory contents*/
+typedef struct  {
+	char **array;
+	size_t n;
+} Charlist;
+
+void
+alloc_charlist(Charlist *charlist){
+if (!(charlist->array = calloc (LMAX, sizeof *charlist->array ))) {
+	fprintf (stderr, "error: memory allocation failed.");
 	exit(-1);
-    }
+}
+}
 
-    /* allocate LMAX pointers and set to NULL. Each of the 255 pointers will
-       point to (hold the address of) the beginning of each string read from
-       the file below. This will allow access to each string with array[x].
-    */
-    if (!(myfile.array = calloc (LMAX, sizeof *myfile.array ))) {
-        fprintf (stderr, "error: memory allocation failed.");
-	exit(-1);
-    }
-
-    /* prototype - ssize_t getline (char **ln, size_t *n, FILE *fp)
-       above we declared: char *ln and size_t n. Why don't they match? Simple,
-       we will be passing the address of each to getline, so we simply precede
-       the variable with the urinary '&' which forces an addition level of
-       dereference making char* char** and size_t size_t *. Now the arguments
-       match the prototype.
-    */
-    while ((nchr = getline (&ln, &n, fp)) != -1)    /* read line    */
-    {
-        while (nchr > 0 && (ln[nchr-1] == '\n' || ln[nchr-1] == '\r'))
-            ln[--nchr] = 0;     /* strip newline or carriage rtn    */
-
-        /* allocate & copy ln to array - this will create a block of memory
-           to hold each character in ln and copy the characters in ln to that
-           memory address. The address will then be stored in array[nlines].
-           (nlines++ just increases nlines by 1 so it is ready for the next address)
-           There is a lot going on in that simple: array[nlines++] = strdup (ln);
-        */
-        myfile.array[myfile.nlines++] = strdup (ln);
-
-        if (myfile.nlines == lmax) {      /* if lmax lines reached, realloc   */
-            char **tmp = realloc (myfile.array, lmax * 2 * sizeof *myfile.array);
+size_t
+realloc_charlist(Charlist *charlist, size_t *p_lmax){
+	size_t lmax = (size_t)&p_lmax;
+        if (charlist->n == lmax) {      /* if lmax lines reached, realloc   */
+            char **tmp = realloc (charlist->array, lmax * 2 * sizeof *charlist->array);
             if (!tmp)
 		exit(-1);
-            myfile.array = tmp;
-            lmax *= 2;
+            charlist->array = tmp;
+            return lmax * 2;
         }
-    }
-
-    if (fp) fclose (fp);        /* close file */
-    if (ln) free (ln);          /* free memory allocated to ln  */
-
-    return myfile;
+	return lmax;
 }
-void freeFile(struct file f){
-    for (int it = 0; it < f.nlines; it++)        /* free array memory    */
-        free (f.array[it]);
-    free (f.array);
+
+void free_charlist(Charlist c){
+    	for (int i = 0; i < c.n; i++)
+        	free (c.array[i]);
+    	free (c.array);
 }
+
+/* Read each file name of a directory*/
+Charlist
+read_dir(const char *dir_path){
+	Charlist charlist = {NULL, 0};
+    	size_t it = 0;              /* general iterator variable        */
+    	size_t lmax = LMAX;         /* current array pointer allocation */
+    	DIR *d;
+    	struct dirent *dir;
+
+    	d = opendir(dir_path);
+    	if (!d) {
+        	fprintf (stderr, "error: opening problem directory: '%s'.", dir_path);
+		exit(-1);
+    	}
+
+	alloc_charlist(&charlist);
+    	while ((dir = readdir(d)) != NULL) {
+        	charlist.array[charlist.n++] = strdup(dir->d_name);
+
+		lmax = realloc_charlist(&charlist, &lmax);
+    	}
+    	closedir(d);
+    	return charlist;
+}
+
+Charlist
+read_file(const char *file_path){
+	Charlist charlist = {NULL, 0};
+	char *ln = NULL;            /* NULL forces getline to allocate  */
+    	size_t n = 0;               /* buf size, 0 use getline default  */
+    	ssize_t nchr = 0;           /* number of chars actually read    */
+    	size_t it = 0;              /* general iterator variable        */
+    	size_t lmax = LMAX;         /* current array pointer allocation */
+    	FILE *fp = NULL;            /* file pointer                     */
+
+
+	if (!(fp = fopen (file_path, "r"))) {
+        	fprintf (stderr, "error: file open failed '%s'.", file_path);
+        	exit(-1);
+    	}
+
+	alloc_charlist(&charlist);
+    	while ((nchr = getline (&ln, &n, fp)) != -1)  /* Note:- ssize_t getline (char **ln, size_t *n, FILE *fp) */
+    	{
+        	while (nchr > 0 && (ln[nchr-1] == '\n' || ln[nchr-1] == '\r'))
+            	ln[--nchr] = 0;     /* strip newline or carriage rtn    */
+
+        	charlist.array[charlist.n++] = strdup (ln);
+		lmax = realloc_charlist(&charlist, &lmax);
+    	}
+
+    	if (fp) fclose (fp);        /* close file */
+    	if (ln) free (ln);          /* free memory allocated to ln  */
+
+    	return charlist;
+}
+

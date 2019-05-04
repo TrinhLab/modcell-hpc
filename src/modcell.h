@@ -8,8 +8,7 @@
 
 /* Main structures */
 
-typedef struct
-{
+typedef struct {
 	// modcell
 	bool *deletions;//[nbits];
     	bool **modules;//[nmodels][nbits];
