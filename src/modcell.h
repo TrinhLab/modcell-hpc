@@ -4,16 +4,12 @@
 
 #define NOT_CANDIDATE -1
 
-//extern pcg32_random_t rng;
-
-/* Main structures */
-
 typedef struct {
-	// modcell
+	/* modcell */
 	bool *deletions;//[nbits];
     	bool **modules;//[nmodels][nbits];
       	glp_prob **Ps;//[nmodels];
-	// moea
+	/* MOEA */
 	int rank;
 	double crowding_distance;
 	double *objectives;//[nmodels];
@@ -21,13 +17,12 @@ typedef struct {
 
 } Individual;
 
-//typedef struct
-//{
-//	individual *ind;
-//} population;
+typedef struct
+{
+	Individual *indv;
+	size_t size;
+} Population;
 
-
-// General problem information
 typedef struct MCproblem
 {
 	char *objective_type; // maybe use enum for this?
@@ -40,7 +35,7 @@ typedef struct MCproblem
 	char **individual2id; //[nvars] Maps individual indices to reaction ID.
 	// hash archive; // maps individuals deletions and module variables into objective values
 
-	//MOEA
+	/* MOEA */
 	unsigned int n_cores;
     	unsigned int seed;
     	int n_vars;
@@ -51,8 +46,8 @@ typedef struct MCproblem
     //double eta_c;
     //double eta_m;
     	int n_generations;
-    int nbinmut;
-    int nbincross;
+    	int nbinmut;
+    	int nbincross;
     //int *nbits;
     //int bitlength;
     //int choice;
@@ -65,8 +60,8 @@ typedef struct MCproblem
 
 
 /* allocation.c */
-Individual initialize_individual(MCproblem *mcp);
+void allocate_population(MCproblem *mcp, Population *indv, size_t size);
+void free_population(MCproblem *mcp, Population *pop);
+void allocate_individual(MCproblem *mcp, Individual *indv);
 void free_individual(MCproblem *mcp, Individual *indv);
-Individual **initialize_population(MCproblem *mcp);
-void free_population(MCproblem *mcp, Individual *indv);
 

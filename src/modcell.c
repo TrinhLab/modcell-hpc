@@ -1,3 +1,5 @@
+/* Main file, essentially handles IO */
+
 #include <stdio.h>
 #include <string.h>
 #include <dirent.h>
@@ -5,10 +7,13 @@
 #include "modcell.h"
 
 
-// Move to header? Should modcell.h be renamed? e.g. to general.h?
+// Should modcell.h be renamed? e.g. to general.h?
 MCproblem read_problem(const char *problem_dir);
 bool is_not_candidate(Charlist ncandfile, const char *rxnid);
 void load_parameters(MCproblem *mcp, const char *filepath);
+void set_random_population(MCproblem *mcp, Population *pop);
+void write_population(MCproblem *mcp, Population *pop, const char *out_population_path);
+void read_initial_population(MCproblem *mcp, Population *pop, const char *population_path);
 
 
 MCproblem
@@ -17,7 +22,6 @@ read_problem(const char *problem_dir_path){
     int i,k,j;
 
     Charlist pd = read_dir(problem_dir_path);
-
     /* Obtain basic info */
     mcp.n_models = 0;
     for (i=0; i < pd.n; i++){
@@ -26,7 +30,7 @@ read_problem(const char *problem_dir_path){
     	    mcp.n_models++;
         }
         /* Determine deletion candidates */
-        if(is_extension(pd.array[i], "cand")){
+        if(strcmp(pd.array[i], "cand") == 0){
             char cand_path[256];
             set_full_path(cand_path, problem_dir_path, pd.array[i]);
     	    Charlist f = read_file(cand_path);
@@ -57,7 +61,6 @@ read_problem(const char *problem_dir_path){
             k++;
         }
     }
-
     free_charlist(pd);
 
     /* Create maps between indvidual and bounds */
@@ -117,19 +120,31 @@ load_parameters(MCproblem *mcp, const char *filepath){
 }
 
 
-//void
-//writepopulation(MCproblem *mcp, Individual *outpop, const char *out_population_path){
-//}
-//
-//void
-//set_initial_population(MCproblem *mcp, Individual **pop, char *population_path){
-//};
-//
-//void
-//set_random_population(MCproblem *mcp, Individual **pop){
-//}
+/* Sets individual variables randomly while  meeting constraints        */
+/* Notes:                                                               */
+/*   -Module reactions simply initialize to all 0                       */
+void
+set_random_individual(MCproblem *mcp,  Individual *indv){
+    int i,j,k;
+    /* init deletions */
+    for (j = 0; j < mcp->n_vars; j++)
+        indv->deletions[j] = 1;
+    for (i = 0; i < mcp->alpha; i++)
+        indv->deletions[(int)pcg32_boundedrand(mcp->n_vars)] = 0;
+    /* init modules */
+    if (mcp->beta > 0){
+        for (int k = 0; k < mcp->n_models; k++){
+            indv->modules[k] = 0;
+        }
+     }
+}
 
-// population runmoea(MCproblem *mcp) // define on separate file
+void
+set_random_population(MCproblem *mcp, Population *pop){
+    for (int i=0; i < pop->size; i++)
+        set_random_individual(mcp, &(pop->indv[i]));
+}
+
 
 int
 main (int argc, char **argv) {
@@ -148,19 +163,24 @@ printf("--------------------------------------------------\n");
 pcg32_srandom(mcp.seed, 54u);
 
 /* Intialize population */
-// allocate
+Population *initial_population = (Population *)malloc(sizeof(Population));
+allocate_population(&mcp, initial_population, mcp.population_size);
+
 if (argc == 4){
     char pop_path[256];
     printf("Initial population path: %s\n", argv[3]);
     strcpy(pop_path, argv[3]);
-    // set population to file read
+    //read_initial_population(MCproblem *mcp, Population *pop, const char *population_path);
 }
 else{
     printf("Initial population not specified\n");
-    // set random population
+    set_random_population(&mcp, initial_population);
 }
 
 /* Run */
+
+//write_population(MCproblem *mcp, Population *pop, const char *out_population_path);
+free_population(&mcp, initial_population);
 
 return(0);
 }
