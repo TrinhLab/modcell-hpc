@@ -1,13 +1,19 @@
-# http://www.cs.colby.edu/maxwell/courses/tutorials/maketutor/
+CC = gcc
+LIBS = -lglpk
+CFLAGS = -O2 -march=native
 
-modcell: modcell.o pcg_basic.o
-	gcc modcell.o pcg_basic.o -lglpk -lm -o modcell
+SRC = $(wildcard *.c)
+ODIR = obj
 
-pcg_basic.o: pcg_basic.c
-	gcc -c pcg_basic.c
+_OBJ = $(SRC:.c=.o)
+OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
-modcell.o: modcell.c
-	gcc -c modcell.c
+$(ODIR)/%.o: %.c
+	$(CC) -c -o $@ $< $(CFLAGS)
 
+modcell: $(OBJ)
+	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
+
+.PHONY: clean
 clean:
-	rm -f *.o modcell
+	rm -f $(ODIR)/*.o modcell
