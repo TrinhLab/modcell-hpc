@@ -2,19 +2,17 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <dirent.h>
 #include <assert.h>
 #include "mcutils.h"
 #include "modcell.h"
 
-
-// Should modcell.h be renamed? e.g. to general.h?
 MCproblem read_problem(const char *problem_dir);
-bool is_not_candidate(Charlist ncandfile, const char *rxnid);
 void load_parameters(MCproblem *mcp, const char *filepath);
-void set_random_population(MCproblem *mcp, Population *pop);
+bool is_not_candidate(Charlist ncandfile, const char *rxnid);
 void write_population(MCproblem *mcp, Population *pop, const char *out_population_path);
 void read_population(MCproblem *mcp, Population *pop, const char *population_path);
+int get_rxn_idx(MCproblem *mcp, const char *rxn_id);
+int get_model_idx(MCproblem *mcp, const char *model_id);
 
 MCproblem
 read_problem(const char *problem_dir_path){
@@ -126,55 +124,6 @@ load_parameters(MCproblem *mcp, const char *filepath){
     if (fp) fclose (fp);
 }
 
-/* Sets individual variables randomly while  meeting constraints        */
-void
-set_random_individual(MCproblem *mcp,  Individual *indv){
-    int i,j,k;
-    int deleted_rxns[mcp->alpha]; // malloc?
-
-    /* init deletions */
-    for (j = 0; j < mcp->n_vars; j++)
-        indv->deletions[j] = 1;
-    for (i = 0; i < mcp->alpha; i++){
-        deleted_rxns[i] = pcg32_boundedrand(mcp->n_vars);
-        indv->deletions[deleted_rxns[i]] = 0;
-    }
-    /* init modules. Only one module reaction is inserted regardless of beta, this heuristic leads to better individuals*/
-    if (mcp->beta > 0){
-        for (int k = 0; k < mcp->n_models; k++){
-            for (j = 0; j < mcp->n_vars; j++)
-                    indv->modules[k][j] = 0;
-            indv->modules[k][deleted_rxns[(int)pcg32_boundedrand(mcp->alpha)]] = 1;
-        }
-     }
-
-    calculate_objectives(mcp, indv);
-}
-
-/* Individual without any genetic manipulations */
-void
-set_blank_individual(MCproblem *mcp,  Individual *indv){
-    int i,j,k;
-    /* init deletions */
-    for (j = 0; j < mcp->n_vars; j++)
-        indv->deletions[j] = 1;
-    /* init modules */
-    if (mcp->beta > 0){
-        for (int k = 0; k < mcp->n_models; k++){
-            for (j = 0; j < mcp->n_vars; j++)
-                indv->modules[k][j] = 0;
-        }
-     }
-    for (int k = 0; k < mcp->n_models; k++)
-        indv->objectives[k] = -1; /* Use this to indivate objectives are not calculated */
-}
-
-
-void
-set_random_population(MCproblem *mcp, Population *pop){
-    for (int i=0; i < pop->size; i++)
-        set_random_individual(mcp, &(pop->indv[i]));
-}
 
 void
 write_population(MCproblem *mcp, Population *pop, const char *out_population_path){

@@ -8,7 +8,6 @@ typedef struct {
 	/* modcell */
 	bool *deletions;//[nbits];
     	bool **modules;//[nmodels][nbits];
-      	glp_prob **Ps;//[nmodels];
 	/* MOEA */
 	int rank;
 	double crowding_distance;
@@ -61,11 +60,14 @@ typedef struct MCproblem
 } MCproblem;
 
 
-/* allocation.c */
+/* init.c */
 void allocate_population(MCproblem *mcp, Population *indv, size_t size);
 void free_population(MCproblem *mcp, Population *pop);
 void allocate_individual(MCproblem *mcp, Individual *indv);
 void free_individual(MCproblem *mcp, Individual *indv);
+void set_random_population(MCproblem *mcp, Population *pop);
+void set_blank_individual(MCproblem *mcp,  Individual *indv);
+void set_random_individual(MCproblem *mcp,  Individual *indv);
 
 /* functions.c */
 double calculate_objectives(MCproblem *mcp, Individual *indv);

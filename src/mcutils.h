@@ -1,5 +1,6 @@
-/* General purpose functions */
+/* General purpose routines*/
 
+#include <dirent.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -11,7 +12,7 @@ get_file_extension(const char *fspec) {
     char *e = strrchr (fspec, '.');
     if (e == NULL)
         e = "";
-    return ++e; /* pointer increased to avoid . in extension */
+    return ++e; /* pointer increased to avoid "." in extension */
 }
 
 char *
@@ -99,6 +100,7 @@ read_dir(const char *dir_path){
     	return charlist;
 }
 
+/* NOTE: This method may have issues dealing with large files */
 Charlist
 read_file(const char *file_path){
 	Charlist charlist = {NULL, 0};
