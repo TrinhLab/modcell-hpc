@@ -8,7 +8,7 @@
 
 MCproblem read_problem(const char *problem_dir);
 void load_parameters(MCproblem *mcp, const char *filepath);
-bool is_not_candidate(Charlist ncandfile, const char *rxnid);
+bool is_not_candidate(Charlist *ncandfile, const char *rxnid);
 void write_population(MCproblem *mcp, Population *pop, const char *out_population_path);
 void read_population(MCproblem *mcp, Population *pop, const char *population_path);
 int get_rxn_idx(MCproblem *mcp, const char *rxn_id);
@@ -52,13 +52,12 @@ read_problem(const char *problem_dir_path){
         if(is_extension(pd.array[i], "mps")){
             char *model_name = remove_file_extension(pd.array[i]);
 	    mcp.model_names[k] = strdup(model_name);
-	    //mcp.model_names[k] = strdup(pd.array[i]);
 
             char prob_path[256];
             set_full_path(prob_path, problem_dir_path, pd.array[i]);
 
             mcp.Ps[k] = glp_create_prob();
-            glp_read_mps(mcp.Ps[k], GLP_MPS_FILE, NULL, prob_path); // TODO: Silence this or redirect to log
+            glp_read_mps(mcp.Ps[k], GLP_MPS_FILE, NULL, prob_path); // TODO: Silence this or redirect to log:
             /* Calculate basis and solve so subsequent computations are warm-started */
             glp_adv_basis(mcp.Ps[k], 0);
             glp_simplex(mcp.Ps[k], &param);
@@ -79,7 +78,7 @@ read_problem(const char *problem_dir_path){
 
       	glp_create_index(mcp.Ps[k]);
         for(j=0; j < mcp.n_vars; j++){
-            if(is_not_candidate(ncandfile, mcp.individual2id[j]))
+            if(is_not_candidate(&ncandfile, mcp.individual2id[j]))
                 mcp.individual2glp[k][j] = NOT_CANDIDATE;
             else
                 mcp.individual2glp[k][j] = glp_find_col(mcp.Ps[k], mcp.individual2id[j]); /* If glp fails to find the column it will error */
@@ -92,9 +91,9 @@ return mcp;
 }
 
 bool
-is_not_candidate(Charlist ncandfile, const char *rxnid){
-    for (int i=0; i < ncandfile.n; i++)
-        if(!strcmp(ncandfile.array[i], rxnid))
+is_not_candidate(Charlist *ncandfile, const char *rxnid){
+    for (int i=0; i < ncandfile->n; i++)
+        if(!strcmp(ncandfile->array[i], rxnid))
                 return true;
     return false;
 }
@@ -200,7 +199,7 @@ get_model_idx(MCproblem *mcp, const char *model_id){
 void
 read_population(MCproblem *mcp, Population *pop, const char *population_path){
     int population_size, alpha, beta;
-    char buff[1000];
+    char buff[1000]; //TODO: Is there a way to detect overflow of this buffer?
     int lc = 0;
     bool in_deletions = 0;
     bool in_modules = 0;

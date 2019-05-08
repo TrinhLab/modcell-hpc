@@ -16,7 +16,7 @@ void
 allocate_population(MCproblem *mcp,  Population *pop, size_t pop_size){
     pop->size = pop_size;
     pop->indv = (Individual *)malloc(pop->size*sizeof(Individual));
-    for (int i=0; i<pop->size; i++)
+    for (int i=0; i < pop->size; i++)
         allocate_individual(mcp, &(pop->indv[i]));
 }
 
@@ -37,7 +37,7 @@ allocate_individual(MCproblem *mcp,  Individual *indv){
 
 void
 free_population(MCproblem *mcp, Population *pop){
-    for (int i=0; i<pop->size; i++)
+    for (int i=0; i < pop->size; i++)
         free_individual(mcp, &(pop->indv[i]));
     free(pop->indv);
 }

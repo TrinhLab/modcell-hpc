@@ -4,26 +4,23 @@
 
 #define NOT_CANDIDATE -1
 
-typedef struct {
-	/* modcell */
-	bool *deletions;//[nbits];
-    	bool **modules;//[nmodels][nbits];
+typedef struct Individual{
+ 	/* ModCell */
+ 	bool *deletions; 		/* [n_variables]*/
+     	bool **modules; 		/* [n_models][n_variables] */
 	/* MOEA */
-	int rank;
+	double *objectives; 		/* [n_models] */
+	double *penalty_objectives; 	/* [n_models] */
+	int rank; // Should it be moved to pop?
 	double crowding_distance;
-	double *objectives;//[nmodels];
-	double *penalty_objectives;//[nmodels];
-
 } Individual;
 
-typedef struct
-{
+typedef struct Population{
 	Individual *indv;
 	size_t size;
 } Population;
 
-typedef struct MCproblem
-{
+typedef struct MCproblem{
 	char *objective_type; // maybe use enum for this?
 	unsigned int alpha;
 	unsigned int beta;
@@ -31,8 +28,7 @@ typedef struct MCproblem
 	char **model_names;
 
       	glp_prob **Ps;//[nmodels];
-	// refbounds *rbounds; This can be added later if glp query has too much overhead
-	unsigned int **individual2glp; //[nmodels][nvars] Contains model index that individual maps to or NOT_CANDIDATE if module is fixed.
+	int **individual2glp; //[nmodels][nvars] Contains model index that individual maps to or NOT_CANDIDATE if module is fixed.
 	char **individual2id; //[nvars] Maps individual indices to reaction ID.
 	// hash archive; // maps individuals deletions and module variables into objective values
 
@@ -40,23 +36,12 @@ typedef struct MCproblem
 	unsigned int n_cores;
     	unsigned int seed;
     	int n_vars;
-//    int nobj; // called nmodels
     	int population_size;
     	double pcross_bin;
     	double pmut_bin;
-    //double eta_c;
-    //double eta_m;
     	int n_generations;
     	int nbinmut;
     	int nbincross;
-    //int *nbits;
-    //int bitlength;
-    //int choice;
-    //int obj1;
-    //int obj2;
-    //int obj3;
-    //int angle1;
-    //int angle2;
 } MCproblem;
 
 
