@@ -11,7 +11,7 @@ typedef struct Individual{
 	/* MOEA */
 	double *objectives; 		/* [n_models] */
 	double *penalty_objectives; 	/* [n_models] */
-	int rank; // Should it be moved to pop?
+	int rank;
 	double crowding_distance;
 } Individual;
 
@@ -20,18 +20,23 @@ typedef struct Population{
 	size_t size;
 } Population;
 
+typedef struct{
+	// char *name; /* This is already in model_names but might be useful for bookeeping */
+	glp_prob *P; 		/* GLPK LP problem */
+	int *cand_col_idx; 	/* [nvars] Contains model index that individual maps to or NOT_CANDIDATE if module is fixed. */
+	double *cand_og_lb; 	/* [n_cands] Maps indices of individuals to original lower bound values */
+	double *cand_og_ub; 	/* [n_cands] Maps indices of individuals to original lower bound values */
+	int *cand_col_type; 	//GLPK column type: coltype = glp_get_col_type(P, colidx); This will be also accessed to set new bounds
+} LPproblem;
+
 typedef struct MCproblem{
-	char *objective_type; // maybe use enum for this?
+	char *objective_type; // maybe use enum for this or otherwise assert that the input is valid
 	unsigned int alpha;
 	unsigned int beta;
 	unsigned int n_models;
 	char **model_names;
-
-      	glp_prob **Ps;//[nmodels];
-	int **cand_col_idx; 	/* [n_models][n_vars] Contains model index that individual maps to or NOT_CANDIDATE if module is fixed. */
-	char **individual2id; //[nvars] Maps individual indices to reaction ID.
-	// hash archive; // maps individuals deletions and module variables into objective values
-
+	LPproblem *lps; /* [n_models] Contains everything needed to calculate an individuals fitness function */
+	char **individual2id; /* [nvars] Maps individual indices to reaction ID. */
 	/* MOEA */
 	size_t n_cores;
     	size_t n_vars;

@@ -22,6 +22,7 @@ read_problem(const char *problem_dir_path){
     char cand_path[256];
     Charlist cand_file, pd;
     MCproblem mcp;
+    LPproblem *lp;
 
     pd = read_dir(problem_dir_path);
     /* Determine number of models and candidates*/
@@ -54,30 +55,39 @@ read_problem(const char *problem_dir_path){
             char prob_path[256];
             set_full_path(prob_path, problem_dir_path, pd.array[i]);
 
-            glp_read_mps(mcp.Ps[k], GLP_MPS_FILE, NULL, prob_path); // TODO: Silence this or redirect to log:
+            lp = &(mcp.lps[k]);
+            glp_read_mps(lp->P, GLP_MPS_FILE, NULL, prob_path); // TODO: Silence this or redirect to log:
             /* Calculate basis and solve so subsequent computations are warm-started */
-            glp_adv_basis(mcp.Ps[k], 0);
-            glp_simplex(mcp.Ps[k], &param);
+            glp_adv_basis(lp->P, 0);
+            glp_simplex(lp->P, &param);
             k++;
         }
     }
     free_charlist(pd);
 
-    /* Create maps between indvidual and bounds */
+    /* Gather info to modify LP problems by individuals */
+    int col_idx;
     for (k=0; k < mcp.n_models; k++){
+        lp = &(mcp.lps[k]);
         char model_path[256];
     	strcpy(model_path, problem_dir_path);
-    	strcat(strcat(model_path, glp_get_prob_name(mcp.Ps[k])), ".ncand");
+    	strcat(strcat(model_path, glp_get_prob_name(lp->P)), ".ncand");
     	Charlist ncandfile = read_file(model_path);
 
-      	glp_create_index(mcp.Ps[k]);
+      	glp_create_index(lp->P);
         for(j=0; j < mcp.n_vars; j++){
+            col_idx = glp_find_col(lp->P, mcp.individual2id[j]); /* If glp fails to find the column it will error */
+            /* Create maps between indvidual and bounds */
             if(is_not_candidate(&ncandfile, mcp.individual2id[j]))
-                mcp.cand_col_idx[k][j] = NOT_CANDIDATE;
+                lp->cand_col_idx[j] = NOT_CANDIDATE;
             else
-                mcp.cand_col_idx[k][j] = glp_find_col(mcp.Ps[k], mcp.individual2id[j]); /* If glp fails to find the column it will error */
+                lp->cand_col_idx[j] = col_idx;
+            /* Bound info*/
+	    lp->cand_col_type[j] = glp_get_col_type(lp->P, col_idx);
+	    lp->cand_og_lb[j] = glp_get_col_lb(lp->P, col_idx);
+	    lp->cand_og_ub[j] = glp_get_col_ub(lp->P, col_idx);
         }
-      	glp_delete_index(mcp.Ps[k]);
+      	glp_delete_index(lp->P);
     	free_charlist(ncandfile);
     }
 

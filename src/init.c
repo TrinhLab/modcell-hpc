@@ -20,13 +20,18 @@ allocate_MCproblem(MCproblem *mcp, unsigned int n_models, size_t n_vars){
     mcp->individual2id = malloc(n_vars * sizeof *mcp->individual2id);
     mcp->model_names = malloc(n_models * sizeof *mcp->model_names );
 
-    mcp->Ps = malloc(n_models * sizeof(*mcp->Ps));
-    mcp->cand_col_idx = malloc(n_models * sizeof(*mcp->cand_col_idx));
+    LPproblem *lp;
+    mcp->lps = malloc(n_models * sizeof(LPproblem));
     for (int k=0; k < n_models; k++){
-        mcp->Ps[k] = glp_create_prob();
-        mcp->cand_col_idx[k] = malloc(n_vars * sizeof(**mcp->cand_col_idx));
+        lp = &(mcp->lps[k]);
+        lp->P = glp_create_prob();
+        lp->cand_col_idx = malloc(n_vars * sizeof(*lp->cand_col_idx));
+        lp->cand_og_lb = malloc(n_vars * sizeof(*lp->cand_og_lb));
+        lp->cand_og_ub = malloc(n_vars * sizeof(*lp->cand_og_ub));
+        lp->cand_col_type = malloc(n_vars * sizeof(*lp->cand_col_type));
     }
 }
+
 
 void
 free_MCproblem(MCproblem *mcp){
