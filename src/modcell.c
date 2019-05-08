@@ -16,37 +16,35 @@ int get_model_idx(MCproblem *mcp, const char *model_id);
 
 MCproblem
 read_problem(const char *problem_dir_path){
-    MCproblem mcp = {NULL};
     int i,k,j;
+    unsigned int n_models = 0;
+    unsigned int n_vars;
+    char cand_path[256];
+    Charlist cand_file, pd;
+    MCproblem mcp;
 
-    Charlist pd = read_dir(problem_dir_path);
-    /* Obtain basic info */
-    mcp.n_models = 0;
+    pd = read_dir(problem_dir_path);
+    /* Determine number of models and candidates*/
     for (i=0; i < pd.n; i++){
-        /* Determine number of models */
-        if(is_extension(pd.array[i], "mps")){
-    	    mcp.n_models++;
-        }
-        /* Determine deletion candidates */
+        if(is_extension(pd.array[i], "mps"))
+    	    n_models++;
         if(strcmp(pd.array[i], "cand") == 0){
-            char cand_path[256];
             set_full_path(cand_path, problem_dir_path, pd.array[i]);
-    	    Charlist f = read_file(cand_path);
-            mcp.n_vars = f.n;
-            mcp.individual2id = malloc(f.n * sizeof *mcp.individual2id);
-            for (i=0; i < f.n; i++)
-                mcp.individual2id[i] = strdup(f.array[i]);
-    	    free_charlist(f);
-    	}
+    	    cand_file = read_file(cand_path);
+        }
     }
+
+    allocate_MCproblem(&mcp, n_models, cand_file.n);
+
+    /* Read deletion candidate names */
+    for (j=0; j < mcp.n_vars; j++)
+        mcp.individual2id[j] = strdup(cand_file.array[j]);
+    free_charlist(cand_file);
 
     /* Load problems */
     glp_smcp param;
     glp_init_smcp(&param);
     param.msg_lev = GLP_MSG_ERR;
-
-    mcp.model_names = malloc(mcp.n_models * sizeof *mcp.model_names );
-    mcp.Ps = malloc(mcp.n_models * sizeof(*mcp.Ps));
     k=0;
     for (i=0; i < pd.n; i++){
         if(is_extension(pd.array[i], "mps")){
@@ -56,7 +54,6 @@ read_problem(const char *problem_dir_path){
             char prob_path[256];
             set_full_path(prob_path, problem_dir_path, pd.array[i]);
 
-            mcp.Ps[k] = glp_create_prob();
             glp_read_mps(mcp.Ps[k], GLP_MPS_FILE, NULL, prob_path); // TODO: Silence this or redirect to log:
             /* Calculate basis and solve so subsequent computations are warm-started */
             glp_adv_basis(mcp.Ps[k], 0);
@@ -67,10 +64,7 @@ read_problem(const char *problem_dir_path){
     free_charlist(pd);
 
     /* Create maps between indvidual and bounds */
-    mcp.individual2glp = malloc(mcp.n_models * sizeof(*mcp.individual2glp));
     for (k=0; k < mcp.n_models; k++){
-        mcp.individual2glp[k] = malloc(mcp.n_vars * sizeof(**mcp.individual2glp));
-
         char model_path[256];
     	strcpy(model_path, problem_dir_path);
     	strcat(strcat(model_path, glp_get_prob_name(mcp.Ps[k])), ".ncand");
@@ -79,9 +73,9 @@ read_problem(const char *problem_dir_path){
       	glp_create_index(mcp.Ps[k]);
         for(j=0; j < mcp.n_vars; j++){
             if(is_not_candidate(&ncandfile, mcp.individual2id[j]))
-                mcp.individual2glp[k][j] = NOT_CANDIDATE;
+                mcp.cand_col_idx[k][j] = NOT_CANDIDATE;
             else
-                mcp.individual2glp[k][j] = glp_find_col(mcp.Ps[k], mcp.individual2id[j]); /* If glp fails to find the column it will error */
+                mcp.cand_col_idx[k][j] = glp_find_col(mcp.Ps[k], mcp.individual2id[j]); /* If glp fails to find the column it will error */
         }
       	glp_delete_index(mcp.Ps[k]);
     	free_charlist(ncandfile);
@@ -313,7 +307,7 @@ printf("--------------------------------------------------\n");
 pcg32_srandom(mcp.seed, 54u);
 
 /* Intialize population */
-Population *initial_population = (Population *)malloc(sizeof(Population));
+Population *initial_population = malloc(sizeof(Population));
 allocate_population(&mcp, initial_population, mcp.population_size);
 
 if (argc == 5){

@@ -13,25 +13,44 @@ void set_blank_individual(MCproblem *mcp,  Individual *indv);
 void set_random_individual(MCproblem *mcp,  Individual *indv);
 
 void
+allocate_MCproblem(MCproblem *mcp, unsigned int n_models, size_t n_vars){
+    mcp->n_models = n_models;
+    mcp->n_vars = n_vars;
+
+    mcp->individual2id = malloc(n_vars * sizeof *mcp->individual2id);
+    mcp->model_names = malloc(n_models * sizeof *mcp->model_names );
+
+    mcp->Ps = malloc(n_models * sizeof(*mcp->Ps));
+    mcp->cand_col_idx = malloc(n_models * sizeof(*mcp->cand_col_idx));
+    for (int k=0; k < n_models; k++){
+        mcp->Ps[k] = glp_create_prob();
+        mcp->cand_col_idx[k] = malloc(n_vars * sizeof(**mcp->cand_col_idx));
+    }
+}
+
+void
+free_MCproblem(MCproblem *mcp){
+    // Is this needed?
+}
+
+void
 allocate_population(MCproblem *mcp,  Population *pop, size_t pop_size){
     pop->size = pop_size;
-    pop->indv = (Individual *)malloc(pop->size*sizeof(Individual));
+    pop->indv = malloc(pop->size*sizeof(Individual));
     for (int i=0; i < pop->size; i++)
         allocate_individual(mcp, &(pop->indv[i]));
 }
 
-//TODO: Make malloc pointer casting consistent
 void
 allocate_individual(MCproblem *mcp,  Individual *indv){
-    indv->deletions = (bool *)malloc(mcp->n_vars * sizeof(bool));
+    indv->deletions = malloc(mcp->n_vars * sizeof(mcp->n_vars));
     if (mcp->beta > 0){
         indv->modules = malloc(mcp->n_models * sizeof( *(indv->modules) ));
         for (int k = 0; k < mcp->n_models; k++)
             indv->modules[k] = malloc(mcp->n_vars * sizeof( **(indv->modules) ));
     }
-
-        indv->objectives = (double *)malloc(mcp->n_models * sizeof(double));
-        indv->penalty_objectives = (double *)malloc(mcp->n_models * sizeof(double));
+    indv->objectives = malloc(mcp->n_models * sizeof(indv->objectives));
+    indv->penalty_objectives = malloc(mcp->n_models * sizeof(indv->penalty_objectives));
 }
 
 
@@ -51,6 +70,8 @@ free_individual(MCproblem *mcp, Individual *indv){
             free(indv->modules[k]);
         free(indv->modules);
     }
+    free(indv->objectives);
+    free(indv->penalty_objectives);
 }
 
 
@@ -75,7 +96,6 @@ set_random_individual(MCproblem *mcp,  Individual *indv){
             indv->modules[k][deleted_rxns[(int)pcg32_boundedrand(mcp->alpha)]] = 1;
         }
      }
-
     calculate_objectives(mcp, indv);
 }
 
@@ -88,12 +108,11 @@ set_blank_individual(MCproblem *mcp,  Individual *indv){
         indv->deletions[j] = 1;
     /* init modules */
     if (mcp->beta > 0){
-        for (int k = 0; k < mcp->n_models; k++){
+        for (k = 0; k < mcp->n_models; k++)
             for (j = 0; j < mcp->n_vars; j++)
                 indv->modules[k][j] = 0;
-        }
      }
-    for (int k = 0; k < mcp->n_models; k++)
+    for (k = 0; k < mcp->n_models; k++)
         indv->objectives[k] = -1; /* Use this to indivate objectives are not calculated */
 }
 

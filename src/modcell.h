@@ -28,24 +28,21 @@ typedef struct MCproblem{
 	char **model_names;
 
       	glp_prob **Ps;//[nmodels];
-	int **individual2glp; //[nmodels][nvars] Contains model index that individual maps to or NOT_CANDIDATE if module is fixed.
+	int **cand_col_idx; 	/* [n_models][n_vars] Contains model index that individual maps to or NOT_CANDIDATE if module is fixed. */
 	char **individual2id; //[nvars] Maps individual indices to reaction ID.
 	// hash archive; // maps individuals deletions and module variables into objective values
 
 	/* MOEA */
-	unsigned int n_cores;
+	size_t n_cores;
+    	size_t n_vars;
+    	unsigned int population_size; //FIXME: setting this to size_t casuses seg fault
     	unsigned int seed;
-    	int n_vars;
-    	int population_size;
-    	double pcross_bin;
-    	double pmut_bin;
-    	int n_generations;
-    	int nbinmut;
-    	int nbincross;
+    	unsigned int n_generations;
 } MCproblem;
 
 
 /* init.c */
+void allocate_MCproblem(MCproblem *mcp, unsigned int n_models, size_t n_vars);
 void allocate_population(MCproblem *mcp, Population *indv, size_t size);
 void free_population(MCproblem *mcp, Population *pop);
 void allocate_individual(MCproblem *mcp, Individual *indv);
