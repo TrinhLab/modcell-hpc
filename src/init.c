@@ -84,7 +84,7 @@ free_individual(MCproblem *mcp, Individual *indv){
 void
 set_random_individual(MCproblem *mcp,  Individual *indv){
     int i,j,k;
-    int deleted_rxns[mcp->alpha]; // malloc?
+    int *deleted_rxns = malloc(mcp->alpha * sizeof(int));
 
     /* init deletions */
     for (j = 0; j < mcp->n_vars; j++)
@@ -95,13 +95,14 @@ set_random_individual(MCproblem *mcp,  Individual *indv){
     }
     /* init modules. Only one module reaction is inserted regardless of beta, this heuristic leads to better individuals*/
     if (mcp->beta > 0){
-        for (int k = 0; k < mcp->n_models; k++){
+        for (k = 0; k < mcp->n_models; k++){
             for (j = 0; j < mcp->n_vars; j++)
                     indv->modules[k][j] = 0;
             indv->modules[k][deleted_rxns[(int)pcg32_boundedrand(mcp->alpha)]] = 1;
         }
      }
     calculate_objectives(mcp, indv);
+    free(deleted_rxns);
 }
 
 /* Individual without any genetic manipulations */

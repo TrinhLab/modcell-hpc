@@ -2,13 +2,18 @@
 #include <glpk.h>
 #include "pcg_basic.h"
 
+/* Definitions */
 #define NOT_CANDIDATE -1
 
+/* Globals */
+glp_smcp param;
+
+/* Structures */
 typedef struct Individual{
  	/* ModCell */
  	bool *deletions; 		/* [n_variables]*/
      	bool **modules; 		/* [n_models][n_variables] */
-	/* MOEA */
+	/* MOEA */ //IMPORTANT: Would these fields interfere or slow down the hash table look up? Maybe a hashkey struct should be created independently
 	double *objectives; 		/* [n_models] */
 	double *penalty_objectives; 	/* [n_models] */
 	int rank;
@@ -26,7 +31,11 @@ typedef struct{
 	int *cand_col_idx; 	/* [nvars] Contains model index that individual maps to or NOT_CANDIDATE if module is fixed. */
 	double *cand_og_lb; 	/* [n_cands] Maps indices of individuals to original lower bound values */
 	double *cand_og_ub; 	/* [n_cands] Maps indices of individuals to original lower bound values */
-	int *cand_col_type; 	//GLPK column type: coltype = glp_get_col_type(P, colidx); This will be also accessed to set new bounds
+	int *cand_col_type; 	/* [n_vars] GLPK column type */
+	int prod_col_idx; 	/* Index of the product secretion reaction */
+	int bio_col_idx; 	/* Index of the biomass formation reaction */
+	double max_prod_growth; /* Maximum rate of product synthesis for growth state */
+	double no_deletion_objective; /* Objective value when no deletions are present */
 } LPproblem;
 
 typedef struct MCproblem{
@@ -57,7 +66,7 @@ void set_blank_individual(MCproblem *mcp,  Individual *indv);
 void set_random_individual(MCproblem *mcp,  Individual *indv);
 
 /* functions.c */
-double calculate_objectives(MCproblem *mcp, Individual *indv);
+void calculate_objectives(MCproblem *mcp, Individual *indv);
 
 /* moea.c */
 Population run_moea(MCproblem *mcp, Population *initial_population);

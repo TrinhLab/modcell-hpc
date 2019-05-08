@@ -61,22 +61,29 @@ for i = 1:length(pn.cand_ind)
 end
 fclose(fileID);
 
-%% Write models
-fprintf('Writting models.... \n')
+%% Write models and model related info
+fprintf('Writting model info.... \n')
 for i =1:length(pn.prod_id)
 	fprintf('\t%s\n', pn.prod_id{i})
 	model = pn.model_array(i);
+
 	[Contain OK] = mcBuildMPS([], [], model.S, model.b, -model.c, model.lb, model.ub, pn.prod_id{i}, 'VarNames', model.rxns, 'MPSfilename', [pn.prod_id{i}, '.mps']);
 	if ~OK
 		warning('Something went wrong when building mps file for model %s', pn.prod_id{i})
 	end
 
-% Write non candidates
+	% Write non candidates
 	fileID = fopen([pn.prod_id{i}, '.ncand'],'w');
 	ncand = setdiff(pn.parent_model.rxns(pn.cand_ind), model.rxns(model.candk));
 	for j = 1:length(ncand)
 		fprintf(fileID,'%s\n', ncand{j});
 	end
+	fclose(fileID);
+
+	% Write parameters
+	fileID = fopen([pn.prod_id{i}, '.param'],'w');
+	fprintf(fileID,'prod_rxn_name=%s\n', model.rxns{model.product_secretion_ind});
+	fprintf(fileID,'max_prod_growth=%f\n', pn.max_product_rate_growth(i));
 	fclose(fileID);
 end
 end

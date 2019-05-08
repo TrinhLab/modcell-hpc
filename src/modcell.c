@@ -6,6 +6,30 @@
 #include "mcutils.h"
 #include "modcell.h"
 
+#define OPENFILER(filepath)\
+    FILE *fp = NULL;\
+    if (!(fp = fopen (filepath, "r"))) {\
+        fprintf (stderr, "error: file open failed '%s'\n", filepath);\
+	exit(-1);\
+    }
+
+#define CLOSEFILE if (fp) fclose (fp);
+
+#define READPARAM(id, type, sname) \
+    if (fscanf(fp, #id"=%"#type"\n", &sname->id) !=1){ \
+        fprintf (stderr, "error: parsing parameter'%s'\n", #id); \
+        if (fp) fclose (fp); \
+	exit(-1); \
+    }
+
+#define READMETADAT(id, type) \
+    fscanf(fp, "%s\n", buff); lc++; \
+    if (sscanf(buff, #id"=%"#type, &id) !=1){ \
+        fprintf (stderr, "error: reading population file parameter: '%s'\n", #id); \
+        if (fp) fclose (fp); \
+	exit(-1); \
+    }
+
 MCproblem read_problem(const char *problem_dir);
 void load_parameters(MCproblem *mcp, const char *filepath);
 bool is_not_candidate(Charlist *ncandfile, const char *rxnid);
@@ -14,12 +38,15 @@ void read_population(MCproblem *mcp, Population *pop, const char *population_pat
 int get_rxn_idx(MCproblem *mcp, const char *rxn_id);
 int get_model_idx(MCproblem *mcp, const char *model_id);
 
+extern glp_smcp param;
+
+/* Function definitions */
+
 MCproblem
 read_problem(const char *problem_dir_path){
-    int i,k,j;
-    unsigned int n_models = 0;
-    unsigned int n_vars;
-    char cand_path[256];
+    int i,k,j,col_idx;
+    unsigned int n_models = 0, n_vars;
+    char cand_path[256], prob_path[256], model_path[256], mparam_path[256], prod_rxn_name[256];
     Charlist cand_file, pd;
     MCproblem mcp;
     LPproblem *lp;
@@ -43,16 +70,12 @@ read_problem(const char *problem_dir_path){
     free_charlist(cand_file);
 
     /* Load problems */
-    glp_smcp param;
-    glp_init_smcp(&param);
-    param.msg_lev = GLP_MSG_ERR;
     k=0;
     for (i=0; i < pd.n; i++){
         if(is_extension(pd.array[i], "mps")){
             char *model_name = remove_file_extension(pd.array[i]);
 	    mcp.model_names[k] = strdup(model_name);
 
-            char prob_path[256];
             set_full_path(prob_path, problem_dir_path, pd.array[i]);
 
             lp = &(mcp.lps[k]);
@@ -66,10 +89,8 @@ read_problem(const char *problem_dir_path){
     free_charlist(pd);
 
     /* Gather info to modify LP problems by individuals */
-    int col_idx;
     for (k=0; k < mcp.n_models; k++){
         lp = &(mcp.lps[k]);
-        char model_path[256];
     	strcpy(model_path, problem_dir_path);
     	strcat(strcat(model_path, glp_get_prob_name(lp->P)), ".ncand");
     	Charlist ncandfile = read_file(model_path);
@@ -87,8 +108,25 @@ read_problem(const char *problem_dir_path){
 	    lp->cand_og_lb[j] = glp_get_col_lb(lp->P, col_idx);
 	    lp->cand_og_ub[j] = glp_get_col_ub(lp->P, col_idx);
         }
+
+        /* Other parameters */
+	strcpy(mparam_path, problem_dir_path);
+    	strcat(strcat(mparam_path, glp_get_prob_name(lp->P)), ".param");
+
+        OPENFILER(mparam_path)
+        if (fscanf(fp, "prod_rxn_name=%s\n", prod_rxn_name) !=1){
+            fprintf (stderr, "error: parsing parameter prod_rxn_name\n"); exit(-1);}
+
+        lp->prod_col_idx = glp_find_col(lp->P, prod_rxn_name);
+        READPARAM(max_prod_growth,lf,lp)
+        CLOSEFILE
+
       	glp_delete_index(lp->P);
     	free_charlist(ncandfile);
+
+        /* Objective values without deletions */
+        glp_simplex(lp->P, &param);
+        lp->no_deletion_objective = glp_get_col_prim(lp->P, lp->prod_col_idx)/lp->max_prod_growth;
     }
 
 return mcp;
@@ -102,29 +140,17 @@ is_not_candidate(Charlist *ncandfile, const char *rxnid){
     return false;
 }
 
-#define READPARAM(id, type) \
-    if (fscanf(fp, #id"=%"#type"\n", &mcp->id) !=1){ \
-        fprintf (stderr, "error: parsing parameter'%s'\n", #id); \
-        if (fp) fclose (fp); \
-	exit(-1); \
-    } // print parameter here if interested
-
 void
 load_parameters(MCproblem *mcp, const char *filepath){
-    FILE *fp = NULL;
-
-    if (!(fp = fopen (filepath, "r"))) {
-        fprintf (stderr, "error: file open failed '%s'\n", filepath);
-	exit(-1);
-    }
-    READPARAM(objective_type,s);
-    READPARAM(alpha,d);
-    READPARAM(beta,d);
-    READPARAM(population_size,d);
-    READPARAM(n_generations,d);
-    READPARAM(n_cores,d);
-    READPARAM(seed,u);
-    if (fp) fclose (fp);
+    OPENFILER(filepath)
+    READPARAM(objective_type,s,mcp);
+    READPARAM(alpha,d,mcp);
+    READPARAM(beta,d,mcp);
+    READPARAM(population_size,d,mcp);
+    READPARAM(n_generations,d,mcp);
+    READPARAM(n_cores,d,mcp);
+    READPARAM(seed,u,mcp);
+    CLOSEFILE
 }
 
 
@@ -165,7 +191,7 @@ for (i=0; i < pop->size; i++){
 
     fprintf(f, "#OBJECTIVES\n");
     for (k=0; k < mcp->n_models; k++)
-       fprintf(f, "%s,%f\n", mcp->model_names[k], indv->objectives[k]);
+       fprintf(f, "%s,%lf\n", mcp->model_names[k], indv->objectives[k]);
 }
 
 fprintf(f, "#ENDFILE\n");
@@ -192,23 +218,13 @@ get_model_idx(MCproblem *mcp, const char *model_id){
     exit(-1);
 }
 
-#define READMETADAT(id, type) \
-    fscanf(fp, "%s\n", buff); lc++; \
-    if (sscanf(buff, #id"=%"#type, &id) !=1){ \
-        fprintf (stderr, "error: reading population file parameter: '%s'\n", #id); \
-        if (fp) fclose (fp); \
-	exit(-1); \
-    }
-
 void
 read_population(MCproblem *mcp, Population *pop, const char *population_path){
     int population_size, alpha, beta;
     char buff[1000]; //TODO: Is there a way to detect overflow of this buffer?
     int lc = 0;
-    bool in_deletions = 0;
-    bool in_modules = 0;
-    int indv_idx = -1;
-    int rxn_idx, model_idx;
+    bool in_deletions = 0, in_modules = 0;
+    int indv_idx = -1, rxn_idx, model_idx;
     Individual *indv;
     char *token, *string, *tofree;
 
@@ -309,12 +325,15 @@ if ( (argc < 4) | (argc > 5) ){
         return(1);
     }
 
+/* Intialize global GLPK parameters*/
+glp_init_smcp(&param);
+param.msg_lev = GLP_MSG_ERR;
+
 MCproblem mcp = read_problem(argv[1]);
 load_parameters(&mcp, argv[2]);
 printf("--------------------------------------------------\n");
 
-/* Seed global RNG */
-pcg32_srandom(mcp.seed, 54u);
+pcg32_srandom(mcp.seed, 54u); /* Seed global RNG */
 
 /* Intialize population */
 Population *initial_population = malloc(sizeof(Population));
