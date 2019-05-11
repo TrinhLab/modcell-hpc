@@ -13,16 +13,17 @@ void set_blank_individual(MCproblem *mcp,  Individual *indv);
 void set_random_individual(MCproblem *mcp,  Individual *indv);
 
 void
-allocate_MCproblem(MCproblem *mcp, unsigned int n_models, size_t n_vars){
+allocate_MCproblem(MCproblem *mcp, unsigned int n_models, size_t n_vars)
+{
     mcp->n_models = n_models;
     mcp->n_vars = n_vars;
 
     mcp->individual2id = malloc(n_vars * sizeof *mcp->individual2id);
-    mcp->model_names = malloc(n_models * sizeof *mcp->model_names );
+    mcp->model_names = malloc(n_models * sizeof *mcp->model_names);
 
     LPproblem *lp;
     mcp->lps = malloc(n_models * sizeof(LPproblem));
-    for (int k=0; k < n_models; k++){
+    for (int k=0; k < n_models; k++) {
         lp = &(mcp->lps[k]);
         lp->P = glp_create_prob();
         lp->cand_col_idx = malloc(n_vars * sizeof(*lp->cand_col_idx));
@@ -34,12 +35,14 @@ allocate_MCproblem(MCproblem *mcp, unsigned int n_models, size_t n_vars){
 
 
 void
-free_MCproblem(MCproblem *mcp){
+free_MCproblem(MCproblem *mcp)
+{
     // Is this needed?
 }
 
 void
-allocate_population(MCproblem *mcp,  Population *pop, size_t pop_size){
+allocate_population(MCproblem *mcp,  Population *pop, size_t pop_size)
+{
     pop->size = pop_size;
     pop->indv = malloc(pop->size*sizeof(Individual));
     for (int i=0; i < pop->size; i++)
@@ -47,9 +50,10 @@ allocate_population(MCproblem *mcp,  Population *pop, size_t pop_size){
 }
 
 void
-allocate_individual(MCproblem *mcp,  Individual *indv){
+allocate_individual(MCproblem *mcp,  Individual *indv)
+{
     indv->deletions = malloc(mcp->n_vars * sizeof(mcp->n_vars));
-    if (mcp->beta > 0){
+    if (mcp->beta > 0) {
         indv->modules = malloc(mcp->n_models * sizeof( *(indv->modules) ));
         for (int k = 0; k < mcp->n_models; k++)
             indv->modules[k] = malloc(mcp->n_vars * sizeof( **(indv->modules) ));
@@ -60,7 +64,8 @@ allocate_individual(MCproblem *mcp,  Individual *indv){
 
 
 void
-free_population(MCproblem *mcp, Population *pop){
+free_population(MCproblem *mcp, Population *pop)
+{
     for (int i=0; i < pop->size; i++)
         free_individual(mcp, &(pop->indv[i]));
     free(pop->indv);
@@ -68,9 +73,10 @@ free_population(MCproblem *mcp, Population *pop){
 
 
 void
-free_individual(MCproblem *mcp, Individual *indv){
+free_individual(MCproblem *mcp, Individual *indv)
+{
     free(indv->deletions);
-    if (mcp->beta > 0){
+    if (mcp->beta > 0) {
         for (int k = 0; k < mcp->n_models; k++)
             free(indv->modules[k]);
         free(indv->modules);
@@ -82,20 +88,21 @@ free_individual(MCproblem *mcp, Individual *indv){
 
 /* Sets individual variables randomly while  meeting constraints        */
 void
-set_random_individual(MCproblem *mcp,  Individual *indv){
+set_random_individual(MCproblem *mcp,  Individual *indv)
+{
     int i,j,k;
     int *deleted_rxns = malloc(mcp->alpha * sizeof(int));
 
     /* init deletions */
     for (j = 0; j < mcp->n_vars; j++)
         indv->deletions[j] = 1;
-    for (i = 0; i < mcp->alpha; i++){
+    for (i = 0; i < mcp->alpha; i++) {
         deleted_rxns[i] = pcg32_boundedrand(mcp->n_vars);
         indv->deletions[deleted_rxns[i]] = 0;
     }
     /* init modules. Only one module reaction is inserted regardless of beta, this heuristic leads to better individuals*/
-    if (mcp->beta > 0){
-        for (k = 0; k < mcp->n_models; k++){
+    if (mcp->beta > 0) {
+        for (k = 0; k < mcp->n_models; k++) {
             for (j = 0; j < mcp->n_vars; j++)
                     indv->modules[k][j] = 0;
             indv->modules[k][deleted_rxns[(int)pcg32_boundedrand(mcp->alpha)]] = 1;
@@ -107,13 +114,14 @@ set_random_individual(MCproblem *mcp,  Individual *indv){
 
 /* Individual without any genetic manipulations */
 void
-set_blank_individual(MCproblem *mcp,  Individual *indv){
-    int i,j,k;
+set_blank_individual(MCproblem *mcp,  Individual *indv)
+{
+    int j,k;
     /* init deletions */
     for (j = 0; j < mcp->n_vars; j++)
         indv->deletions[j] = 1;
     /* init modules */
-    if (mcp->beta > 0){
+    if (mcp->beta > 0) {
         for (k = 0; k < mcp->n_models; k++)
             for (j = 0; j < mcp->n_vars; j++)
                 indv->modules[k][j] = 0;
@@ -124,7 +132,8 @@ set_blank_individual(MCproblem *mcp,  Individual *indv){
 
 
 void
-set_random_population(MCproblem *mcp, Population *pop){
+set_random_population(MCproblem *mcp, Population *pop)
+{
     for (int i=0; i < pop->size; i++)
         set_random_individual(mcp, &(pop->indv[i]));
 }

@@ -9,7 +9,7 @@
 glp_smcp param;
 
 /* Structures */
-typedef struct Individual{
+typedef struct {
  	/* ModCell */
  	bool *deletions; 		/* [n_variables]*/
      	bool **modules; 		/* [n_models][n_variables] */
@@ -25,7 +25,7 @@ typedef struct Population{
 	size_t size;
 } Population;
 
-typedef struct{
+typedef struct {
 	// char *name; /* This is already in model_names but might be useful for bookeeping */
 	glp_prob *P; 		/* GLPK LP problem */
 	int *cand_col_idx; 	/* [nvars] Contains model index that individual maps to or NOT_CANDIDATE if module is fixed. */
@@ -38,18 +38,18 @@ typedef struct{
 	double no_deletion_objective; /* Objective value when no deletions are present */
 } LPproblem;
 
-typedef struct MCproblem{
-	char *objective_type; // maybe use enum for this or otherwise assert that the input is valid
+typedef struct {
+	char objective_type[256]; // maybe use enum for this or otherwise assert that the input is valid
 	unsigned int alpha;
 	unsigned int beta;
 	unsigned int n_models;
-	char **model_names;
-	LPproblem *lps; /* [n_models] Contains everything needed to calculate an individuals fitness function */
-	char **individual2id; /* [nvars] Maps individual indices to reaction ID. */
+	char **model_names; 	/* [nvars] */
+	LPproblem *lps; 	/* [n_models] Contains everything needed to calculate an individuals fitness function */
+	char **individual2id; 	/* [nvars] Maps individual indices to reaction ID. */
 	/* MOEA */
-	size_t n_cores;
     	size_t n_vars;
-    	unsigned int population_size; //FIXME: setting this to size_t casuses seg fault
+	unsigned int n_cores;
+    	unsigned int population_size; //FIXME: Use size_t consistently
     	unsigned int seed;
     	unsigned int n_generations;
 } MCproblem;

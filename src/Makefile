@@ -1,6 +1,6 @@
 CC = gcc
 LIBS = -lglpk
-CFLAGS = -O2 -march=native
+CFLAGS = -O2 -march=native -Wall
 
 SRC = $(wildcard *.c)
 ODIR = obj

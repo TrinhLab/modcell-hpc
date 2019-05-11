@@ -7,7 +7,6 @@
 extern glp_smcp param;
 
 
-
 /*
    This function will set indv->objectives and indv->penalty_objectives
 
@@ -19,7 +18,8 @@ extern glp_smcp param;
         - Look up hash table of known solutions
 */
 void
-calculate_objectives(MCproblem *mcp, Individual *indv){
+calculate_objectives(MCproblem *mcp, Individual *indv)
+{
     LPproblem *lp;
     int j,k,n_deletions=0;
     int *change_bound = malloc(mcp->n_vars * sizeof(int));
@@ -30,7 +30,7 @@ calculate_objectives(MCproblem *mcp, Individual *indv){
             n_deletions++;
 
     if (n_deletions == 0){ /* Avoid further evaluation */
-        for (k=0; k < mcp->n_models; k++){
+        for (k=0; k < mcp->n_models; k++) {
             lp = &(mcp->lps[k]);
             indv->objectives[k] = lp->no_deletion_objective;
             indv->penalty_objectives[k] = lp->no_deletion_objective;
@@ -39,15 +39,15 @@ calculate_objectives(MCproblem *mcp, Individual *indv){
     }
 
     /* Objective calculation */
-    for (k=0; k < mcp->n_models; k++){
+    for (k=0; k < mcp->n_models; k++) {
         lp = &(mcp->lps[k]);
 
         /* Determine what bounds to change */
-        for (j=0; j < mcp->n_vars; j++){
+        for (j=0; j < mcp->n_vars; j++) {
             change_bound[j] = 0;
             if(lp->cand_col_idx[j] == NOT_CANDIDATE)
                 continue;
-            if(indv->deletions[j] == 0){
+            if(indv->deletions[j] == 0) {
                 change_bound[j] = 1; /* Reaction deleted in the chassis */
                 if(mcp->beta > 0)
                     if (indv->modules[k][j] == 1)

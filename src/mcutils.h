@@ -8,7 +8,8 @@
 #define LMAX 255
 
 const char *
-get_file_extension(const char *fspec) {
+get_file_extension(const char *fspec)
+{
     char *e = strrchr (fspec, '.');
     if (e == NULL)
         e = "";
@@ -16,7 +17,8 @@ get_file_extension(const char *fspec) {
 }
 
 char *
-remove_file_extension(char* mystr) {
+remove_file_extension(char* mystr)
+{
     char *retstr;
     char *lastdot;
     if (mystr == NULL)
@@ -31,26 +33,29 @@ remove_file_extension(char* mystr) {
 }
 
 int
-is_extension(char *file_name, char *extension){
+is_extension(char *file_name, char *extension)
+{
     if(strcmp(get_file_extension(file_name), extension) == 0)
         return 1;
     return 0;
 }
 
 void
-set_full_path(char *full_path, const char *parent_path, const char *file_path) {
+set_full_path(char *full_path, const char *parent_path, const char *file_path)
+{
     	    strcpy(full_path, parent_path);
     	    strcat(full_path, file_path);
 }
 
 /* A dynamic array of char* to get file or directory contents*/
-typedef struct  {
+typedef struct {
 	char **array;
 	size_t n;
 } Charlist;
 
 void
-alloc_charlist(Charlist *charlist){
+alloc_charlist(Charlist *charlist)
+{
 if (!(charlist->array = calloc (LMAX, sizeof *charlist->array ))) {
 	fprintf (stderr, "error: memory allocation failed.");
 	exit(-1);
@@ -58,7 +63,8 @@ if (!(charlist->array = calloc (LMAX, sizeof *charlist->array ))) {
 }
 
 size_t
-realloc_charlist(Charlist *charlist, size_t *p_lmax){
+realloc_charlist(Charlist *charlist, size_t *p_lmax)
+{
 	size_t lmax = (size_t)&p_lmax;
         if (charlist->n == lmax) {      /* if lmax lines reached, realloc   */
             char **tmp = realloc (charlist->array, lmax * 2 * sizeof *charlist->array);
@@ -70,7 +76,8 @@ realloc_charlist(Charlist *charlist, size_t *p_lmax){
 	return lmax;
 }
 
-void free_charlist(Charlist c){
+void free_charlist(Charlist c)
+{
     	for (int i = 0; i < c.n; i++)
         	free (c.array[i]);
     	free (c.array);
@@ -78,9 +85,9 @@ void free_charlist(Charlist c){
 
 /* Read each file name of a directory*/
 Charlist
-read_dir(const char *dir_path){
+read_dir(const char *dir_path)
+{
 	Charlist charlist = {NULL, 0};
-    	size_t it = 0;
     	size_t lmax = LMAX;         /* current array pointer allocation */
     	DIR *d;
     	struct dirent *dir;
@@ -102,12 +109,12 @@ read_dir(const char *dir_path){
 
 /* NOTE: This method may have issues dealing with large files */
 Charlist
-read_file(const char *file_path){
+read_file(const char *file_path)
+{
 	Charlist charlist = {NULL, 0};
 	char *ln = NULL;
     	size_t n = 0;               /* buf size, 0 use getline default  */
     	ssize_t nchr = 0;           /* number of chars actually read    */
-    	size_t it = 0;
     	size_t lmax = LMAX;         /* current array pointer allocation */
     	FILE *fp = NULL;
 
@@ -129,7 +136,6 @@ read_file(const char *file_path){
 
     	if (fp) fclose (fp);
     	if (ln) free (ln);
-
     	return charlist;
 }
 
