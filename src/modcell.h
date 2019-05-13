@@ -2,8 +2,17 @@
 #include <glpk.h>
 #include "pcg_basic.h"
 
-/* Definitions */
+/* Notation */
 #define NOT_CANDIDATE -1
+#define DELETED_RXN 0
+#define MODULE_RXN 1
+#define A_DOMINATES_B 1
+#define B_DOMINATES_A -1
+#define NONDOMINATED 0
+
+/* Definitions */
+#define INF 1.0e14
+#define MAX_MODULES 200 /* A value above any practical beta expected, used for array allocation. */
 
 /* Globals */
 glp_smcp param;
@@ -52,6 +61,9 @@ typedef struct {
     	unsigned int population_size; //FIXME: Use size_t consistently
     	unsigned int seed;
     	unsigned int n_generations;
+	double crossover_probability;
+	double mutation_probability;
+	double max_run_time;
 } MCproblem;
 
 
@@ -67,6 +79,11 @@ void set_random_individual(MCproblem *mcp,  Individual *indv);
 
 /* functions.c */
 void calculate_objectives(MCproblem *mcp, Individual *indv);
+void crossover(MCproblem *mcp, Individual *parent1, Individual *parent2, Individual *child1, Individual *child2);
+void mutation(MCproblem *mcp, Individual *indv);
+void enforce_module_constraints(MCproblem *mcp, Individual *indv);
+int find_domination(MCproblem *mcp, Individual *indv_a, Individual *indv_b);
+void copy_individual(MCproblem *mcp, Individual *indv_source, Individual *indv_dest);
 
 /* moea.c */
-Population run_moea(MCproblem *mcp, Population *initial_population);
+void run_moea(MCproblem *mcp, Population *initial_population);

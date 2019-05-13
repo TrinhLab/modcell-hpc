@@ -159,8 +159,10 @@ load_parameters(MCproblem *mcp, const char *filepath)
     READPARAM(beta,u,mcp)
     READPARAM(population_size,u,mcp)
     READPARAM(n_generations,u,mcp)
-    READPARAM(n_cores,u,mcp)
     READPARAM(seed,u,mcp)
+    READPARAM(crossover_probability,lf,mcp)
+    READPARAM(mutation_probability,lf,mcp)
+    READPARAM(max_run_time,lf,mcp)
     CLOSEFILE
 }
 
@@ -317,8 +319,8 @@ read_population(MCproblem *mcp, Population *pop, const char *population_path)
         indv_idx++;
     }
 
-    /* Calculate objectives */
-    for (int i =0; i < mcp->population_size; i++)
+    /* Calculate objectives */ //FIXME: This will be done in the first MOEA itereation
+    for (int i=0; i < mcp->population_size; i++)
             calculate_objectives(mcp, &(pop->indv[i]));
 }
 
@@ -366,12 +368,12 @@ main (int argc, char **argv)
     }
 
     /* Run */
-    Population output_population = run_moea(&mcp, initial_population);
+    run_moea(&mcp, initial_population);
 
-    write_population(&mcp, &output_population, argv[3]);
+    write_population(&mcp, initial_population, argv[3]);
 
     free_population(&mcp, initial_population);
-    //free_population(&mcp, &output_population); //FIXME: Uncomment when run_moea is written
+
     return(0);
 }
 

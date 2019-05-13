@@ -40,6 +40,7 @@ free_MCproblem(MCproblem *mcp)
     // Is this needed?
 }
 
+// Remove pop_size if there is no need to use.
 void
 allocate_population(MCproblem *mcp,  Population *pop, size_t pop_size)
 {
@@ -97,7 +98,7 @@ set_random_individual(MCproblem *mcp,  Individual *indv)
     for (j = 0; j < mcp->n_vars; j++)
         indv->deletions[j] = 1;
     for (i = 0; i < mcp->alpha; i++) {
-        deleted_rxns[i] = pcg32_boundedrand(mcp->n_vars);
+        deleted_rxns[i] = (int)pcg32_boundedrand(mcp->n_vars);
         indv->deletions[deleted_rxns[i]] = 0;
     }
     /* init modules. Only one module reaction is inserted regardless of beta, this heuristic leads to better individuals*/
