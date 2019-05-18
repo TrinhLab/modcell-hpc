@@ -1,7 +1,12 @@
 /* Core MOEA (NSGA-II) method, relays heavily on the methods defined in functions.c */
 
 #include <stdlib.h>
+#include <stdio.h>
+#include <time.h>
 #include "modcell.h"
+
+int verbose = 1; //TODO: Make this a parameter
+#define PRINT_INTERVAL 10
 
 void run_moea(MCproblem *mcp, Population *parent_population);
 void selection_and_variation(MCproblem *mcp, Population *core_population, Population *offspring_population);
@@ -25,6 +30,7 @@ run_moea(MCproblem *mcp, Population *parent_population)
     allocate_population(mcp, offspring_population, mcp->population_size);
     allocate_population(mcp, combined_population, 2*mcp->population_size);
 
+    clock_t begin = clock();
     evaluate_population(mcp, parent_population);
     assign_rank_and_crowding(mcp, parent_population);
     n_generations++;
@@ -40,6 +46,10 @@ run_moea(MCproblem *mcp, Population *parent_population)
 
        /* Book keeping */
         n_generations++;
+        run_time = (double)(clock() - begin) / CLOCKS_PER_SEC;
+
+        if (verbose & ( (n_generations-1) % PRINT_INTERVAL == 0))
+            printf("Geneneration:%i Time:%.2f\n",n_generations-1, run_time);
     }
 
     free_population(mcp, offspring_population);
