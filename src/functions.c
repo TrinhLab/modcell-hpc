@@ -3,11 +3,13 @@
  */
 
 #include <stdlib.h>
+//#include <assert.h>
 #include "modcell.h"
 
 extern glp_smcp param;
 
 void copy_individual(MCproblem *mcp, Individual *indv_source, Individual *indv_dest);
+void combine_populations(MCproblem *mcp, Population *pop1, Population *pop2, Population *combined_pop);
 int find_domination(MCproblem *mcp, Individual *indv_a, Individual *indv_b);
 void crossover(MCproblem *mcp, Individual *parent1, Individual *parent2, Individual *child1, Individual *child2);
 void mutation(MCproblem *mcp, Individual *indv);
@@ -15,6 +17,7 @@ void enforce_module_constraints(MCproblem *mcp, Individual *indv);
 void calculate_objectives(MCproblem *mcp, Individual *indv);
 
 
+/* TODO: Make sure this overwrites the destination individual and does not cause a memory leak*/
 void
 copy_individual(MCproblem *mcp, Individual *indv_source, Individual *indv_dest)
 {
@@ -35,6 +38,18 @@ copy_individual(MCproblem *mcp, Individual *indv_source, Individual *indv_dest)
     indv_dest->crowding_distance = indv_source->crowding_distance;
 }
 
+void
+combine_populations(MCproblem *mcp, Population *pop1, Population *pop2, Population *combined_pop)
+{
+    int i, it;
+//    assert(pop1->size == combined_pop->size/2)
+ //   assert(pop2->size == combined_pop->size/2)
+    for (it=0, i=0; i<pop1->size; i++, it++)
+        copy_individual(mcp, &(pop1->indv[i]), &(combined_pop->indv[it]));
+    for (i=0; i<pop2->size; i++, it++)
+        copy_individual(mcp, &(pop2->indv[i]), &(combined_pop->indv[it]));
+}
+
 /* Checks if indv1 dominates indv2. Assumes objectives are maximized! Returns:
    1DOMINATES2 if indv1 dominates indv2
    2DOMINATES1 if indv2 dominates indv1
@@ -52,7 +67,7 @@ find_domination(MCproblem *mcp, Individual *indv_a, Individual *indv_b)
         if(indv_b->penalty_objectives[i] > indv_a->penalty_objectives[i])
             a_dominates_b = 0; //can stop if 2dominates1==0
     }
-    if(a_dominates_b & b_dominates_a) return NONDOMINATED; /* both objective vectors are equal */
+    if(a_dominates_b && b_dominates_a) return NONDOMINATED; /* both objective vectors are equal */
     if(a_dominates_b) return A_DOMINATES_B;
     if(b_dominates_a) return B_DOMINATES_A;
     return NONDOMINATED;
@@ -156,7 +171,7 @@ enforce_module_constraints(MCproblem *mcp, Individual *indv)
    /*  Removes modules that are not deletions */
     for (k=0; k < mcp->n_models; k++) {
         for (j=0; j < mcp->n_vars; j++) {
-            if ( (indv->deletions[j] == !DELETED_RXN) & (indv->modules[k][j] == MODULE_RXN))
+            if ( (indv->deletions[j] == !DELETED_RXN) && (indv->modules[k][j] == MODULE_RXN))
                 indv->modules[k][j] = !MODULE_RXN;
         }
     }
@@ -242,8 +257,10 @@ calculate_objectives(MCproblem *mcp, Individual *indv)
 	        glp_set_col_bnds(lp->P, lp->cand_col_idx[j], GLP_FX, 0, 0);
 
         /* Calculate objectives */
-        glp_simplex(lp->P, &param);
-        indv->objectives[k] = glp_get_col_prim(lp->P, lp->prod_col_idx)/lp->max_prod_growth;
+        if ((glp_simplex(lp->P, &param) == 0) && (glp_get_status(lp->P) == GLP_OPT)) /*Problem solved succesfully and solution status is optimal*/
+            indv->objectives[k] = glp_get_col_prim(lp->P, lp->prod_col_idx)/lp->max_prod_growth;
+        else
+            indv->objectives[k] = 0;
 
         /* Reset bounds */
         for (j=0; j < mcp->n_vars; j++)
