@@ -11,8 +11,11 @@
 #define NONDOMINATED 0
 
 /* Definitions */
-#define INF 1.0e14
+#define INF 1.0e14 /* A value to simulate infinity */
 #define MAX_MODULES 200 /* A value above any practical beta expected, used for array allocation. */
+
+/* Macros */
+#define SAFE_ALLOC(expr) if( (expr) == NULL) { printf("Memory allocation failed, exiting...\n"); exit(-1);}
 
 /* Globals */
 glp_smcp param;
