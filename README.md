@@ -34,8 +34,7 @@ You can use the provided Makefile. For optimal performance adjust compilation fl
 
 ## How does it work?
 - The MOEA of choice is the proven NSGA-II.
-- The ``flux balance analysis" linear programming problems are solved using GLPK.
-- Objective function evaluations are done in parallel using MPI, this model is known as master-slave parallelization (as opposed to island parallelization).
+- The ``flux balance analysis" linear programming problems that determine metabolic fluxes are solved using GLPK.
 
 ## Why not use existing GA/MOEA libraries?
 There are many libraries in various fast languages to do GA/MOEA. However, the very particular specifications and overall small size of this program have led me to conclude that avoiding these libraries will be beneficial for simplicity and optimization.
@@ -43,4 +42,4 @@ There are many libraries in various fast languages to do GA/MOEA. However, the v
 ## Credits
 - [GLPK](https://www.gnu.org/software/glpk/) is used to solve LP problems.
 - [PCG Random Number Generator](http://www.pcg-random.org/) is used to obtain fastly generated and uniformly distributed random numbers.
-
+- [UTLIST and UTHASH](https://troydhanson.github.io/uthash/) are used for linked list and hash table data structures, respectively.

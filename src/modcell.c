@@ -346,7 +346,7 @@ main (int argc, char **argv)
     /* Intialize global GLPK parameters*/
     glp_init_smcp(&param);
     param.msg_lev = GLP_MSG_ERR;
-    //param.tm_lim = INT_MAX; //TODO: Consider time limit (integer in mili-seconds) to prevent LP from getting stuck?
+    param.tm_lim = LP_TIME_LIMIT_MILISEC;
 
     MCproblem mcp = read_problem(argv[1]);
     load_parameters(&mcp, argv[2]);
