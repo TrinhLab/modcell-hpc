@@ -197,8 +197,9 @@ write_population(MCproblem *mcp, Population *pop, const char *out_population_pat
         for (k=0; k < mcp->n_models; k++) {
            fprintf(f, "%s", mcp->model_names[k]);
             for (j=0; j < mcp->n_vars; j++)
-                if (indv->modules[k][j] == 1)
-                    fprintf(f, ",%s", mcp->individual2id[j]);
+                if (mcp->beta > 0) // TODO: Consider an alternative format for beta = 0?
+                    if (indv->modules[k][j] == 1)
+                        fprintf(f, ",%s", mcp->individual2id[j]);
             fprintf(f, "\n");
         }
 
@@ -298,7 +299,7 @@ read_population(MCproblem *mcp, Population *pop, const char *population_path)
             indv->deletions[rxn_idx] = 0;
         }
 
-        if (in_modules & (mcp->beta > 0)) {
+        if (in_modules && (mcp->beta > 0)) {
             tofree = string = strdup(buff);
             assert(string != NULL);
             token = strsep(&string, ",");
@@ -345,6 +346,7 @@ main (int argc, char **argv)
     /* Intialize global GLPK parameters*/
     glp_init_smcp(&param);
     param.msg_lev = GLP_MSG_ERR;
+    //param.tm_lim = INT_MAX; //TODO: Consider time limit (integer in mili-seconds) to prevent LP from getting stuck?
 
     MCproblem mcp = read_problem(argv[1]);
     load_parameters(&mcp, argv[2]);

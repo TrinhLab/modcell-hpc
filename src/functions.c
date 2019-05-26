@@ -3,7 +3,7 @@
  */
 
 #include <stdlib.h>
-//#include <assert.h>
+#include <assert.h>
 #include "modcell.h"
 
 extern glp_smcp param;
@@ -41,9 +41,11 @@ copy_individual(MCproblem *mcp, Individual *indv_source, Individual *indv_dest)
 void
 combine_populations(MCproblem *mcp, Population *pop1, Population *pop2, Population *combined_pop)
 {
+    assert(pop1->size == combined_pop->size/2);
+    assert(pop2->size == combined_pop->size/2);
+
     int i, it;
-//    assert(pop1->size == combined_pop->size/2)
- //   assert(pop2->size == combined_pop->size/2)
+
     for (it=0, i=0; i<pop1->size; i++, it++)
         copy_individual(mcp, &(pop1->indv[i]), &(combined_pop->indv[it]));
     for (i=0; i<pop2->size; i++, it++)
@@ -211,7 +213,7 @@ enforce_module_constraints(MCproblem *mcp, Individual *indv)
    - Currently only computes wGCP.
 
     Optimizations (perform them prior to calling this function?):
-        - Look up hash table of known solutions
+        - TODO: Look up hash table of known solutions
 */
 void
 calculate_objectives(MCproblem *mcp, Individual *indv)

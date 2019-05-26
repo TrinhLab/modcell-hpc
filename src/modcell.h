@@ -22,10 +22,10 @@ typedef struct {
  	/* ModCell */
  	bool *deletions; 		/* [n_variables]*/
      	bool **modules; 		/* [n_models][n_variables] */
-	/* MOEA */ //IMPORTANT: Would these fields interfere or slow down the hash table look up? Maybe a hashkey struct should be created independently
+	/* MOEA */ //IMPORTANT: Would these fields interfere (or slow down) the hash table look up? Maybe a hashkey struct should be created independently
 	double *objectives; 		/* [n_models] */
 	double *penalty_objectives; 	/* [n_models] */
-	int rank;
+	int rank; // This is currently unused.
 	double crowding_distance;
 } Individual;
 
@@ -66,6 +66,10 @@ typedef struct {
 	double max_run_time;
 } MCproblem;
 
+typedef struct item { /* list item */
+     int index;
+     struct item *prev, *next;
+} item;
 
 /* init.c */
 void allocate_MCproblem(MCproblem *mcp, unsigned int n_models, size_t n_vars);
@@ -84,6 +88,7 @@ void mutation(MCproblem *mcp, Individual *indv);
 void enforce_module_constraints(MCproblem *mcp, Individual *indv);
 int find_domination(MCproblem *mcp, Individual *indv_a, Individual *indv_b);
 void copy_individual(MCproblem *mcp, Individual *indv_source, Individual *indv_dest);
+void combine_populations(MCproblem *mcp, Population *pop1, Population *pop2, Population *combined_pop);
 
 /* moea.c */
 void run_moea(MCproblem *mcp, Population *initial_population);
