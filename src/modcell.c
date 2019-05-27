@@ -130,12 +130,13 @@ read_problem(const char *problem_dir_path)
         READPARAM(max_prod_growth,lf,lp)
         CLOSEFILE
 
+        /* Cleanup */
       	glp_delete_index(lp->P);
     	free_charlist(ncandfile);
 
         /* Objective values without deletions */
         glp_simplex(lp->P, &param);
-        lp->no_deletion_objective = glp_get_col_prim(lp->P, lp->prod_col_idx)/lp->max_prod_growth;
+        lp->no_deletion_objective = glp_get_col_prim(lp->P, lp->prod_col_idx)/lp->max_prod_growth; //FIXME: Assumes wGCP
     }
 
 return mcp;
@@ -190,7 +191,7 @@ write_population(MCproblem *mcp, Population *pop, const char *out_population_pat
 
         fprintf(f, "#DELETIONS\n");
         for (j=0; j < mcp->n_vars; j++)
-            if ( indv->deletions[j] == 0 )
+            if ( indv->deletions[j] == DELETED_RXN )
                 fprintf(f, "%s\n", mcp->individual2id[j]);
 
         fprintf(f, "#MODULES\n");
@@ -198,7 +199,7 @@ write_population(MCproblem *mcp, Population *pop, const char *out_population_pat
            fprintf(f, "%s", mcp->model_names[k]);
             for (j=0; j < mcp->n_vars; j++)
                 if (mcp->beta > 0) // TODO: Consider an alternative format for beta = 0?
-                    if (indv->modules[k][j] == 1)
+                    if (indv->modules[k][j] == MODULE_RXN)
                         fprintf(f, ",%s", mcp->individual2id[j]);
             fprintf(f, "\n");
         }
@@ -211,27 +212,27 @@ write_population(MCproblem *mcp, Population *pop, const char *out_population_pat
     fprintf(f, "#ENDFILE\n");
     fclose(f);
     printf("Output population written to: %s\n",out_population_path);
-    }
+}
 
-    /* Notes: This can be replaced by a hash table, but the look up is only done during IO */
-    int
-    get_rxn_idx(MCproblem *mcp, const char *rxn_id)
-    {
-        for (int j=0; j < mcp->n_vars; j++)
-            if(strcmp(mcp->individual2id[j], rxn_id) == 0)
-                return j;
-        fprintf (stderr, "error: Reaction ID not found: '%s'\n", rxn_id);
-        exit(-1);
-    }
+/* Notes: This can be replaced by a hash table, but the look up is only done during IO */
+int
+get_rxn_idx(MCproblem *mcp, const char *rxn_id)
+{
+    for (int j=0; j < mcp->n_vars; j++)
+        if(strcmp(mcp->individual2id[j], rxn_id) == 0)
+            return j;
+    fprintf (stderr, "error: Reaction ID not found: '%s'\n", rxn_id);
+    exit(-1);
+}
 
-    int
-    get_model_idx(MCproblem *mcp, const char *model_id)
-    {
-        for (int k=0; k < mcp->n_models; k++)
-            if(strcmp(mcp->model_names[k], model_id) == 0)
-                return k;
-        fprintf (stderr, "error: Model ID not found: '%s'\n", model_id);
-        exit(-1);
+int
+get_model_idx(MCproblem *mcp, const char *model_id)
+{
+    for (int k=0; k < mcp->n_models; k++)
+        if(strcmp(mcp->model_names[k], model_id) == 0)
+            return k;
+    fprintf (stderr, "error: Model ID not found: '%s'\n", model_id);
+    exit(-1);
 }
 
 void
@@ -296,7 +297,7 @@ read_population(MCproblem *mcp, Population *pop, const char *population_path)
 
         if (in_deletions) {
             rxn_idx = get_rxn_idx(mcp, buff);
-            indv->deletions[rxn_idx] = 0;
+            indv->deletions[rxn_idx] = DELETED_RXN;
         }
 
         if (in_modules && (mcp->beta > 0)) {
@@ -306,7 +307,7 @@ read_population(MCproblem *mcp, Population *pop, const char *population_path)
             model_idx = get_model_idx(mcp, token);
             while ((token = strsep(&string, ",")) != NULL){
                 rxn_idx = get_rxn_idx(mcp, token);
-                indv->modules[model_idx][rxn_idx] = 1;
+                indv->modules[model_idx][rxn_idx] = MODULE_RXN;
             }
         }
     }

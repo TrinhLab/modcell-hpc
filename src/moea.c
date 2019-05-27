@@ -42,6 +42,10 @@ run_moea(MCproblem *mcp, Population *parent_population)
     allocate_population(mcp, offspring_population, mcp->population_size);
     allocate_population(mcp, combined_population, 2*mcp->population_size);
 
+    /* This is not needed, but otherwise individuals can be uninitialized leading to hideous bugs. */
+    set_blank_population(mcp, offspring_population);
+    set_blank_population(mcp, combined_population);
+
     clock_t begin = clock();
     evaluate_population(mcp, parent_population);
     n_generations++;
@@ -83,18 +87,20 @@ selection_and_variation(MCproblem *mcp, Population *parent_population, Populatio
     Individual *parent1, *parent2;
 
     /*Tournament selection and crossover*/
-    for (i=0; i < mcp->population_size; i+=2){
+    for (i=0; i < mcp->population_size; i+=2) {
         parent1 = tournament_k2(mcp, &(parent_population->indv[(int)pcg32_boundedrand(mcp->population_size)]), &(parent_population->indv[(int)pcg32_boundedrand(mcp->population_size)]));
         parent2 = tournament_k2(mcp, &(parent_population->indv[(int)pcg32_boundedrand(mcp->population_size)]), &(parent_population->indv[(int)pcg32_boundedrand(mcp->population_size)]));
         crossover(mcp, parent1, parent2, &(offspring_population->indv[i]), &(offspring_population->indv[i+1]));
     }
 
-    /* Mutation and constraint enforcement */
-    for (i=0; i < mcp->population_size; i++) {
+    /* Mutation */
+    for (i=0; i < mcp->population_size; i++)
         mutation(mcp, &(offspring_population->indv[i]));
-        if (mcp->beta > 0)
+
+    /* Constraint enforcement */
+    if (mcp->beta > 0)
+        for (i=0; i < mcp->population_size; i++)
             enforce_module_constraints(mcp, &(offspring_population->indv[i]));
-    }
 }
 
 
@@ -260,6 +266,7 @@ add_individuals(MCproblem *mcp, Population *combined_pop, Population *parent_pop
     item *elt_p;
 
     /* If fi size is above what is needed to fill the pop calculate crowding distance and sort fi by it*/
+
     if (fi_size > (parent_pop->size - *individuals_added)) {
         item  *elt, *tail_fi;
         int it;
@@ -297,9 +304,9 @@ add_individuals(MCproblem *mcp, Population *combined_pop, Population *parent_pop
                 }
             }
         }
+
         /* Sort fi_size by crowding distance */
         DL_SORT(head_fi, sortcrowding);
-
     }
 
     DL_FOREACH(head_fi, elt_p) {
@@ -310,6 +317,7 @@ add_individuals(MCproblem *mcp, Population *combined_pop, Population *parent_pop
     }
 
     FREE_LIST(head_fi); /*free local copy of head_fi */
+
 }
 
 /* Makes sure that crowding distance is assigned for tournament selection */

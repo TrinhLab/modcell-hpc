@@ -17,22 +17,21 @@ void enforce_module_constraints(MCproblem *mcp, Individual *indv);
 void calculate_objectives(MCproblem *mcp, Individual *indv);
 
 
-/* TODO: Make sure this overwrites the destination individual and does not cause a memory leak*/
 void
 copy_individual(MCproblem *mcp, Individual *indv_source, Individual *indv_dest)
 {
-    int i, j, k;
+    int j, k;
 
     for (j=0; j < mcp->n_vars; j++)
         indv_dest->deletions[j] = indv_source->deletions[j];
 
-    for (k=0; j < mcp->n_models; k++)
+    for (k=0; k < mcp->n_models; k++)
         for (j=0; j < mcp->n_vars; j++)
             indv_dest->modules[k][j] = indv_source->modules[k][j];
 
-    for (i=0; i < mcp->n_models; i++) {
-        indv_dest->objectives[i] = indv_source->objectives[i];
-        indv_dest->penalty_objectives[i] = indv_source->penalty_objectives[i];
+    for (k=0; k < mcp->n_models; k++) {
+        indv_dest->objectives[k] = indv_source->objectives[k];
+        indv_dest->penalty_objectives[k] = indv_source->penalty_objectives[k];
     }
     indv_dest->rank = indv_source->rank;
     indv_dest->crowding_distance = indv_source->crowding_distance;
@@ -173,8 +172,9 @@ enforce_module_constraints(MCproblem *mcp, Individual *indv)
    /*  Removes modules that are not deletions */
     for (k=0; k < mcp->n_models; k++) {
         for (j=0; j < mcp->n_vars; j++) {
-            if ( (indv->deletions[j] == !DELETED_RXN) && (indv->modules[k][j] == MODULE_RXN))
+            if ( (indv->deletions[j] == !DELETED_RXN) && (indv->modules[k][j] == MODULE_RXN)) {
                 indv->modules[k][j] = !MODULE_RXN;
+            }
         }
     }
 
@@ -187,9 +187,9 @@ enforce_module_constraints(MCproblem *mcp, Individual *indv)
                 n_module_rxn++;
             }
         }
-        /* Randomly remove additional modules  */
+        /* Randomly remove additional modules */
         module_diff = n_module_rxn - mcp->beta;
-        if(module_diff > 0){
+        if(module_diff > 0) {
             for (i=0; i < module_diff; i++) /* Reset removed modules */
                 is_removed_module[i] = 0;
             n_removed_module = 0;
@@ -224,7 +224,7 @@ calculate_objectives(MCproblem *mcp, Individual *indv)
 
     /* Preliminary evaluation */
     for (j=0; j < mcp->n_vars; j++)
-        if(indv->deletions[j] == 0)
+        if(indv->deletions[j] == DELETED_RXN)
             n_deletions++;
 
     if (n_deletions == 0){ /* Avoid further evaluation */
@@ -245,7 +245,7 @@ calculate_objectives(MCproblem *mcp, Individual *indv)
             change_bound[j] = 0;
             if(lp->cand_col_idx[j] == NOT_CANDIDATE)
                 continue;
-            if(indv->deletions[j] == 0) {
+            if(indv->deletions[j] == DELETED_RXN) {
                 change_bound[j] = 1; /* Reaction deleted in the chassis */
                 if(mcp->beta > 0)
                     if (indv->modules[k][j] == 1)
@@ -262,7 +262,7 @@ calculate_objectives(MCproblem *mcp, Individual *indv)
         if ((glp_simplex(lp->P, &param) == 0) && (glp_get_status(lp->P) == GLP_OPT)) /*Problem solved succesfully and solution status is optimal*/
             indv->objectives[k] = glp_get_col_prim(lp->P, lp->prod_col_idx)/lp->max_prod_growth;
         else
-            indv->objectives[k] = 0;
+            indv->objectives[k] = 0; //TODO: Should it be set to UNKNOWN_OBJ (-1)? Is there anything that assumes positive value here? Can help keep track of failed calc., although currently this information is not used.
 
         /* Reset bounds */
         for (j=0; j < mcp->n_vars; j++)

@@ -3,6 +3,7 @@
 #include "pcg_basic.h"
 
 /* Notation */
+#define UNKNOWN_OBJ -1
 #define NOT_CANDIDATE -1
 #define DELETED_RXN 0
 #define MODULE_RXN 1
@@ -82,8 +83,9 @@ void free_population(MCproblem *mcp, Population *pop);
 void allocate_individual(MCproblem *mcp, Individual *indv);
 void free_individual(MCproblem *mcp, Individual *indv);
 void set_random_population(MCproblem *mcp, Population *pop);
-void set_blank_individual(MCproblem *mcp,  Individual *indv);
 void set_random_individual(MCproblem *mcp,  Individual *indv);
+void set_blank_population(MCproblem *mcp, Population *pop);
+void set_blank_individual(MCproblem *mcp,  Individual *indv);
 
 /* functions.c */
 void calculate_objectives(MCproblem *mcp, Individual *indv);

@@ -9,6 +9,7 @@ void free_population(MCproblem *mcp, Population *pop);
 void free_individual(MCproblem *mcp, Individual *indv);
 
 void set_random_population(MCproblem *mcp, Population *pop);
+void set_blank_population(MCproblem *mcp, Population *pop);
 void set_blank_individual(MCproblem *mcp,  Individual *indv);
 void set_random_individual(MCproblem *mcp,  Individual *indv);
 
@@ -96,17 +97,17 @@ set_random_individual(MCproblem *mcp,  Individual *indv)
 
     /* init deletions */
     for (j = 0; j < mcp->n_vars; j++)
-        indv->deletions[j] = 1;
+        indv->deletions[j] = !DELETED_RXN;
     for (i = 0; i < mcp->alpha; i++) {
         deleted_rxns[i] = (int)pcg32_boundedrand(mcp->n_vars);
-        indv->deletions[deleted_rxns[i]] = 0;
+        indv->deletions[deleted_rxns[i]] = DELETED_RXN;
     }
     /* init modules. Only one module reaction is inserted regardless of beta, this heuristic leads to better individuals*/
     if (mcp->beta > 0) {
         for (k = 0; k < mcp->n_models; k++) {
             for (j = 0; j < mcp->n_vars; j++)
-                    indv->modules[k][j] = 0;
-            indv->modules[k][deleted_rxns[(int)pcg32_boundedrand(mcp->alpha)]] = 1;
+                    indv->modules[k][j] = !MODULE_RXN;
+            indv->modules[k][deleted_rxns[(int)pcg32_boundedrand(mcp->alpha)]] = MODULE_RXN;
         }
      }
     calculate_objectives(mcp, indv);
@@ -120,15 +121,17 @@ set_blank_individual(MCproblem *mcp,  Individual *indv)
     int j,k;
     /* init deletions */
     for (j = 0; j < mcp->n_vars; j++)
-        indv->deletions[j] = 1;
+        indv->deletions[j] = !DELETED_RXN;
     /* init modules */
     if (mcp->beta > 0) {
         for (k = 0; k < mcp->n_models; k++)
             for (j = 0; j < mcp->n_vars; j++)
-                indv->modules[k][j] = 0;
+                indv->modules[k][j] = !MODULE_RXN;
      }
-    for (k = 0; k < mcp->n_models; k++)
-        indv->objectives[k] = -1; /* Use this to indivate objectives are not calculated */
+    for (k = 0; k < mcp->n_models; k++) {
+        indv->objectives[k] = UNKNOWN_OBJ;
+        indv->penalty_objectives[k] = UNKNOWN_OBJ;
+    }
 }
 
 
@@ -137,4 +140,11 @@ set_random_population(MCproblem *mcp, Population *pop)
 {
     for (int i=0; i < pop->size; i++)
         set_random_individual(mcp, &(pop->indv[i]));
+}
+
+void
+set_blank_population(MCproblem *mcp, Population *pop)
+{
+    for (int i=0; i < pop->size; i++)
+        set_blank_individual(mcp, &(pop->indv[i]));
 }
