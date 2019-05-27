@@ -33,18 +33,31 @@ pn.set_mip_state(design_objective, state, 0, 1); % Why is growth specified?
 pn.set_deletion_type('reactions', design_objective);
 
 %% Make IDs safe for MPS format
-% Currently the only manipulation is truncating the strings to a max name
+% - Max length is truncated to 8
+% - An integer between 10 and 99 is added at the end to avoid repetition.
+% - No other checks are performed.(e.g. illegal characters)
+
+% Generate new ids
 all_ids = {};
 for i =1:length(pn.prod_id)
     all_ids = union(all_ids, pn.model_array(i).rxns);
 end
 max_length = 8;
+global salt_counter;
+salt_counter = 10;
 new_ids = cellfun(@(x)(truncatestr(x, max_length)),all_ids, 'UniformOutput',false);
 if length(new_ids) ~= length(unique(new_ids))
-    error('Reaction ID truncation led to duplicates, add some salt to he truncated ids to avoid this')
+    error('Reaction ID truncation led to duplicates, add more salt to he truncated ids to avoid this')
 end
 
+% Update model reactions and other places where ids appear
 idmap = containers.Map(all_ids, new_ids);
+
+	% Parent model
+for j =1:length(pn.parent_model.rxns)
+	pn.parent_model.rxns{j} = idmap(pn.parent_model.rxns{j});
+end
+	% Production networks
 for i =1:length(pn.prod_id)
     for j =1:length(pn.model_array(i).rxns)
         pn.model_array(i).rxns{j} = idmap(pn.model_array(i).rxns{j});
@@ -89,9 +102,22 @@ end
 end
 
 function newstr = truncatestr(instr, max_length)
-if length(instr) < max_length
-    newstr = instr;
-else
-    newstr = instr(1:max_length);
+% Modifying the end of the string keeps reaction names readable.
+
+global salt_counter;
+if salt_counter > 99
+	salt_counter = 10;
 end
+
+newstr = instr;
+if length(instr) >= max_length
+    newstr = newstr(1:max_length);
+    newstr(end-1:end) = num2str(salt_counter);
+elseif length(instr)  == (max_length - 1)
+    newstr(end:end+1) = num2str(salt_counter);
+else
+    newstr(end+1:end+2) = num2str(salt_counter);
+end
+
+salt_counter = salt_counter+1;
 end

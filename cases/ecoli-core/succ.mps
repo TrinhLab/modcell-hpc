@@ -74,356 +74,356 @@ ROWS
  E  EQ71                                                     
  E  EQ72                                                     
 COLUMNS                                                      
-    ACALD     EQ8       -1             EQ10      1           
-    ACALD     EQ21      -1             EQ43      1           
-    ACALD     EQ50      -1             EQ51      1           
-    ACALDt    EQ8       1              EQ9       -1          
-    ACKr      EQ6       -1             EQ12      1           
-    ACKr      EQ13      1              EQ17      -1          
-    ACONTa    EQ11      1              EQ18      -1          
-    ACONTa    EQ41      1                                    
-    ACONTb    EQ11      -1             EQ41      -1          
-    ACONTb    EQ45      1                                    
-    ACt2r     EQ6       1              EQ7       -1          
-    ACt2r     EQ43      1              EQ44      -1          
-    ADK1      EQ13      2              EQ16      -1          
-    ADK1      EQ17      -1                                   
-    AKGDH     EQ14      -1             EQ19      1           
-    AKGDH     EQ21      -1             EQ50      -1          
-    AKGDH     EQ51      1              EQ71      1           
-    AKGt2r    EQ14      1              EQ15      -1          
-    AKGt2r    EQ43      1              EQ44      -1          
-    ALCD2x    EQ8       1              EQ24      -1          
-    ALCD2x    EQ43      1              EQ50      -1          
-    ALCD2x    EQ51      1                                    
-    ATPM      EQ13      1              EQ17      -1          
-    ATPM      EQ41      -1             EQ43      1           
-    ATPM      EQ60      1                                    
-    ATPS4r    EQ13      -1             EQ17      1           
-    ATPS4r    EQ41      1              EQ43      3           
-    ATPS4r    EQ44      -4             EQ60      -1          
-    BIOMASS_  COST      -1             EQ3       -1.496      
-    BIOMASS_  EQ10      -3.7478        EQ13      59.81       
-    BIOMASS_  EQ14      4.1182         EQ17      -59.81      
-    BIOMASS_  EQ21      3.7478         EQ23      -0.361      
-    BIOMASS_  EQ26      -0.0709        EQ33      -0.129      
-    BIOMASS_  EQ34      -0.205         EQ36      -0.2557     
-    BIOMASS_  EQ38      -4.9414        EQ41      -59.81      
-    BIOMASS_  EQ43      59.81          EQ50      -3.547      
-    BIOMASS_  EQ51      3.547          EQ52      13.0279     
-    BIOMASS_  EQ53      -13.0279       EQ58      -1.7867     
-    BIOMASS_  EQ59      -0.5191        EQ60      59.81       
-    BIOMASS_  EQ62      -2.8328        EQ66      -0.8977     
-    CO2t      EQ19      1              EQ20      -1          
-    CS        EQ10      -1             EQ18      1           
-    CS        EQ21      1              EQ41      -1          
-    CS        EQ43      1              EQ58      -1          
-    CYTBD     EQ41      1              EQ43      -2          
-    CYTBD     EQ44      2              EQ56      -0.5        
-    CYTBD     EQ64      1              EQ65      -1          
-    D_LACt2   EQ43      1              EQ44      -1          
-    D_LACt2   EQ46      1              EQ47      -1          
-    ENO       EQ2       -1             EQ41      1           
-    ENO       EQ59      1                                    
-    ETOHt2r   EQ24      1              EQ25      -1          
-    ETOHt2r   EQ43      1              EQ44      -1          
-    EX_ac_e   EQ7       -1                                   
-    EX_acald  EQ9       -1                                   
-    EX_akg_e  EQ15      -1                                   
-    EX_co2_e  EQ20      -1                                   
-    EX_etoh_  EQ25      -1                                   
-    EX_for_e  EQ29      -1                                   
-    EX_fru_e  EQ30      -1                                   
-    EX_fum_e  EQ32      -1                                   
-    EX_glc__  EQ35      -1                                   
-    EX_gln__  EQ37      -1                                   
-    EX_glu__  EQ39      -1                                   
-    EX_h_e    EQ44      -1                                   
-    EX_h2o_e  EQ42      -1                                   
-    EX_lac__  EQ47      -1                                   
-    EX_mal__  EQ49      -1                                   
-    EX_nh4_e  EQ55      -1                                   
-    EX_o2_e   EQ57      -1                                   
-    EX_pi_e   EQ61      -1                                   
-    EX_pyr_e  EQ63      -1                                   
-    EX_succ_  COST      0.0001         EQ70      -1          
-    FBA       EQ22      1              EQ27      -1          
-    FBA       EQ33      1                                    
-    FBP       EQ26      1              EQ27      -1          
-    FBP       EQ41      -1             EQ60      1           
-    FORt2     EQ28      1              EQ29      -1          
-    FORt2     EQ43      1              EQ44      -1          
-    FORt      EQ28      1              EQ29      -1          
-    FRD7      EQ31      -1             EQ64      1           
-    FRD7      EQ65      -1             EQ69      1           
-    FRUpts2   EQ26      1              EQ30      -1          
-    FRUpts2   EQ59      -1             EQ62      1           
-    FUM       EQ31      -1             EQ41      -1          
-    FUM       EQ48      1                                    
-    FUMt2_2   EQ31      1              EQ32      -1          
-    FUMt2_2   EQ43      2              EQ44      -2          
-    G6PDH2r   EQ5       1              EQ34      -1          
-    G6PDH2r   EQ43      1              EQ52      -1          
-    G6PDH2r   EQ53      1                                    
-    GAPD      EQ1       1              EQ33      -1          
-    GAPD      EQ43      1              EQ50      -1          
-    GAPD      EQ51      1              EQ60      -1          
-    GLCpts    EQ34      1              EQ35      -1          
-    GLCpts    EQ59      -1             EQ62      1           
-    GLNS      EQ13      1              EQ17      -1          
-    GLNS      EQ36      1              EQ38      -1          
-    GLNS      EQ43      1              EQ54      -1          
-    GLNS      EQ60      1                                    
-    GLNabc    EQ13      1              EQ17      -1          
-    GLNabc    EQ36      1              EQ37      -1          
-    GLNabc    EQ41      -1             EQ43      1           
-    GLNabc    EQ60      1                                    
-    GLUDy     EQ14      1              EQ38      -1          
-    GLUDy     EQ41      -1             EQ43      1           
-    GLUDy     EQ52      -1             EQ53      1           
-    GLUDy     EQ54      1                                    
-    GLUN      EQ36      -1             EQ38      1           
-    GLUN      EQ41      -1             EQ54      1           
-    GLUSy     EQ14      -1             EQ36      -1          
-    GLUSy     EQ38      2              EQ43      -1          
-    GLUSy     EQ52      1              EQ53      -1          
-    GLUt2r    EQ38      1              EQ39      -1          
-    GLUt2r    EQ43      1              EQ44      -1          
-    GND       EQ4       -1             EQ19      1           
-    GND       EQ52      -1             EQ53      1           
-    GND       EQ67      1                                    
-    H2Ot      EQ41      1              EQ42      -1          
-    ICDHyr    EQ14      1              EQ19      1           
-    ICDHyr    EQ45      -1             EQ52      -1          
-    ICDHyr    EQ53      1                                    
-    ICL       EQ40      1              EQ45      -1          
-    ICL       EQ69      1                                    
-    LDH_D     EQ43      1              EQ46      -1          
-    LDH_D     EQ50      -1             EQ51      1           
-    LDH_D     EQ62      1                                    
-    MALS      EQ10      -1             EQ21      1           
-    MALS      EQ40      -1             EQ41      -1          
-    MALS      EQ43      1              EQ48      1           
-    MALt2_2   EQ43      2              EQ44      -2          
-    MALt2_2   EQ48      1              EQ49      -1          
-    MDH       EQ43      1              EQ48      -1          
-    MDH       EQ50      -1             EQ51      1           
-    MDH       EQ58      1                                    
-    ME1       EQ19      1              EQ48      -1          
-    ME1       EQ50      -1             EQ51      1           
-    ME1       EQ62      1                                    
-    ME2       EQ19      1              EQ48      -1          
-    ME2       EQ52      -1             EQ53      1           
-    ME2       EQ62      1                                    
-    NADH16    EQ43      -4             EQ44      3           
-    NADH16    EQ50      1              EQ51      -1          
-    NADH16    EQ64      -1             EQ65      1           
-    NADTRHD   EQ50      -1             EQ51      1           
-    NADTRHD   EQ52      1              EQ53      -1          
-    NH4t      EQ54      1              EQ55      -1          
-    O2t       EQ56      1              EQ57      -1          
-    PDH       EQ10      1              EQ19      1           
-    PDH       EQ21      -1             EQ50      -1          
-    PDH       EQ51      1              EQ62      -1          
-    PFK       EQ13      1              EQ17      -1          
-    PFK       EQ26      -1             EQ27      1           
-    PFK       EQ43      1                                    
-    PFL       EQ10      1              EQ21      -1          
-    PFL       EQ28      1              EQ62      -1          
-    PGI       EQ26      1              EQ34      -1          
-    PGK       EQ1       1              EQ3       -1          
-    PGK       EQ13      1              EQ17      -1          
-    PGL       EQ4       1              EQ5       -1          
-    PGL       EQ41      -1             EQ43      1           
-    PGM       EQ2       -1             EQ3       1           
-    PIt2r     EQ43      1              EQ44      -1          
-    PIt2r     EQ60      1              EQ61      -1          
-    PPC       EQ19      -1             EQ41      -1          
-    PPC       EQ43      1              EQ58      1           
-    PPC       EQ59      -1             EQ60      1           
-    PPCK      EQ13      1              EQ17      -1          
-    PPCK      EQ19      1              EQ58      -1          
-    PPCK      EQ59      1                                    
-    PPS       EQ16      1              EQ17      -1          
-    PPS       EQ41      -1             EQ43      2           
-    PPS       EQ59      1              EQ60      1           
-    PPS       EQ62      -1                                   
-    PTAr      EQ10      -1             EQ12      1           
-    PTAr      EQ21      1              EQ60      -1          
-    PYK       EQ13      -1             EQ17      1           
-    PYK       EQ43      -1             EQ59      -1          
-    PYK       EQ62      1                                    
-    PYRt2     EQ43      1              EQ44      -1          
-    PYRt2     EQ62      1              EQ63      -1          
-    RPE       EQ67      -1             EQ72      1           
-    RPI       EQ66      -1             EQ67      1           
-    SUCCt2_2  EQ43      2              EQ44      -2          
-    SUCCt2_2  EQ69      1              EQ70      -1          
-    SUCCt3    EQ43      1              EQ44      -1          
-    SUCCt3    EQ69      -1             EQ70      1           
-    SUCDi     EQ31      1              EQ64      -1          
-    SUCDi     EQ65      1              EQ69      -1          
-    SUCOAS    EQ13      1              EQ17      -1          
-    SUCOAS    EQ21      -1             EQ60      1           
-    SUCOAS    EQ69      -1             EQ71      1           
-    TALA      EQ23      1              EQ26      1           
-    TALA      EQ33      -1             EQ68      -1          
-    THD2      EQ43      2              EQ44      -2          
-    THD2      EQ50      1              EQ51      -1          
-    THD2      EQ52      -1             EQ53      1           
-    TKT1      EQ33      1              EQ66      -1          
-    TKT1      EQ68      1              EQ72      -1          
-    TKT2      EQ23      -1             EQ26      1           
-    TKT2      EQ33      1              EQ72      -1          
-    TPI       EQ22      -1             EQ33      1           
-    FRDx      EQ31      -1             EQ43      -1          
-    FRDx      EQ50      1              EQ51      -1          
-    FRDx      EQ69      1                                    
+    ACALD10   EQ8       -1             EQ10      1           
+    ACALD10   EQ21      -1             EQ43      1           
+    ACALD10   EQ50      -1             EQ51      1           
+    ACALDt11  EQ8       1              EQ9       -1          
+    ACKr12    EQ6       -1             EQ12      1           
+    ACKr12    EQ13      1              EQ17      -1          
+    ACONTa14  EQ11      1              EQ18      -1          
+    ACONTa14  EQ41      1                                    
+    ACONTb15  EQ11      -1             EQ41      -1          
+    ACONTb15  EQ45      1                                    
+    ACt2r16   EQ6       1              EQ7       -1          
+    ACt2r16   EQ43      1              EQ44      -1          
+    ADK117    EQ13      2              EQ16      -1          
+    ADK117    EQ17      -1                                   
+    AKGDH18   EQ14      -1             EQ19      1           
+    AKGDH18   EQ21      -1             EQ50      -1          
+    AKGDH18   EQ51      1              EQ71      1           
+    AKGt2r19  EQ14      1              EQ15      -1          
+    AKGt2r19  EQ43      1              EQ44      -1          
+    ALCD2x21  EQ8       1              EQ24      -1          
+    ALCD2x21  EQ43      1              EQ50      -1          
+    ALCD2x21  EQ51      1                                    
+    ATPM22    EQ13      1              EQ17      -1          
+    ATPM22    EQ41      -1             EQ43      1           
+    ATPM22    EQ60      1                                    
+    ATPS4r23  EQ13      -1             EQ17      1           
+    ATPS4r23  EQ41      1              EQ43      3           
+    ATPS4r23  EQ44      -4             EQ60      -1          
+    BIOMAS24  COST      -1             EQ3       -1.496      
+    BIOMAS24  EQ10      -3.7478        EQ13      59.81       
+    BIOMAS24  EQ14      4.1182         EQ17      -59.81      
+    BIOMAS24  EQ21      3.7478         EQ23      -0.361      
+    BIOMAS24  EQ26      -0.0709        EQ33      -0.129      
+    BIOMAS24  EQ34      -0.205         EQ36      -0.2557     
+    BIOMAS24  EQ38      -4.9414        EQ41      -59.81      
+    BIOMAS24  EQ43      59.81          EQ50      -3.547      
+    BIOMAS24  EQ51      3.547          EQ52      13.0279     
+    BIOMAS24  EQ53      -13.0279       EQ58      -1.7867     
+    BIOMAS24  EQ59      -0.5191        EQ60      59.81       
+    BIOMAS24  EQ62      -2.8328        EQ66      -0.8977     
+    CO2t25    EQ19      1              EQ20      -1          
+    CS26      EQ10      -1             EQ18      1           
+    CS26      EQ21      1              EQ41      -1          
+    CS26      EQ43      1              EQ58      -1          
+    CYTBD27   EQ41      1              EQ43      -2          
+    CYTBD27   EQ44      2              EQ56      -0.5        
+    CYTBD27   EQ64      1              EQ65      -1          
+    D_LACt29  EQ43      1              EQ44      -1          
+    D_LACt29  EQ46      1              EQ47      -1          
+    ENO30     EQ2       -1             EQ41      1           
+    ENO30     EQ59      1                                    
+    ETOHt231  EQ24      1              EQ25      -1          
+    ETOHt231  EQ43      1              EQ44      -1          
+    EX_ac_32  EQ7       -1                                   
+    EX_aca33  EQ9       -1                                   
+    EX_akg34  EQ15      -1                                   
+    EX_co235  EQ20      -1                                   
+    EX_eto36  EQ25      -1                                   
+    EX_for37  EQ29      -1                                   
+    EX_fru38  EQ30      -1                                   
+    EX_fum39  EQ32      -1                                   
+    EX_glc40  EQ35      -1                                   
+    EX_gln41  EQ37      -1                                   
+    EX_glu42  EQ39      -1                                   
+    EX_h_e44  EQ44      -1                                   
+    EX_h2o43  EQ42      -1                                   
+    EX_lac46  EQ47      -1                                   
+    EX_mal47  EQ49      -1                                   
+    EX_nh448  EQ55      -1                                   
+    EX_o2_49  EQ57      -1                                   
+    EX_pi_50  EQ61      -1                                   
+    EX_pyr51  EQ63      -1                                   
+    EX_suc52  COST      0.0001         EQ70      -1          
+    FBA53     EQ22      1              EQ27      -1          
+    FBA53     EQ33      1                                    
+    FBP54     EQ26      1              EQ27      -1          
+    FBP54     EQ41      -1             EQ60      1           
+    FORt256   EQ28      1              EQ29      -1          
+    FORt256   EQ43      1              EQ44      -1          
+    FORt55    EQ28      1              EQ29      -1          
+    FRD757    EQ31      -1             EQ64      1           
+    FRD757    EQ65      -1             EQ69      1           
+    FRUpts59  EQ26      1              EQ30      -1          
+    FRUpts59  EQ59      -1             EQ62      1           
+    FUM60     EQ31      -1             EQ41      -1          
+    FUM60     EQ48      1                                    
+    FUMt2_61  EQ31      1              EQ32      -1          
+    FUMt2_61  EQ43      2              EQ44      -2          
+    G6PDH262  EQ5       1              EQ34      -1          
+    G6PDH262  EQ43      1              EQ52      -1          
+    G6PDH262  EQ53      1                                    
+    GAPD63    EQ1       1              EQ33      -1          
+    GAPD63    EQ43      1              EQ50      -1          
+    GAPD63    EQ51      1              EQ60      -1          
+    GLCpts64  EQ34      1              EQ35      -1          
+    GLCpts64  EQ59      -1             EQ62      1           
+    GLNS65    EQ13      1              EQ17      -1          
+    GLNS65    EQ36      1              EQ38      -1          
+    GLNS65    EQ43      1              EQ54      -1          
+    GLNS65    EQ60      1                                    
+    GLNabc66  EQ13      1              EQ17      -1          
+    GLNabc66  EQ36      1              EQ37      -1          
+    GLNabc66  EQ41      -1             EQ43      1           
+    GLNabc66  EQ60      1                                    
+    GLUDy67   EQ14      1              EQ38      -1          
+    GLUDy67   EQ41      -1             EQ43      1           
+    GLUDy67   EQ52      -1             EQ53      1           
+    GLUDy67   EQ54      1                                    
+    GLUN68    EQ36      -1             EQ38      1           
+    GLUN68    EQ41      -1             EQ54      1           
+    GLUSy69   EQ14      -1             EQ36      -1          
+    GLUSy69   EQ38      2              EQ43      -1          
+    GLUSy69   EQ52      1              EQ53      -1          
+    GLUt2r70  EQ38      1              EQ39      -1          
+    GLUt2r70  EQ43      1              EQ44      -1          
+    GND71     EQ4       -1             EQ19      1           
+    GND71     EQ52      -1             EQ53      1           
+    GND71     EQ67      1                                    
+    H2Ot72    EQ41      1              EQ42      -1          
+    ICDHyr74  EQ14      1              EQ19      1           
+    ICDHyr74  EQ45      -1             EQ52      -1          
+    ICDHyr74  EQ53      1                                    
+    ICL75     EQ40      1              EQ45      -1          
+    ICL75     EQ69      1                                    
+    LDH_D77   EQ43      1              EQ46      -1          
+    LDH_D77   EQ50      -1             EQ51      1           
+    LDH_D77   EQ62      1                                    
+    MALS78    EQ10      -1             EQ21      1           
+    MALS78    EQ40      -1             EQ41      -1          
+    MALS78    EQ43      1              EQ48      1           
+    MALt2_79  EQ43      2              EQ44      -2          
+    MALt2_79  EQ48      1              EQ49      -1          
+    MDH80     EQ43      1              EQ48      -1          
+    MDH80     EQ50      -1             EQ51      1           
+    MDH80     EQ58      1                                    
+    ME181     EQ19      1              EQ48      -1          
+    ME181     EQ50      -1             EQ51      1           
+    ME181     EQ62      1                                    
+    ME282     EQ19      1              EQ48      -1          
+    ME282     EQ52      -1             EQ53      1           
+    ME282     EQ62      1                                    
+    NADH1683  EQ43      -4             EQ44      3           
+    NADH1683  EQ50      1              EQ51      -1          
+    NADH1683  EQ64      -1             EQ65      1           
+    NADTRH84  EQ50      -1             EQ51      1           
+    NADTRH84  EQ52      1              EQ53      -1          
+    NH4t85    EQ54      1              EQ55      -1          
+    O2t86     EQ56      1              EQ57      -1          
+    PDH88     EQ10      1              EQ19      1           
+    PDH88     EQ21      -1             EQ50      -1          
+    PDH88     EQ51      1              EQ62      -1          
+    PFK89     EQ13      1              EQ17      -1          
+    PFK89     EQ26      -1             EQ27      1           
+    PFK89     EQ43      1                                    
+    PFL90     EQ10      1              EQ21      -1          
+    PFL90     EQ28      1              EQ62      -1          
+    PGI91     EQ26      1              EQ34      -1          
+    PGK92     EQ1       1              EQ3       -1          
+    PGK92     EQ13      1              EQ17      -1          
+    PGL93     EQ4       1              EQ5       -1          
+    PGL93     EQ41      -1             EQ43      1           
+    PGM94     EQ2       -1             EQ3       1           
+    PIt2r95   EQ43      1              EQ44      -1          
+    PIt2r95   EQ60      1              EQ61      -1          
+    PPC96     EQ19      -1             EQ41      -1          
+    PPC96     EQ43      1              EQ58      1           
+    PPC96     EQ59      -1             EQ60      1           
+    PPCK97    EQ13      1              EQ17      -1          
+    PPCK97    EQ19      1              EQ58      -1          
+    PPCK97    EQ59      1                                    
+    PPS98     EQ16      1              EQ17      -1          
+    PPS98     EQ41      -1             EQ43      2           
+    PPS98     EQ59      1              EQ60      1           
+    PPS98     EQ62      -1                                   
+    PTAr99    EQ10      -1             EQ12      1           
+    PTAr99    EQ21      1              EQ60      -1          
+    PYK10     EQ13      -1             EQ17      1           
+    PYK10     EQ43      -1             EQ59      -1          
+    PYK10     EQ62      1                                    
+    PYRt212   EQ43      1              EQ44      -1          
+    PYRt212   EQ62      1              EQ63      -1          
+    RPE13     EQ67      -1             EQ72      1           
+    RPI14     EQ66      -1             EQ67      1           
+    SUCCt215  EQ43      2              EQ44      -2          
+    SUCCt215  EQ69      1              EQ70      -1          
+    SUCCt316  EQ43      1              EQ44      -1          
+    SUCCt316  EQ69      -1             EQ70      1           
+    SUCDi17   EQ31      1              EQ64      -1          
+    SUCDi17   EQ65      1              EQ69      -1          
+    SUCOAS18  EQ13      1              EQ17      -1          
+    SUCOAS18  EQ21      -1             EQ60      1           
+    SUCOAS18  EQ69      -1             EQ71      1           
+    TALA19    EQ23      1              EQ26      1           
+    TALA19    EQ33      -1             EQ68      -1          
+    THD220    EQ43      2              EQ44      -2          
+    THD220    EQ50      1              EQ51      -1          
+    THD220    EQ52      -1             EQ53      1           
+    TKT121    EQ33      1              EQ66      -1          
+    TKT121    EQ68      1              EQ72      -1          
+    TKT222    EQ23      -1             EQ26      1           
+    TKT222    EQ33      1              EQ72      -1          
+    TPI23     EQ22      -1             EQ33      1           
+    FRDx58    EQ31      -1             EQ43      -1          
+    FRDx58    EQ50      1              EQ51      -1          
+    FRDx58    EQ69      1                                    
 RHS                                                          
 BOUNDS                                                       
- LO BND1      ACALD     -1000                                
- UP BND1      ACALD     1000                                 
- LO BND1      ACALDt    -1000                                
- UP BND1      ACALDt    1000                                 
- LO BND1      ACKr      -1000                                
- UP BND1      ACKr      1000                                 
- LO BND1      ACONTa    -1000                                
- UP BND1      ACONTa    1000                                 
- LO BND1      ACONTb    -1000                                
- UP BND1      ACONTb    1000                                 
- LO BND1      ACt2r     -1000                                
- UP BND1      ACt2r     1000                                 
- LO BND1      ADK1      -1000                                
- UP BND1      ADK1      1000                                 
- UP BND1      AKGDH     1000                                 
- LO BND1      AKGt2r    -1000                                
- UP BND1      AKGt2r    1000                                 
- LO BND1      ALCD2x    -1000                                
- UP BND1      ALCD2x    1000                                 
- LO BND1      ATPM      8.39                                 
- UP BND1      ATPM      1000                                 
- LO BND1      ATPS4r    -1000                                
- UP BND1      ATPS4r    1000                                 
- LO BND1      BIOMASS_  0.0423                               
- UP BND1      BIOMASS_  1000                                 
- LO BND1      CO2t      -1000                                
- UP BND1      CO2t      1000                                 
- UP BND1      CS        1000                                 
- UP BND1      CYTBD     1000                                 
- LO BND1      D_LACt2   -1000                                
- UP BND1      D_LACt2   1000                                 
- LO BND1      ENO       -1000                                
- UP BND1      ENO       1000                                 
- LO BND1      ETOHt2r   -1000                                
- UP BND1      ETOHt2r   1000                                 
- UP BND1      EX_ac_e   1000                                 
- UP BND1      EX_acald  1000                                 
- UP BND1      EX_akg_e  1000                                 
- LO BND1      EX_co2_e  -1000                                
- UP BND1      EX_co2_e  1000                                 
- UP BND1      EX_etoh_  1000                                 
- UP BND1      EX_for_e  1000                                 
- UP BND1      EX_fru_e  1000                                 
- UP BND1      EX_fum_e  1000                                 
- LO BND1      EX_glc__  -10                                  
- UP BND1      EX_glc__  -10                                  
- UP BND1      EX_gln__  1000                                 
- UP BND1      EX_glu__  1000                                 
- LO BND1      EX_h_e    -1000                                
- UP BND1      EX_h_e    1000                                 
- LO BND1      EX_h2o_e  -1000                                
- UP BND1      EX_h2o_e  1000                                 
- UP BND1      EX_lac__  1000                                 
- UP BND1      EX_mal__  1000                                 
- LO BND1      EX_nh4_e  -1000                                
- UP BND1      EX_nh4_e  1000                                 
- UP BND1      EX_o2_e   1000                                 
- LO BND1      EX_pi_e   -1000                                
- UP BND1      EX_pi_e   1000                                 
- UP BND1      EX_pyr_e  1000                                 
- UP BND1      EX_succ_  1000                                 
- LO BND1      FBA       -1000                                
- UP BND1      FBA       1000                                 
- UP BND1      FBP       1000                                 
- UP BND1      FORt2     1000                                 
- LO BND1      FORt      -1000                                
- UP BND1      FORt      0                                    
- UP BND1      FRD7      1000                                 
- UP BND1      FRUpts2   1000                                 
- LO BND1      FUM       -1000                                
- UP BND1      FUM       1000                                 
- UP BND1      FUMt2_2   1000                                 
- LO BND1      G6PDH2r   -1000                                
- UP BND1      G6PDH2r   1000                                 
- LO BND1      GAPD      -1000                                
- UP BND1      GAPD      1000                                 
- UP BND1      GLCpts    1000                                 
- UP BND1      GLNS      1000                                 
- UP BND1      GLNabc    1000                                 
- LO BND1      GLUDy     -1000                                
- UP BND1      GLUDy     1000                                 
- UP BND1      GLUN      1000                                 
- UP BND1      GLUSy     1000                                 
- LO BND1      GLUt2r    -1000                                
- UP BND1      GLUt2r    1000                                 
- UP BND1      GND       1000                                 
- LO BND1      H2Ot      -1000                                
- UP BND1      H2Ot      1000                                 
- LO BND1      ICDHyr    -1000                                
- UP BND1      ICDHyr    1000                                 
- UP BND1      ICL       1000                                 
- LO BND1      LDH_D     -1000                                
- UP BND1      LDH_D     1000                                 
- UP BND1      MALS      1000                                 
- UP BND1      MALt2_2   1000                                 
- LO BND1      MDH       -1000                                
- UP BND1      MDH       1000                                 
- UP BND1      ME1       1000                                 
- UP BND1      ME2       1000                                 
- UP BND1      NADH16    1000                                 
- UP BND1      NADTRHD   1000                                 
- LO BND1      NH4t      -1000                                
- UP BND1      NH4t      1000                                 
- LO BND1      O2t       -1000                                
- UP BND1      O2t       1000                                 
- UP BND1      PDH       1000                                 
- UP BND1      PFK       1000                                 
- UP BND1      PFL       1000                                 
- LO BND1      PGI       -1000                                
- UP BND1      PGI       1000                                 
- LO BND1      PGK       -1000                                
- UP BND1      PGK       1000                                 
- UP BND1      PGL       1000                                 
- LO BND1      PGM       -1000                                
- UP BND1      PGM       1000                                 
- LO BND1      PIt2r     -1000                                
- UP BND1      PIt2r     1000                                 
- UP BND1      PPC       1000                                 
- UP BND1      PPCK      1000                                 
- UP BND1      PPS       1000                                 
- LO BND1      PTAr      -1000                                
- UP BND1      PTAr      1000                                 
- UP BND1      PYK       1000                                 
- LO BND1      PYRt2     -1000                                
- UP BND1      PYRt2     1000                                 
- LO BND1      RPE       -1000                                
- UP BND1      RPE       1000                                 
- LO BND1      RPI       -1000                                
- UP BND1      RPI       1000                                 
- UP BND1      SUCCt2_2  1000                                 
- UP BND1      SUCCt3    1000                                 
- UP BND1      SUCDi     1000                                 
- LO BND1      SUCOAS    -1000                                
- UP BND1      SUCOAS    1000                                 
- LO BND1      TALA      -1000                                
- UP BND1      TALA      1000                                 
- UP BND1      THD2      1000                                 
- LO BND1      TKT1      -1000                                
- UP BND1      TKT1      1000                                 
- LO BND1      TKT2      -1000                                
- UP BND1      TKT2      1000                                 
- LO BND1      TPI       -1000                                
- UP BND1      TPI       1000                                 
- LO BND1      FRDx      -1000                                
- UP BND1      FRDx      1000                                 
+ LO BND1      ACALD10   -1000                                
+ UP BND1      ACALD10   1000                                 
+ LO BND1      ACALDt11  -1000                                
+ UP BND1      ACALDt11  1000                                 
+ LO BND1      ACKr12    -1000                                
+ UP BND1      ACKr12    1000                                 
+ LO BND1      ACONTa14  -1000                                
+ UP BND1      ACONTa14  1000                                 
+ LO BND1      ACONTb15  -1000                                
+ UP BND1      ACONTb15  1000                                 
+ LO BND1      ACt2r16   -1000                                
+ UP BND1      ACt2r16   1000                                 
+ LO BND1      ADK117    -1000                                
+ UP BND1      ADK117    1000                                 
+ UP BND1      AKGDH18   1000                                 
+ LO BND1      AKGt2r19  -1000                                
+ UP BND1      AKGt2r19  1000                                 
+ LO BND1      ALCD2x21  -1000                                
+ UP BND1      ALCD2x21  1000                                 
+ LO BND1      ATPM22    8.39                                 
+ UP BND1      ATPM22    1000                                 
+ LO BND1      ATPS4r23  -1000                                
+ UP BND1      ATPS4r23  1000                                 
+ LO BND1      BIOMAS24  0.0423                               
+ UP BND1      BIOMAS24  1000                                 
+ LO BND1      CO2t25    -1000                                
+ UP BND1      CO2t25    1000                                 
+ UP BND1      CS26      1000                                 
+ UP BND1      CYTBD27   1000                                 
+ LO BND1      D_LACt29  -1000                                
+ UP BND1      D_LACt29  1000                                 
+ LO BND1      ENO30     -1000                                
+ UP BND1      ENO30     1000                                 
+ LO BND1      ETOHt231  -1000                                
+ UP BND1      ETOHt231  1000                                 
+ UP BND1      EX_ac_32  1000                                 
+ UP BND1      EX_aca33  1000                                 
+ UP BND1      EX_akg34  1000                                 
+ LO BND1      EX_co235  -1000                                
+ UP BND1      EX_co235  1000                                 
+ UP BND1      EX_eto36  1000                                 
+ UP BND1      EX_for37  1000                                 
+ UP BND1      EX_fru38  1000                                 
+ UP BND1      EX_fum39  1000                                 
+ LO BND1      EX_glc40  -10                                  
+ UP BND1      EX_glc40  -10                                  
+ UP BND1      EX_gln41  1000                                 
+ UP BND1      EX_glu42  1000                                 
+ LO BND1      EX_h_e44  -1000                                
+ UP BND1      EX_h_e44  1000                                 
+ LO BND1      EX_h2o43  -1000                                
+ UP BND1      EX_h2o43  1000                                 
+ UP BND1      EX_lac46  1000                                 
+ UP BND1      EX_mal47  1000                                 
+ LO BND1      EX_nh448  -1000                                
+ UP BND1      EX_nh448  1000                                 
+ UP BND1      EX_o2_49  1000                                 
+ LO BND1      EX_pi_50  -1000                                
+ UP BND1      EX_pi_50  1000                                 
+ UP BND1      EX_pyr51  1000                                 
+ UP BND1      EX_suc52  1000                                 
+ LO BND1      FBA53     -1000                                
+ UP BND1      FBA53     1000                                 
+ UP BND1      FBP54     1000                                 
+ UP BND1      FORt256   1000                                 
+ LO BND1      FORt55    -1000                                
+ UP BND1      FORt55    0                                    
+ UP BND1      FRD757    1000                                 
+ UP BND1      FRUpts59  1000                                 
+ LO BND1      FUM60     -1000                                
+ UP BND1      FUM60     1000                                 
+ UP BND1      FUMt2_61  1000                                 
+ LO BND1      G6PDH262  -1000                                
+ UP BND1      G6PDH262  1000                                 
+ LO BND1      GAPD63    -1000                                
+ UP BND1      GAPD63    1000                                 
+ UP BND1      GLCpts64  1000                                 
+ UP BND1      GLNS65    1000                                 
+ UP BND1      GLNabc66  1000                                 
+ LO BND1      GLUDy67   -1000                                
+ UP BND1      GLUDy67   1000                                 
+ UP BND1      GLUN68    1000                                 
+ UP BND1      GLUSy69   1000                                 
+ LO BND1      GLUt2r70  -1000                                
+ UP BND1      GLUt2r70  1000                                 
+ UP BND1      GND71     1000                                 
+ LO BND1      H2Ot72    -1000                                
+ UP BND1      H2Ot72    1000                                 
+ LO BND1      ICDHyr74  -1000                                
+ UP BND1      ICDHyr74  1000                                 
+ UP BND1      ICL75     1000                                 
+ LO BND1      LDH_D77   -1000                                
+ UP BND1      LDH_D77   1000                                 
+ UP BND1      MALS78    1000                                 
+ UP BND1      MALt2_79  1000                                 
+ LO BND1      MDH80     -1000                                
+ UP BND1      MDH80     1000                                 
+ UP BND1      ME181     1000                                 
+ UP BND1      ME282     1000                                 
+ UP BND1      NADH1683  1000                                 
+ UP BND1      NADTRH84  1000                                 
+ LO BND1      NH4t85    -1000                                
+ UP BND1      NH4t85    1000                                 
+ LO BND1      O2t86     -1000                                
+ UP BND1      O2t86     1000                                 
+ UP BND1      PDH88     1000                                 
+ UP BND1      PFK89     1000                                 
+ UP BND1      PFL90     1000                                 
+ LO BND1      PGI91     -1000                                
+ UP BND1      PGI91     1000                                 
+ LO BND1      PGK92     -1000                                
+ UP BND1      PGK92     1000                                 
+ UP BND1      PGL93     1000                                 
+ LO BND1      PGM94     -1000                                
+ UP BND1      PGM94     1000                                 
+ LO BND1      PIt2r95   -1000                                
+ UP BND1      PIt2r95   1000                                 
+ UP BND1      PPC96     1000                                 
+ UP BND1      PPCK97    1000                                 
+ UP BND1      PPS98     1000                                 
+ LO BND1      PTAr99    -1000                                
+ UP BND1      PTAr99    1000                                 
+ UP BND1      PYK10     1000                                 
+ LO BND1      PYRt212   -1000                                
+ UP BND1      PYRt212   1000                                 
+ LO BND1      RPE13     -1000                                
+ UP BND1      RPE13     1000                                 
+ LO BND1      RPI14     -1000                                
+ UP BND1      RPI14     1000                                 
+ UP BND1      SUCCt215  1000                                 
+ UP BND1      SUCCt316  1000                                 
+ UP BND1      SUCDi17   1000                                 
+ LO BND1      SUCOAS18  -1000                                
+ UP BND1      SUCOAS18  1000                                 
+ LO BND1      TALA19    -1000                                
+ UP BND1      TALA19    1000                                 
+ UP BND1      THD220    1000                                 
+ LO BND1      TKT121    -1000                                
+ UP BND1      TKT121    1000                                 
+ LO BND1      TKT222    -1000                                
+ UP BND1      TKT222    1000                                 
+ LO BND1      TPI23     -1000                                
+ UP BND1      TPI23     1000                                 
+ LO BND1      FRDx58    -1000                                
+ UP BND1      FRDx58    1000                                 
 ENDATA                                                       
