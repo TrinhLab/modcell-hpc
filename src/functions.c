@@ -25,9 +25,11 @@ copy_individual(MCproblem *mcp, Individual *indv_source, Individual *indv_dest)
     for (j=0; j < mcp->n_vars; j++)
         indv_dest->deletions[j] = indv_source->deletions[j];
 
-    for (k=0; k < mcp->n_models; k++)
-        for (j=0; j < mcp->n_vars; j++)
-            indv_dest->modules[k][j] = indv_source->modules[k][j];
+    if (mcp->beta > 0 ) {
+        for (k=0; k < mcp->n_models; k++)
+            for (j=0; j < mcp->n_vars; j++)
+                indv_dest->modules[k][j] = indv_source->modules[k][j];
+    }
 
     for (k=0; k < mcp->n_models; k++) {
         indv_dest->objectives[k] = indv_source->objectives[k];

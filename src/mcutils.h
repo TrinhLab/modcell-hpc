@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define LMAX 255
+#define LMAX 1000 /* memory block size for dynamica allocation, reallocation seems to have issues */
 
 const char *
 get_file_extension(const char *fspec)
@@ -117,7 +117,6 @@ read_file(const char *file_path)
     	ssize_t nchr = 0;           /* number of chars actually read    */
     	size_t lmax = LMAX;         /* current array pointer allocation */
     	FILE *fp = NULL;
-
 
 	if (!(fp = fopen (file_path, "r"))) {
         	fprintf (stderr, "error: file open failed '%s'.", file_path);

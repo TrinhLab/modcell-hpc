@@ -9,9 +9,9 @@ void free_population(MCproblem *mcp, Population *pop);
 void free_individual(MCproblem *mcp, Individual *indv);
 
 void set_random_population(MCproblem *mcp, Population *pop);
+void set_random_individual(MCproblem *mcp,  Individual *indv);
 void set_blank_population(MCproblem *mcp, Population *pop);
 void set_blank_individual(MCproblem *mcp,  Individual *indv);
-void set_random_individual(MCproblem *mcp,  Individual *indv);
 
 void
 allocate_MCproblem(MCproblem *mcp, unsigned int n_models, size_t n_vars)
@@ -38,10 +38,10 @@ allocate_MCproblem(MCproblem *mcp, unsigned int n_models, size_t n_vars)
 void
 free_MCproblem(MCproblem *mcp)
 {
-    // Is this needed?
+    // TODO: Is this needed?
 }
 
-// Remove pop_size if there is no need to use.
+// TODO: Remove pop_size if there is no need to use.
 void
 allocate_population(MCproblem *mcp,  Population *pop, size_t pop_size)
 {
@@ -88,12 +88,13 @@ free_individual(MCproblem *mcp, Individual *indv)
 }
 
 
-/* Sets individual variables randomly while  meeting constraints        */
+/* Sets individual variables randomly while  meeting constraints  */
 void
 set_random_individual(MCproblem *mcp,  Individual *indv)
 {
     int i,j,k;
-    int *deleted_rxns = malloc(mcp->alpha * sizeof(int));
+    int *deleted_rxns;
+    SAFE_ALLOC(deleted_rxns = malloc(mcp->alpha * sizeof *deleted_rxns))
 
     /* init deletions */
     for (j = 0; j < mcp->n_vars; j++)

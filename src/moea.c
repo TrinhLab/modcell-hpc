@@ -1,7 +1,6 @@
 /* Core MOEA (NSGA-II) method, relays heavily on the methods defined in functions.c */
 
 #include <stdlib.h>
-#include <stdio.h>
 #include <time.h>
 #include "utlist.h"
 #include "modcell.h"

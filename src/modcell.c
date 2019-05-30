@@ -1,6 +1,5 @@
 /* Main file, essentially handles IO */
 
-#include <stdio.h>
 #include <string.h>
 #include <assert.h>
 #include "mcutils.h"
@@ -61,12 +60,14 @@ read_problem(const char *problem_dir_path)
     LPproblem *lp;
 
     pd = read_dir(problem_dir_path);
+
     /* Determine number of models and candidates*/
     for (i=0; i < pd.n; i++) {
         if(is_extension(pd.array[i], "mps"))
     	    n_models++;
         if(strcmp(pd.array[i], "cand") == 0) {
             set_full_path(cand_path, problem_dir_path, pd.array[i]);
+            printf("%s\n", cand_path);
     	    cand_file = read_file(cand_path);
         }
     }
@@ -235,6 +236,11 @@ get_model_idx(MCproblem *mcp, const char *model_id)
     exit(-1);
 }
 
+
+/* Loads a population file:
+Notes:
+- Objectives could be calculated here and checked for consitency, currently objectives are not calculated until the moea procdure.
+*/
 void
 read_population(MCproblem *mcp, Population *pop, const char *population_path)
 {
@@ -321,15 +327,13 @@ read_population(MCproblem *mcp, Population *pop, const char *population_path)
         indv_idx++;
     }
 
-    /* Calculate objectives */ //FIXME: This will be done in the first MOEA itereation
-    for (int i=0; i < mcp->population_size; i++)
-            calculate_objectives(mcp, &(pop->indv[i]));
 }
 
 
 int
 main (int argc, char **argv)
 {
+
     /* Parse  input */
     if ( (argc < 4) | (argc > 5) ) {
     	fprintf (stderr, "error: insufficient input"
@@ -346,7 +350,7 @@ main (int argc, char **argv)
 
     /* Intialize global GLPK parameters*/
     glp_init_smcp(&param);
-    param.msg_lev = GLP_MSG_ERR;
+    param.msg_lev = LP_MSG_LEV;
     param.tm_lim = LP_TIME_LIMIT_MILISEC;
 
     MCproblem mcp = read_problem(argv[1]);
