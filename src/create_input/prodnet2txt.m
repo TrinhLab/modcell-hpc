@@ -32,7 +32,21 @@ pn = getfield(load(prodnet_path), 'prodnet');
 pn.set_mip_state(design_objective, state, 0, 1); % Why is growth specified?
 pn.set_deletion_type('reactions', design_objective);
 
-%% Make IDs safe for MPS format
+%% Comply to MPS format absurd restrictions
+
+%% 1)Change problem ids to be a maximum length of 7 characters
+og_model_ids = pn.prod_id;
+new_model_ids = {};
+for i=1:length(pn.prod_id)
+	new_model_ids{i,1} = truncatestr_nosalt(og_model_ids{i}, 7);
+end
+if length(og_model_ids) ~= length(unique(new_model_ids))
+    error('Truncated model ids non-unique, add some salt')
+end
+writetable(table(og_model_ids, new_model_ids), fullfile(output_dir, 'modelidmap.csv'))
+pn.prod_id = new_model_ids;
+
+%% 2)Make IDs safe for MPS format
 % - Max length is truncated to 8
 % - An integer between 10 and 99 is added at the end to avoid repetition.
 % - No other checks are performed.(e.g. illegal characters)
@@ -120,4 +134,13 @@ else
 end
 
 salt_counter = salt_counter+1;
+end
+
+
+function newstr = truncatestr_nosalt(instr, max_length)
+%
+newstr = instr;
+if length(instr) >= max_length
+    newstr = newstr(1:max_length);
+end
 end

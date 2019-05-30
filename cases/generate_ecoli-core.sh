@@ -1,5 +1,6 @@
 #!/bin/sh
 
+rm ecoli-core/*
 cd ecoli-core
 
 prodnet_path='~/wrk/s/matlab/modcell2/problems/ecoli-core/prodnet.mat'
