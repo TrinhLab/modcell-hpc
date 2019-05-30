@@ -1,6 +1,23 @@
 CC = gcc
 LIBS = -lglpk
-CFLAGS = -O2 -march=native -Wall
+CFLAGS = -O3 -march=native
+
+ifeq ($(flags), develop)
+	CFLAGS = -Wall -Wpedantic -g
+endif
+ifeq ($(flags), debug)
+	CFLAGS = -Wall -Wpedantic -g -Wextra -Wconversion
+endif
+ifeq ($(flags), optimize)
+	CFLAGS = -O3 -march=native -Wall
+endif
+
+ifeq ($(link), static)
+	LIBS = ../notes/glpk-4.65/src/.libs/libglpk.a -lm
+endif
+ifeq ($(link), dynamic)
+	LIBS = -lglpk
+endif
 
 SRC = $(wildcard *.c)
 ODIR = obj
@@ -14,6 +31,7 @@ $(ODIR)/%.o: %.c
 modcell: $(OBJ)
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
-.PHONY: clean
 clean:
 	rm -f $(ODIR)/*.o modcell
+
+.PHONY : clean

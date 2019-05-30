@@ -27,6 +27,12 @@ The output of the main method corresponds to a plain text files with information
 ## Compiling
 You can use the provided Makefile. For optimal performance adjust compilation flags for the processor architecture of choice. The following dependencies are needed:
 - [GLPK](https://www.gnu.org/software/glpk/) (In Arch linux install with `sudo pacman -S glpk`)
+### Compiling GLPK
+To statically link glpk it must be compiled locally. A nice thing about this is that compilation flags can be tuned. The steps are as follows:
+1. extract tarball and cd into glpk-X-YY
+2. ./configure
+3. make clean && make CFLAGS="-O3"
+4. The desired file is found under glpk-X-YY/src/.libs/libglpk.a
 
 # Tests
 
