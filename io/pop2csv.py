@@ -3,6 +3,10 @@
 """
 Formats population using the table format compatible with other ModCell tools. It only keeps non-dominated individuals.
 
+Usage examples:
+    pop2csv.py problem_path population_path
+    pop2csv.py problem_path population_path -o ouput_path
+
 Notes:
     - Add option to keep dominated individuals?
 """
@@ -20,6 +24,8 @@ def main():
 
     if args.output_path == default_output:
         output_path = args.pop_path.replace('.pop', '.csv')
+    else:
+        output_path = args.output_path
 
     # Mapping dictionaries for ids
     mdf = pd.read_csv(os.path.join(args.problem_path, "modelidmap.csv"))

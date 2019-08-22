@@ -1,0 +1,6 @@
+#!/bin/sh
+#(source load_paths)
+export MODCELL2_PATH="${HOME}/wrk/s/matlab/modcell2/"
+export MODCELLHPC_PATH="${HOME}/wrk/s/matlab/modcell-hpc"
+export MATLAB_BIN="${HOME}/progs/matlab/bin/matlab"
+export MATLAB_SD="${HOME}/wrk/s/matlab"
