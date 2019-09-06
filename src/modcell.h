@@ -70,7 +70,7 @@ typedef struct {
     	unsigned int n_generations;
 	double crossover_probability;
 	double mutation_probability;
-	double max_run_time;
+	double max_run_time; 	/* maximum run time in seconds */
 } MCproblem;
 
 typedef struct item { /* list item */

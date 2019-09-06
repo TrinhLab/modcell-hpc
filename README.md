@@ -1,7 +1,7 @@
 (In progress)
 
 # ModCell-HPC
-This is a free/libre version of the ModCell2 multi-objective strain design method for optimized performance and freedom of use (i.e., does not depend on proprietary programs such as Matlab to run, which among other advantages allows you to run the program on any HPC resources). If you use any part of this software please cite:
+This is a libre version of the ModCell2 multi-objective strain design method for optimized performance and freedom of use (i.e., does not depend on proprietary programs such as Matlab to run, which among other advantages allows you to run the program on any HPC resources). If you use any part of this software please cite:
 ~~~
         Sergio Garcia, Cong T. Trinh,
         Multiobjective strain design: A framework for modular cell engineering,
