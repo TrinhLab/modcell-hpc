@@ -5,6 +5,7 @@
 #include "mcutils.h"
 #include "modcell.h"
 
+/* Macro and function declarations */
 #define OPENFILER(filepath)\
     FILE *fp = NULL;\
     if (!(fp = fopen (filepath, "r"))) {\
@@ -48,7 +49,6 @@ int get_model_idx(MCproblem *mcp, const char *model_id);
 extern glp_smcp param;
 
 /* Function definitions */
-
 MCproblem
 read_problem(const char *problem_dir_path)
 {
@@ -83,6 +83,7 @@ read_problem(const char *problem_dir_path)
     k=0;
     for (i=0; i < pd.n; i++) {
         if(is_extension(pd.array[i], "mps")) {
+            printf("----Reading problem %i---\n", k+1);
             char *model_name = remove_file_extension(pd.array[i]);
 	    mcp.model_names[k] = strdup(model_name);
 
@@ -276,7 +277,6 @@ read_population(MCproblem *mcp, Population *pop, const char *population_path)
 
     /* Read individuals  */
     while (fscanf(fp, "%s\n", buff) != EOF) {
-        //printf("%i: %s\n",lc,  buff);
         lc++;
 
         if(strcmp(buff, "#INDIVIDUAL") == 0) {
@@ -355,7 +355,9 @@ main (int argc, char **argv)
 
     MCproblem mcp = read_problem(argv[1]);
     load_parameters(&mcp, argv[2]);
-    printf("--------------------------------------------------\n");
+    fflush(stdout);
+    printf("-------------------------------------------------------------------\n");
+    printf("-------------------------------------------------------------------\n");
 
     pcg32_srandom(mcp.seed, 54u); /* Seed global RNG */
 
@@ -365,9 +367,10 @@ main (int argc, char **argv)
 
     if (argc == 5) {
         char pop_path[256];
-        printf("Initial population path: %s\n", argv[4]);
+        printf("Reading initial population (path: %s)...", argv[4]);
         strcpy(pop_path, argv[4]);
         read_population(&mcp, initial_population, pop_path);
+        printf("done\n");
     }
     else {
         printf("Initial population not specified\n");

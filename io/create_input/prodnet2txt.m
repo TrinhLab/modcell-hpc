@@ -6,9 +6,6 @@ function prodnet2txt(prodnet_path, design_objective, output_dir)
 % - The appropriate objective, based on the overall design objective (e.g. wGCP) is set for the models.
 % - MPS assumes minimization so all objectives are negated since ModCell assumes maximization.
 
-% Todo:
-% - Make a map between mps safe ids and actual ids.
-% - Write txt of values used to normalize objectives. It must follow the format of prod_id, value (since the production network parsing order is unreliable)
 
 %% parse inputs
 if ~exist('design_objective', 'var')

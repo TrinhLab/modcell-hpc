@@ -1,7 +1,0 @@
-Solution index,Deletion_id,etoh(module),etoh_pdc(module),ibutoh(module),succ(module),pyr(module),lac__D(module),ac(module),etoh(objective),etoh_pdc(objective),ibutoh(objective),succ(objective),pyr(objective),lac__D(objective),ac(objective)
-0,"ACALD, ACKr, GLUDy, LDH_D",,,,,,,,0.866614,0.892368,0.972152,0.000000,0.000000,0.930553,0.954824
-1,"ACALD, ACKr, GLUDy, PYK",,,,,,,,0.949755,0.949755,0.000000,0.000000,0.000000,0.000000,0.955080
-2,"ALCD2x, ME2, PFL, PYK, TALA, THD2",,,,,,,,0.371405,0.371405,-0.000000,0.713374,0.000000,0.323998,0.201106
-3,"ACALD, ACKr, LDH_D, PDH, TALA",,,,,,,,0.462164,0.883954,0.968156,0.001134,0.000000,0.924141,0.943492
-4,"ALCD2x, GLUDy, PFL, THD2",,,,,,,,0.879758,0.879758,0.000000,0.239137,0.000000,0.920932,0.000000
-5,"ACKr, GLUDy, LDH_D, PDH, TALA",,,,,,,,0.465314,0.892345,0.000000,0.000000,0.928286,0.000000,0.872236

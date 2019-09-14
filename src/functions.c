@@ -158,7 +158,7 @@ mutation(MCproblem *mcp, Individual *indv)
 }
 
 
-/* After crossover are mutation are done, they may generate individuals that violate the two module reaction related constraints. This method enforces both constraints as follows:
+/* After crossover and mutation are done, they may generate individuals that violate the two module reaction related constraints. This method enforces both constraints as follows:
    1. Removes modules that are not deletions
    2. If number of modules is above limit (beta), randomly removes modules until within limit.
 Notes:
@@ -181,7 +181,7 @@ enforce_module_constraints(MCproblem *mcp, Individual *indv)
     }
 
     for (k=0; k < mcp->n_models; k++) {
-        /* Identify module reactions */
+        /* Identify module reactions */ //optimization: this could be merged with the above loop and likely minimize some calculations
         n_module_rxn = 0;
         for (j=0; j < mcp->n_vars; j++) {
             if (indv->modules[k][j] == MODULE_RXN) {
@@ -195,9 +195,9 @@ enforce_module_constraints(MCproblem *mcp, Individual *indv)
             for (i=0; i < module_diff; i++) /* Reset removed modules */
                 is_removed_module[i] = 0;
             n_removed_module = 0;
-            while (module_diff != n_removed_module){
+            while (module_diff != n_removed_module) {
                 target = pcg32_boundedrand(module_diff);
-                if (is_removed_module[target] == 0){
+                if (is_removed_module[target] == 0) {
                     is_removed_module[target] = 1;
                     n_removed_module++;
                     indv->modules[k][module_rxn_idx[target]] = 0; /* apply removal */
@@ -229,7 +229,7 @@ calculate_objectives(MCproblem *mcp, Individual *indv)
         if(indv->deletions[j] == DELETED_RXN)
             n_deletions++;
 
-    if (n_deletions == 0){ /* Avoid further evaluation */
+    if (n_deletions == 0) { /* Avoid further evaluation */
         for (k=0; k < mcp->n_models; k++) {
             lp = &(mcp->lps[k]);
             indv->objectives[k] = lp->no_deletion_objective;
@@ -245,12 +245,9 @@ calculate_objectives(MCproblem *mcp, Individual *indv)
         /* Determine what bounds to change */
         for (j=0; j < mcp->n_vars; j++) {
             change_bound[j] = 0;
-            if(lp->cand_col_idx[j] == NOT_CANDIDATE)
-                continue;
-            if(indv->deletions[j] == DELETED_RXN) {
+            if ((lp->cand_col_idx[j] != NOT_CANDIDATE) && (indv->deletions[j] == DELETED_RXN)) {
                 change_bound[j] = 1; /* Reaction deleted in the chassis */
-                if(mcp->beta > 0)
-                    if (indv->modules[k][j] == 1)
+                if((mcp->beta > 0) && (indv->modules[k][j] == 1))
                         change_bound[j] = 0; /* Reaction inserted back as module */
             }
         }
@@ -261,17 +258,17 @@ calculate_objectives(MCproblem *mcp, Individual *indv)
 	        glp_set_col_bnds(lp->P, lp->cand_col_idx[j], GLP_FX, 0, 0);
 
         /* Calculate objectives */
-        if ((glp_simplex(lp->P, &param) == 0) && (glp_get_status(lp->P) == GLP_OPT)) /*Problem solved succesfully and solution status is optimal*/
+        if ((glp_simplex(lp->P, &param) == 0) && (glp_get_status(lp->P) == GLP_OPT)) /* Problem solved succesfully and solution status is optimal */
             indv->objectives[k] = glp_get_col_prim(lp->P, lp->prod_col_idx)/lp->max_prod_growth;
         else
-            indv->objectives[k] = 0; //TODO: Should it be set to UNKNOWN_OBJ (-1)? Is there anything that assumes positive value here? Can help keep track of failed calc., although currently this information is not used.
+            indv->objectives[k] = 0; //TODO: Should it be set to UNKNOWN_OBJ (-1)? Is there anything that assumes positive objective values? Can help keep track of failed calc., although currently this information is not used.
 
         /* Reset bounds */
         for (j=0; j < mcp->n_vars; j++)
             if(change_bound[j])
 	        glp_set_col_bnds(lp->P, lp->cand_col_idx[j], lp->cand_col_type[j], lp->cand_og_lb[j], lp->cand_og_ub[j]);
 
-        /* Calculate penalty objectives (note that module reaction constraints are strictly enforced by genetic operators)*/
+        /* Calculate penalty objectives (note that module reaction constraints are strictly enforced by genetic operators) */
         if (n_deletions > mcp->alpha)
             indv->penalty_objectives[k] = indv->objectives[k]/n_deletions;
         else

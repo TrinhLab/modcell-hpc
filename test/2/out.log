@@ -1,0 +1,107 @@
+Sat 14 Sep 2019 01:36:29 PM EDT
+/home/sg/wrk/s/matlab/modcell-hpc/cases/ecoli-core/cand
+----Reading problem 1---
+Reading problem data from '/home/sg/wrk/s/matlab/modcell-hpc/cases/ecoli-core/ibutoh.mps'...
+Problem: ibutoh
+Objective: COST
+79 rows, 102 columns, 392 non-zeros
+455 records were read
+One free row was removed
+Constructing initial basis...
+Size of triangular part is 69
+----Reading problem 2---
+Reading problem data from '/home/sg/wrk/s/matlab/modcell-hpc/cases/ecoli-core/etoh.mps'...
+Problem: etoh
+Objective: COST
+73 rows, 95 columns, 362 non-zeros
+424 records were read
+One free row was removed
+Constructing initial basis...
+Size of triangular part is 63
+----Reading problem 3---
+Reading problem data from '/home/sg/wrk/s/matlab/modcell-hpc/cases/ecoli-core/succ.mps'...
+Problem: succ
+Objective: COST
+73 rows, 96 columns, 367 non-zeros
+429 records were read
+One free row was removed
+Constructing initial basis...
+Size of triangular part is 63
+----Reading problem 4---
+Reading problem data from '/home/sg/wrk/s/matlab/modcell-hpc/cases/ecoli-core/lac__D.mps'...
+Problem: lac__D
+Objective: COST
+73 rows, 95 columns, 362 non-zeros
+424 records were read
+One free row was removed
+Constructing initial basis...
+Size of triangular part is 63
+----Reading problem 5---
+Reading problem data from '/home/sg/wrk/s/matlab/modcell-hpc/cases/ecoli-core/ac.mps'...
+Problem: ac
+Objective: COST
+73 rows, 95 columns, 362 non-zeros
+424 records were read
+One free row was removed
+Constructing initial basis...
+Size of triangular part is 63
+----Reading problem 6---
+Reading problem data from '/home/sg/wrk/s/matlab/modcell-hpc/cases/ecoli-core/pyr.mps'...
+Problem: pyr
+Objective: COST
+73 rows, 95 columns, 362 non-zeros
+424 records were read
+One free row was removed
+Constructing initial basis...
+Size of triangular part is 63
+----Reading problem 7---
+Reading problem data from '/home/sg/wrk/s/matlab/modcell-hpc/cases/ecoli-core/etoh_pd.mps'...
+Problem: etoh_pd
+Objective: COST
+73 rows, 96 columns, 366 non-zeros
+427 records were read
+One free row was removed
+Constructing initial basis...
+Size of triangular part is 63
+-------------------------------------------------------------------
+-------------------------------------------------------------------
+Initial population not specified
+Geneneration:10 Time:0.81
+Geneneration:20 Time:1.53
+Geneneration:30 Time:2.00
+Geneneration:40 Time:2.30
+Geneneration:50 Time:2.57
+Geneneration:60 Time:2.82
+Geneneration:70 Time:3.08
+Geneneration:80 Time:3.32
+Geneneration:90 Time:3.61
+Output population written to: /home/sg/wrk/s/matlab/modcell-hpc/test/2/out.pop
+Unique solutions: 19/100
+Non-dominated solutions: 8/19
+
+                            < M A T L A B (R) >
+                  Copyright 1984-2018 The MathWorks, Inc.
+                   R2018b (9.5.0.944444) 64-bit (glnxa64)
+                              August 28, 2018
+
+ 
+To get started, type doc.
+For product information, visit www.mathworks.com.
+ 
+>> >> [Warning: Variable names were modified to make them valid MATLAB identifiers.
+The original names are saved in the VariableDescriptions property.] 
+[Warning: Variable names were modified to make them valid MATLAB identifiers.
+The original names are saved in the VariableDescriptions property.] 
+Sol idx:0 	 Obj:etoh 	 In obj.: 0.94 	 Calc. obj.: 0.96
+Sol idx:1 	 Obj:ac 	 In obj.: 0.95 	 Calc. obj.: 0.00
+Sol idx:2 	 Obj:ibutoh 	 In obj.: 0.00 	 Calc. obj.: 0.97
+Sol idx:2 	 Obj:pyr 	 In obj.: 0.79 	 Calc. obj.: 0.00
+Sol idx:3 	 Obj:lac__D 	 In obj.: 0.00 	 Calc. obj.: 0.93
+Sol idx:3 	 Obj:ac 	 In obj.: 0.88 	 Calc. obj.: 0.95
+Sol idx:5 	 Obj:etoh 	 In obj.: 0.43 	 Calc. obj.: 0.10
+Sol idx:5 	 Obj:lac__D 	 In obj.: 0.92 	 Calc. obj.: 0.00
+Sol idx:6 	 Obj:pyr 	 In obj.: 0.35 	 Calc. obj.: 0.00
+Sol idx:6 	 Obj:ac 	 In obj.: 0.95 	 Calc. obj.: 0.97
+Sol idx:7 	 Obj:etoh 	 In obj.: 0.86 	 Calc. obj.: 0.83
+Sol idx:7 	 Obj:etoh_pdc 	 In obj.: 0.44 	 Calc. obj.: 0.83
+>> 

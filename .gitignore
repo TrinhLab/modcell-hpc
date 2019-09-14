@@ -3,3 +3,5 @@ notes
 *.o
 src/modcell
 rtest.sh
+template/
+old/

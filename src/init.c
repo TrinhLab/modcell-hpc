@@ -1,4 +1,4 @@
-/* Routines to allocate/free  and initialize objects*/
+/* Routines to allocate/free  and initialize objects */
 
 #include <stdlib.h>
 #include "modcell.h"
@@ -34,12 +34,6 @@ allocate_MCproblem(MCproblem *mcp, unsigned int n_models, size_t n_vars)
     }
 }
 
-
-void
-free_MCproblem(MCproblem *mcp)
-{
-    // TODO: Is this needed?
-}
 
 // TODO: Remove pop_size if there is no need to use.
 void
@@ -103,7 +97,7 @@ set_random_individual(MCproblem *mcp,  Individual *indv)
         deleted_rxns[i] = (int)pcg32_boundedrand(mcp->n_vars);
         indv->deletions[deleted_rxns[i]] = DELETED_RXN;
     }
-    /* init modules. Only one module reaction is inserted regardless of beta, this heuristic leads to better individuals*/
+    /* init modules. Only one module reaction is inserted regardless of beta, this heuristic leads to better individuals */
     if (mcp->beta > 0) {
         for (k = 0; k < mcp->n_models; k++) {
             for (j = 0; j < mcp->n_vars; j++)

@@ -1,4 +1,4 @@
-/* General purpose routines*/
+/* General purpose routines */
 
 #include <dirent.h>
 #include <stdio.h>

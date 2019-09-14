@@ -20,6 +20,7 @@ def main():
     parser.add_argument('pop_path', help='Path to the .pop file to be converted')
     default_output = "<pop_path>.csv"
     parser.add_argument('-o','--output_path', help='output file name', default=default_output, type=str)
+    parser.add_argument('-a','--write_all', help='writes all solutions in the population instead of only dominated ones', action='store_true')
     args = parser.parse_args()
 
     if args.output_path == default_output:
@@ -43,16 +44,18 @@ def main():
     individuals = []
     indv = None
 
+    def append_indv(indv):
+        indv['Deletion_id'] = ', '.join(indv['Deletion_id'])
+        individuals.append(indv)
+
     with open(args.pop_path, 'r') as f:
         for rline in f:
             line = rline.strip()
             # Set state // Note: This assumes the lines are encountered in a given order so it is not the most robust solution
             if line == "#INDIVIDUAL":
                 in_objectives = False
-#                in_individual = True
                 if indv:
-                    indv['Deletion_id'] = ', '.join(indv['Deletion_id'])
-                    individuals.append(indv)
+                    append_indv(indv)
                 indv = {}
                 indv['Deletion_id'] = []
                 continue
@@ -68,7 +71,8 @@ def main():
                 in_objectives = True
                 continue
             if line == "#ENDFILE":
-                continue
+                append_indv(indv)
+                break
 
             if in_deletions:
                 indv['Deletion_id'].append(r_map[line])
@@ -91,18 +95,23 @@ def main():
     model_ids = list(m_map.values())
     df = df[['Deletion_id'] + ['{}(module)'.format(x) for x in model_ids] + ['{}(objective)'.format(x) for x in model_ids]]
 
-    # Only keep non-dominated solutions
-    obj_idx = df.columns.str.contains(r'\(objective\)')
-    idx_to_drop = []
-    for idx, row in df.iterrows():
-        for idx_b, row_b in df.iterrows():
-            if idx_b != idx:
-                comp = row[obj_idx] <= row_b[obj_idx]
-                if comp.all():
-                    idx_to_drop.append(idx)
-                    break
-    print("Non-dominated solutions: {}/{}".format(df.shape[0] - len(idx_to_drop), df.shape[0]))
-    df = df.drop(idx_to_drop)
+    # Remove duplicated solutions
+    df = df.drop_duplicates()
+    print("Unique solutions: {}/{}".format(df.shape[0], len(individuals)))
+
+    if not args.write_all:
+        # Only keep non-dominated solutions
+        obj_idx = df.columns.str.contains(r'\(objective\)')
+        idx_to_drop = []
+        for idx, row in df.iterrows():
+            for idx_b, row_b in df.iterrows():
+                if idx_b != idx:
+                    comp = row[obj_idx] <= row_b[obj_idx]
+                    if comp.all():
+                        idx_to_drop.append(idx)
+                        break
+        print("Non-dominated solutions: {}/{}".format(df.shape[0] - len(idx_to_drop), df.shape[0]))
+        df = df.drop(idx_to_drop)
 
     # Add solution index
     df.insert(loc=0, column='Solution index', value=[_ for _ in range(df.shape[0])])
@@ -112,4 +121,4 @@ def main():
 
 
 if __name__ == '__main__':
-   main()
+    main()

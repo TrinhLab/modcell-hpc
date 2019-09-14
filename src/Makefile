@@ -3,10 +3,7 @@ LIBS = -lglpk
 CFLAGS = -O3 -march=native
 
 ifeq ($(flags), develop)
-	CFLAGS = -Wall -Wpedantic -g
-endif
-ifeq ($(flags), debug)
-	CFLAGS = -Wall -Wpedantic -g -Wextra -Wconversion
+	CFLAGS = -Wall -Wpedantic -g -Wextra -Wno-sign-compare
 endif
 ifeq ($(flags), optimize)
 	CFLAGS = -O3 -march=native -Wall

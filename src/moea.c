@@ -13,10 +13,10 @@ void selection_and_variation(MCproblem *mcp, Population *core_population, Popula
 void evaluate_population(MCproblem *mcp, Population *population);
 void environmental_selection(MCproblem *mcp, Population *parent_population, Population *offspring_population, Population *combined_population);
 Individual * tournament_k2(MCproblem *mcp, Individual *indv1, Individual *indv2);
-void add_individuals(MCproblem *mcp, Population *combined_pop, Population *parent_pop, item *head_fi, int fi_size, int *individuals_added);
+void add_individuals(MCproblem *mcp, Population *combined_pop, Population *parent_pop, item *head_fi, unsigned int fi_size, unsigned int *individuals_added);
 
 void set_inf_crowding(MCproblem *mcp, Population *population);
-void assign_crowding_distance(MCproblem *mcp, Population *pop, item *head_fi, int fi_size);
+void assign_crowding_distance(MCproblem *mcp, Population *pop, item *head_fi, unsigned int fi_size);
 
 /* Macros */
 #define FREE_LIST(list_head) \
@@ -34,7 +34,7 @@ Notes:
 void
 run_moea(MCproblem *mcp, Population *parent_population)
 {
-    int n_generations = 0;
+    unsigned int n_generations = 0;
     double run_time = 0;
     Population *offspring_population = malloc(sizeof(Population));
     Population *combined_population = malloc(sizeof(Population));
@@ -52,8 +52,7 @@ run_moea(MCproblem *mcp, Population *parent_population)
     set_inf_crowding(mcp, parent_population);
     set_inf_crowding(mcp, offspring_population);
 
-    while( (run_time < mcp->max_run_time) & (n_generations < mcp->n_generations) )
-    {
+    while( (run_time < mcp->max_run_time) & (n_generations < mcp->n_generations) ) {
         /* Core procedure */
         selection_and_variation(mcp, parent_population, offspring_population);
         evaluate_population(mcp, offspring_population);
@@ -136,7 +135,7 @@ environmental_selection(MCproblem *mcp, Population *parent_pop, Population *offs
     int *domination_count = calloc(combined_pop->size, sizeof(int)); /* keeps domination count (np, nq) of each individual */
     Individual *p, *q;
     item *head_sp = NULL, *head_fi = NULL, *head_f_next=NULL, *node, *tmp, *elt, *ref, *elt_p, *elt_q;
-    int individuals_added = 0, fi_size = 0;
+    unsigned int individuals_added = 0, fi_size = 0;
 
     for (it1=0; it1 < combined_pop->size; it1++) {
         for (it2=0; it2 < combined_pop->size; it2++) {
@@ -249,7 +248,7 @@ sortcrowding(item *a, item *b)
 */
 
 void
-add_individuals(MCproblem *mcp, Population *combined_pop, Population *parent_pop, item *head_fi_og, int fi_size, int *individuals_added)
+add_individuals(MCproblem *mcp, Population *combined_pop, Population *parent_pop, item *head_fi_og, unsigned int fi_size, unsigned int *individuals_added)
 {
     assert(*individuals_added < parent_pop->size);
 
