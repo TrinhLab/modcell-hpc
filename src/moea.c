@@ -15,6 +15,8 @@ void add_individuals(MCproblem *mcp, Population *combined_pop, Population *paren
 void set_inf_crowding(MCproblem *mcp, Population *population);
 void assign_crowding_distance(MCproblem *mcp, Population *pop, item *head_fi, unsigned int fi_size);
 
+void migrate(MCproblem *mcp, Population *parent_population);
+
 /* Macros */
 #define FREE_LIST(list_head) \
     DL_FOREACH_SAFE(list_head,elt,tmp) { \
@@ -56,17 +58,47 @@ run_moea(MCproblem *mcp, Population *parent_population)
         environmental_selection(mcp, parent_population, offspring_population, combined_population);
 
         /* Migration */
+        if (n_generations % mcp->migration_interval == 0)
+            migrate(mcp, parent_population);
 
        /* Book keeping */
         n_generations++;
         run_time = (double)(clock() - begin) / CLOCKS_PER_SEC;
 
-        if (VERBOSE && ( (n_generations-1) % PRINT_INTERVAL == 0))
-            printf("Geneneration:%i Time:%.2f\n",n_generations-1, run_time);
+        if (mcp->verbose && ( (n_generations-1) % PRINT_INTERVAL == 0))
+            printf("PE: %i\t Geneneration:%i\t Time:%.2f\n",mpi_pe, n_generations-1, run_time);
     }
 
     free_population(mcp, offspring_population);
     free_population(mcp, combined_population);
+}
+
+/* Sends top individuals to other islands and replaces bottom individuals. Assumes the popualtion is sorted.
+Notes:
+- Currently uses ring topology, in the future could parse a graph (edge list, with nodes corresponding to PEs) with an arbitrary. Then each PE would go thorugh a list of senders.
+- How to avoid sync issues? e.g., send without waiting for response and raise a flag to do a pending migration and only perform when response is available
+*/
+void
+migrate(MCproblem *mcp, Population *parent_population)
+{
+    int target_pe;
+    int tag = 10; // Random number
+    int  test_receive;
+    MPI_Status status;
+    // mpi_indv_type; // array of indv to send
+
+    if (mpi_pe == mpi_comm_size - 1)
+        target_pe = 0;
+    else
+        target_pe = mpi_pe + 1;
+
+    /* Send */
+    MPI_Send(&mpi_pe, 1, MPI_INT, target_pe, tag, MPI_COMM_WORLD);
+
+    /* Recieve */
+    MPI_Recv(&test_receive, 1, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+
+    //printf("Migration\t PE:%i\t Received: %i\n", mpi_pe, test_receive);
 }
 
 

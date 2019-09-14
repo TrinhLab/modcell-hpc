@@ -1,0 +1,7 @@
+#!/bin/sh
+# Runs one or more tests and logs the results
+
+for i in "$@"; do
+	date > $1/out.log
+	sh $i/test.sh | tee -a $i/out.log
+done

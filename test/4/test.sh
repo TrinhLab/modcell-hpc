@@ -5,25 +5,35 @@ problem_path="${MODCELLHPC_PATH}/cases/ecoli-core/"
 prodnet_path="${MODCELL2_PATH}/problems/ecoli-core/prodnet.mat"
 ini_pop_file=""
 
+# Parameters
+objective_type="wgcp"
+alpha=5
+beta=0
+population_size=100
+n_generations=100
+seed=0
+crossover_probability=0.8
+mutation_probability=0.05
+max_run_time=7200
+
 #
 test_path="${MODCELLHPC_PATH}/test/${TEST_N}"
-params_file="${test_path}/Test.params"
-ini_pop_file=""
 output_file="${test_path}/out.pop"
 output_file_csv="${test_path}/out.csv"
-log_path="${test_path}/out.log"
 
-date > "$log_path"
+
 # Run modcell
-eval "mpiexec -n 4 ${MODCELLHPC_PATH}/src/modcell $problem_path $params_file $output_file $ini_pop_file" | tee -a "$log_path"|| exit
+eval "mpiexec -n 4 ${MODCELLHPC_PATH}/src/modcell $problem_path $output_file --initial_population=$ini_pop_file --objective_type=$objective_type --alpha=$alpha --beta=$beta --population_size=$population_size --n_generations=$n_generations --seed=$seed --crossover_probability=$crossover_probability --mutation_probability=$mutation_probability --max_run_time=$max_run_time" || exit
 
 # Convert ouput
-eval "${MODCELLHPC_PATH}/io/popmerge.sh $test_path/"
-eval "${MODCELLHPC_PATH}/io/pop2csv.py $problem_path $output_file -o $output_file_csv" | tee -a "$log_path" || exit
+eval "${MODCELLHPC_PATH}/io/popmerge.sh $test_path/" || exit
+
+# Convert ouput
+eval "${MODCELLHPC_PATH}/io/pop2csv.py $problem_path $output_file -o $output_file_csv" || exit
 
 # Check with matlab
 temp_script=$(mktemp)
 echo "cd ${test_path}" >> $temp_script
 echo "test_objectives(\"${output_file_csv}\", \"${prodnet_path}\")" >> $temp_script
-eval "${MATLAB_BIN} -nodesktop -nodisplay -sd ~/wrk/s/matlab < $temp_script" | tee -a "$log_path"
+eval "${MATLAB_BIN} -nodesktop -nodisplay -sd ~/wrk/s/matlab < $temp_script"
 

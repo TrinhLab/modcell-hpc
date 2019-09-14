@@ -28,7 +28,6 @@ int mpi_pe;
 int mpi_comm_size;
 
 /* Paramters */ //Some (or all) can eventually move to CLI
-#define VERBOSE 1
 #define PRINT_INTERVAL 10
 
 /* Structures */
@@ -71,13 +70,20 @@ typedef struct {
 	char **individual2id; 	/* [nvars] Maps individual indices to reaction ID. */
 	/* MOEA */
     	size_t n_vars;
-	unsigned int n_cores;
     	unsigned int population_size; // TODO: Use size_t consistently
     	unsigned int seed; /* Note: The real RNG seed is seed + MPI PE number */
     	unsigned int n_generations;
 	double crossover_probability;
 	double mutation_probability;
 	double max_run_time; 	/* maximum run time in seconds */
+
+	/* Parallelization  */
+    	unsigned int migration_interval;
+    	unsigned int migration_fraction;
+
+	/* Other */
+	int verbose;
+
 } MCproblem;
 
 typedef struct item { /* list item */

@@ -4,6 +4,10 @@
 #include <assert.h>
 #include "mcutils.h"
 #include "modcell.h"
+#include <stdlib.h>
+#include <argp.h>
+#include <error.h>
+
 
 /* Macro and function declarations */
 #define OPENFILER(filepath)\
@@ -23,13 +27,6 @@
     }
 
 
-#define READPARAM_STR(id, sname) \
-    if (fscanf(fp, #id"=%s\n", sname->id) !=1){ \
-        fprintf (stderr, "error: parsing parameter'%s'\n", #id); \
-        if (fp) fclose (fp); \
-        exit(-1); \
-    }
-
 #define READMETADAT(id, type) \
     fscanf(fp, "%s\n", buff); lc++; \
     if (sscanf(buff, #id"=%"#type, &id) !=1){ \
@@ -39,7 +36,6 @@
     }
 
 MCproblem read_problem(const char *problem_dir);
-void load_parameters(MCproblem *mcp, const char *filepath);
 bool is_not_candidate(Charlist *ncandfile, const char *rxnid);
 void write_population(MCproblem *mcp, Population *pop, char *out_population_path);
 void read_population(MCproblem *mcp, Population *pop, const char *population_path);
@@ -50,6 +46,121 @@ extern glp_smcp param;
 extern int mpi_pe;
 
 /* Function definitions */
+
+/* CLI */
+const char *argp_program_version = "ModCell-HPC 1.0";
+const char *argp_program_bug_address = "https://github.com/trinhlab/modcell-hpc/issues";
+
+/* Program documentation. */
+static char doc[] ="Neccessary arguments:\n\t- PROBLEM_DIR: Path to problem directory with a .mps file for each production network, cand file (with a list of reaction candidates) and .ncand file for each production network with a list of fixed reactions per network.\n\t- OUTPUT_FILE: Path to output population file in .pop format. The file does not need to exist (In general it should not exist, since it would be overwritten) but the DIRECTORY containing the file MUST EXIST!\n";
+
+/* A description of the arguments we accept. */
+static char args_doc[] = "PROBLEM_DIR OUTPUT_FILE";
+
+/* Keys for options without short-options. */
+#define OPT_ABORT  1            /* –abort */
+
+/* The options we understand. */
+static struct argp_option options[] = {
+  {"quiet",                     'q', 0,       0, "Don't produce any output" },
+  {"initial_population",        'i', "FILE",  0, "Path to input population file in .pop format. If not included the first population will be initialized randomly" },
+  {"objective_type",            'd', "INT",       0, "Design objective. Current options are \"wgcp\"" },
+  {"alpha",                     'a', "INT",       0, "Max. number of deletions" },
+  {"beta",                      'b', "INT",       0, "Max. number of module reactions" },
+  {"seed",                      'r', "INT",       0, "RNG seed, note that it will be modified by PE number" },
+  {"population_size",           's', "INT",       0, "MOEA parameter" },
+  {"crossover_probability",     'c', "FLOAT",       0, "MOEA parameter" },
+  {"mutation_probability",      'm', "FLOAT",       0, "MOEA parameter" },
+  {"migration_interval",        'g', "INT",       0, "MOEA parameter" },
+  {"migration_fraction",        'z', "FLOAT",       0, "MOEA parameter" },
+  {"max_run_time",              't', "INT",       0, "Wall-clock run time in seconds for the main MOEA loop (allow some extra time for IO)" },
+  {"n_generations",             'n', "INT",       0, "Maximum number of generations" },
+  { 0 }
+};
+
+/* Used by main to communicate with parse_opt. */
+struct arguments
+{
+  char *args[2];     /* arg1 and arg2 */
+  char *objective_type, *initial_population;
+  int alpha, beta, seed, max_run_time, migration_interval, population_size, verbose, n_generations;
+  float crossover_probability, mutation_probability, migration_fraction;
+};
+
+void load_parameters(MCproblem *mcp, struct arguments *arguments);
+
+/* Parse a single option. */
+static error_t
+parse_opt (int key, char *arg, struct argp_state *state)
+{
+  /* Get the input argument from argp_parse, which we
+     know is a pointer to our arguments structure. */
+  struct arguments *arguments = state->input;
+
+  switch (key)
+    {
+    case 'q':
+      arguments->verbose = 0;
+      break;
+    case 'i':
+      arguments->initial_population = arg;
+      break;
+    case 'd':
+      arguments->objective_type = arg;
+      break;
+    case 'a':
+      arguments->alpha = atoi(arg);
+      break;
+    case 'b':
+      arguments->beta = atoi(arg);
+      break;
+    case 'r':
+      arguments->seed = atoi(arg);
+      break;
+    case 's':
+      arguments->population_size = atoi(arg);
+      break;
+    case 'c':
+      arguments->crossover_probability = atof(arg);
+      break;
+    case 'm':
+      arguments->mutation_probability = atof(arg);
+      break;
+    case 'g':
+      arguments->migration_interval = atoi(arg);
+      break;
+    case 'z':
+      arguments->migration_fraction = atof(arg);
+      break;
+    case 't':
+      arguments->max_run_time = atoi(arg);
+      break;
+    case 'n':
+      arguments->n_generations = atoi(arg);
+      break;
+
+    case ARGP_KEY_ARG:
+      if (state->arg_num >= 2) /* Too many arguments. */
+        argp_usage (state);
+      arguments->args[state->arg_num] = arg;
+      break;
+
+    case ARGP_KEY_END:
+      if (state->arg_num < 2) /* Not enough arguments. */
+        argp_usage (state);
+      break;
+
+    default:
+      return ARGP_ERR_UNKNOWN;
+    }
+  return 0;
+}
+
+/* Our argp parser. */
+static struct argp argp = { options, parse_opt, args_doc, doc };
+
+/* CLI done */
+
 MCproblem
 read_problem(const char *problem_dir_path)
 {
@@ -155,19 +266,20 @@ is_not_candidate(Charlist *ncandfile, const char *rxnid)
 }
 
 void
-load_parameters(MCproblem *mcp, const char *filepath)
+load_parameters(MCproblem *mcp, struct arguments *arguments)
 {
-    OPENFILER(filepath)
-    READPARAM_STR(objective_type, mcp)
-    READPARAM(alpha,u,mcp)
-    READPARAM(beta,u,mcp)
-    READPARAM(population_size,u,mcp)
-    READPARAM(n_generations,u,mcp)
-    READPARAM(seed,u,mcp)
-    READPARAM(crossover_probability,lf,mcp)
-    READPARAM(mutation_probability,lf,mcp)
-    READPARAM(max_run_time,lf,mcp)
-    CLOSEFILE
+    mcp->verbose = arguments->verbose;
+    strcpy(mcp->objective_type, arguments->objective_type);
+    mcp->alpha = arguments->alpha;
+    mcp->beta = arguments->beta;
+    mcp->seed = arguments->seed;
+    mcp->population_size = arguments->population_size;
+    mcp->crossover_probability = arguments->crossover_probability;
+    mcp->mutation_probability = arguments->mutation_probability;
+    mcp->migration_interval = arguments->migration_interval;
+    mcp->migration_fraction = arguments->migration_fraction;
+    mcp->max_run_time = arguments->max_run_time;
+    mcp->n_generations = arguments->n_generations;
 }
 
 
@@ -336,18 +448,24 @@ main (int argc, char **argv)
 {
 
     /* Parse  input */
-    if ( (argc < 4) | (argc > 5) ) {
-        fprintf (stderr, "error: insufficient input"
-                ", usage: %s <problem_directory> <parameters> <output_population> <initial_population (optional)>\n"
-                "Program command-line arguments correspond primarily to file and directory paths:\n"
-                "\t- problem_directory: Path to problem directory with a .mps file for each production network, cand file (with a list of reaction candidates) and .ncand file for each production network with a list of fixed reactions per network.\n"
-                "\t- parameters: Path to parameter file.\n"
-                "\t- output_population: Path to output population file in .pop format. The file does not need to exist (In general it should not exist, since it would be overwritten) but the directory containing the file must exist!\n"
-                "\t- input_population (optional): Path to input population file in .pop format. If not included the first population will be initialized randomly.\n"
-                "NOTE: Directory for output population must exist.\n"
-                ,argv[0]);
-        return(1);
-    }
+    struct arguments arguments;
+
+    /* Default values. */
+    arguments.verbose = 1;
+    arguments.initial_population = "";
+    arguments.objective_type = "wgcp";
+    arguments.alpha = 5;
+    arguments.beta = 0;
+    arguments.seed = 0;
+    arguments.population_size = 200;
+    arguments.crossover_probability = 0.8;
+    arguments.mutation_probability = 0.05;
+    arguments.migration_interval = 20;
+    arguments.migration_fraction = 0.1;
+    arguments.max_run_time = 10000000;
+    arguments.n_generations = 500;
+
+    argp_parse (&argp, argc, argv, 0, 0, &arguments);
 
     /* Intialize MPI */
     MPI_Init(&argc, &argv);
@@ -362,10 +480,9 @@ main (int argc, char **argv)
     param.msg_lev = LP_MSG_LEV;
     param.tm_lim = LP_TIME_LIMIT_MILISEC;
 
-    MCproblem mcp = read_problem(argv[1]);
-    load_parameters(&mcp, argv[2]);
+    MCproblem mcp = read_problem(arguments.args[0]);
+    load_parameters(&mcp, &arguments);
     fflush(stdout);
-    printf("-------------------------------------------------------------------\n");
     printf("-------------------------------------------------------------------\n");
 
     /* Seed global RNG */
@@ -374,17 +491,14 @@ main (int argc, char **argv)
     /* Intialize population */
     Population *initial_population = malloc(sizeof(Population));
     allocate_population(&mcp, initial_population, mcp.population_size);
-
-    if (argc == 5) {
-        char pop_path[256];
-        printf("Reading initial population (path: %s)...", argv[4]);
-        strcpy(pop_path, argv[4]);
-        read_population(&mcp, initial_population, pop_path);
-        printf("done\n");
+    if (arguments.initial_population[0] == '\0') {
+        printf("Initial population not specified (initialize at random)\n");
+        set_random_population(&mcp, initial_population);
     }
     else {
-        printf("Initial population not specified\n");
-        set_random_population(&mcp, initial_population);
+        printf("Reading initial population (path: %s)...", arguments.initial_population);
+        read_population(&mcp, initial_population, arguments.initial_population);
+        printf("done\n");
     }
 
     /* Run */
@@ -393,9 +507,9 @@ main (int argc, char **argv)
     /* Write ouput */
     char pop_path[256];
     if (mpi_comm_size > 1)
-        sprintf(pop_path, "%s_%i",argv[3], mpi_pe);
+        sprintf(pop_path, "%s_%i", arguments.args[1], mpi_pe);
     else
-        sprintf(pop_path, "%s",argv[3]);
+        sprintf(pop_path, "%s", arguments.args[1]);
     write_population(&mcp, initial_population, pop_path);
 
     /* Cleanup */

@@ -18,3 +18,5 @@ Cases:
 - 2 : Basic test with beta > 0
 - 3 : Test reading from an initial population
 - 4 : Basic test with beta = 0 + MPI
+- 5 : Read one initial population with MPI
+- 6 : Read multiple initial populations with MPI

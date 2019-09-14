@@ -24,4 +24,4 @@ for fullfile in "${target}_"* ; do
 done
 #cat "$target_"* | grep -Ev "#ENDFILE|${md_pattern}" | sed -e "\$a#ENDFILE"  > "$target"
 grep -Ev "#ENDFILE|${md_pattern}" temp | sed -e "\$a#ENDFILE"  > "$target" && rm temp
-grep -E $md_pattern "${target}_0" | cat - out.pop > temp && mv temp "$target"
+grep -E $md_pattern "${target}_0" | cat - "$target" > temp && mv temp "$target"

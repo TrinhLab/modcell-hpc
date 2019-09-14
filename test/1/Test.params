@@ -1,9 +1,0 @@
-objective_type=wgcp
-alpha=5
-beta=0
-population_size=100
-n_generations=100
-seed=0
-crossover_probability=0.8
-mutation_probability=0.05
-max_run_time=7200
