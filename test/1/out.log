@@ -1,4 +1,6 @@
-Sat 14 Sep 2019 01:34:31 PM EDT
+Sat 14 Sep 2019 03:07:27 PM EDT
+PE number: 0.
+Comm size: 1.
 /home/sg/wrk/s/matlab/modcell-hpc/cases/ecoli-core/cand
 ----Reading problem 1---
 Reading problem data from '/home/sg/wrk/s/matlab/modcell-hpc/cases/ecoli-core/ibutoh.mps'...
@@ -66,15 +68,15 @@ Size of triangular part is 63
 -------------------------------------------------------------------
 -------------------------------------------------------------------
 Initial population not specified
-Geneneration:10 Time:0.87
-Geneneration:20 Time:1.40
-Geneneration:30 Time:2.05
-Geneneration:40 Time:2.85
-Geneneration:50 Time:3.56
-Geneneration:60 Time:4.19
-Geneneration:70 Time:4.59
-Geneneration:80 Time:4.97
-Geneneration:90 Time:5.34
+Geneneration:10 Time:0.86
+Geneneration:20 Time:1.39
+Geneneration:30 Time:2.03
+Geneneration:40 Time:2.84
+Geneneration:50 Time:3.55
+Geneneration:60 Time:4.18
+Geneneration:70 Time:4.58
+Geneneration:80 Time:4.95
+Geneneration:90 Time:5.33
 Output population written to: /home/sg/wrk/s/matlab/modcell-hpc/test/1/out.pop
 Unique solutions: 9/100
 Non-dominated solutions: 8/9

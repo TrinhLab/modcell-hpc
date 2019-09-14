@@ -27,6 +27,7 @@ The output of the main method corresponds to a plain text files with information
 ## Compiling
 You can use the provided Makefile. For optimal performance adjust compilation flags for the processor architecture of choice. The following dependencies are needed:
 - [GLPK](https://www.gnu.org/software/glpk/) (In Arch linux install with `sudo pacman -S glpk`)
+- MPI (Your favorite implementation, e.g.,in Arch linux install with `sudo pacman -S openmpi`)
 
 ### Compilation examples
 Compile with optimize flag:

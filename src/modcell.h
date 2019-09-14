@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <glpk.h>
 #include "pcg_basic.h"
+#include "mpi.h"
 
 /* Notation */
 #define UNKNOWN_OBJ -1
@@ -23,6 +24,12 @@
 
 /* Globals */
 glp_smcp param;
+int mpi_pe;
+int mpi_comm_size;
+
+/* Paramters */ //Some (or all) can eventually move to CLI
+#define VERBOSE 1
+#define PRINT_INTERVAL 10
 
 /* Structures */
 typedef struct {
@@ -65,8 +72,8 @@ typedef struct {
 	/* MOEA */
     	size_t n_vars;
 	unsigned int n_cores;
-    	unsigned int population_size; //FIXME: Use size_t consistently
-    	unsigned int seed;
+    	unsigned int population_size; // TODO: Use size_t consistently
+    	unsigned int seed; /* Note: The real RNG seed is seed + MPI PE number */
     	unsigned int n_generations;
 	double crossover_probability;
 	double mutation_probability;

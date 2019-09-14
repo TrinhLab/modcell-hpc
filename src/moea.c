@@ -5,9 +5,6 @@
 #include "utlist.h"
 #include "modcell.h"
 
-int verbose = 1; //TODO: Make this a parameter
-#define PRINT_INTERVAL 10 //TODO: Should this be a parameter or moved elsewhere?
-
 void run_moea(MCproblem *mcp, Population *parent_population);
 void selection_and_variation(MCproblem *mcp, Population *core_population, Population *offspring_population);
 void evaluate_population(MCproblem *mcp, Population *population);
@@ -64,7 +61,7 @@ run_moea(MCproblem *mcp, Population *parent_population)
         n_generations++;
         run_time = (double)(clock() - begin) / CLOCKS_PER_SEC;
 
-        if (verbose && ( (n_generations-1) % PRINT_INTERVAL == 0))
+        if (VERBOSE && ( (n_generations-1) % PRINT_INTERVAL == 0))
             printf("Geneneration:%i Time:%.2f\n",n_generations-1, run_time);
     }
 

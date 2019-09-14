@@ -1,4 +1,5 @@
-CC = gcc
+#CC = gcc
+CC=mpicc
 LIBS = -lglpk
 CFLAGS = -O3 -march=native
 
