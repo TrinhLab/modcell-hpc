@@ -64,15 +64,17 @@ static char args_doc[] = "PROBLEM_DIR OUTPUT_FILE";
 static struct argp_option options[] = {
   {"quiet",                     'q', 0,       0, "Don't produce any output" },
   {"initial_population",        'i', "FILE",  0, "Path to input population file in .pop format. If not included the first population will be initialized randomly" },
-  {"objective_type",            'd', "INT",       0, "Design objective. Current options are \"wgcp\"" },
+  {"objective_type",            'd', "STRING",    0, "Design objective. Current options are \"wgcp\"" },
   {"alpha",                     'a', "INT",       0, "Max. number of deletions" },
   {"beta",                      'b', "INT",       0, "Max. number of module reactions" },
   {"seed",                      'r', "INT",       0, "RNG seed, note that it will be modified by PE number" },
-  {"population_size",           's', "INT",       0, "MOEA parameter" },
-  {"crossover_probability",     'c', "FLOAT",       0, "MOEA parameter" },
-  {"mutation_probability",      'm', "FLOAT",       0, "MOEA parameter" },
-  {"migration_interval",        'g', "INT",       0, "MOEA parameter" },
-  {"migration_fraction",        'z', "FLOAT",       0, "MOEA parameter" },
+  {"population_size",           's', "INT",       0, "Number of individuals" },
+  {"crossover_probability",     'c', "FLOAT",       0, "Value between 0 and 1 that indicates the chances of crossover for each individual" },
+  {"mutation_probability",      'm', "FLOAT",       0, "Value between 0 and 1 that indicates the chances of mutation for each individual" },
+  {"migration_interval",        'g', "INT",       0, "Number of generations in between migrations" },
+  {"migration_fraction",        'z', "FLOAT",     0, "Value between 0 and 1 of the population that will be transfered during migration" },
+  {"migration_topology",        'y', "INT",       0, "0: Ring topology, islands communicate as a directed ring graph; 1: Random topology, each migration will send and receive from a random island other than itself." },
+  {"migration_policy",          'p', "INT",       0, "0: replace_bottom, the top individuals are sent and the bottom replaced, 1, :replace_sent, the top individuals are sent and replaced; 2, random, Random individuals are sent and replaced. Option 0 maintains the sent individuals in the original population, 1 or 2 do not." },
   {"max_run_time",              't', "INT",       0, "Wall-clock run time in seconds for the main MOEA loop (allow some extra time for IO)" },
   {"n_generations",             'n', "INT",       0, "Maximum number of generations" },
   { 0 }
@@ -83,7 +85,7 @@ struct arguments
 {
   char *args[2];     /* arg1 and arg2 */
   char *objective_type, *initial_population;
-  int alpha, beta, seed, max_run_time, migration_interval, population_size, verbose, n_generations;
+  int alpha, beta, seed, max_run_time, migration_interval, population_size, verbose, n_generations, migration_policy, migration_topology;
   float crossover_probability, mutation_probability, migration_fraction;
 };
 
@@ -132,6 +134,12 @@ parse_opt (int key, char *arg, struct argp_state *state)
     case 'z':
       arguments->migration_fraction = atof(arg);
       break;
+    case 'y':
+      arguments->migration_topology = atoi(arg);
+      break;
+    case 'p':
+      arguments->migration_policy = atoi(arg);
+      break;
     case 't':
       arguments->max_run_time = atoi(arg);
       break;
@@ -158,6 +166,25 @@ parse_opt (int key, char *arg, struct argp_state *state)
 
 /* Our argp parser. */
 static struct argp argp = { options, parse_opt, args_doc, doc };
+
+void
+load_parameters(MCproblem *mcp, struct arguments *arguments)
+{
+    mcp->verbose = arguments->verbose;
+    strcpy(mcp->objective_type, arguments->objective_type);
+    mcp->alpha = arguments->alpha;
+    mcp->beta = arguments->beta;
+    mcp->seed = arguments->seed;
+    mcp->population_size = arguments->population_size;
+    mcp->crossover_probability = arguments->crossover_probability;
+    mcp->mutation_probability = arguments->mutation_probability;
+    mcp->migration_interval = arguments->migration_interval;
+    mcp->migration_size = (int)(arguments->migration_fraction * arguments->population_size);
+    mcp->max_run_time = arguments->max_run_time;
+    mcp->n_generations = arguments->n_generations;
+    mcp->migration_topology = arguments->migration_topology;
+    mcp->migration_policy = arguments->migration_policy;
+}
 
 /* CLI done */
 
@@ -265,22 +292,6 @@ is_not_candidate(Charlist *ncandfile, const char *rxnid)
     return false;
 }
 
-void
-load_parameters(MCproblem *mcp, struct arguments *arguments)
-{
-    mcp->verbose = arguments->verbose;
-    strcpy(mcp->objective_type, arguments->objective_type);
-    mcp->alpha = arguments->alpha;
-    mcp->beta = arguments->beta;
-    mcp->seed = arguments->seed;
-    mcp->population_size = arguments->population_size;
-    mcp->crossover_probability = arguments->crossover_probability;
-    mcp->mutation_probability = arguments->mutation_probability;
-    mcp->migration_interval = arguments->migration_interval;
-    mcp->migration_fraction = arguments->migration_fraction;
-    mcp->max_run_time = arguments->max_run_time;
-    mcp->n_generations = arguments->n_generations;
-}
 
 
 void
@@ -464,6 +475,8 @@ main (int argc, char **argv)
     arguments.migration_fraction = 0.1;
     arguments.max_run_time = 10000000;
     arguments.n_generations = 500;
+    arguments.migration_policy = 0;
+    arguments.migration_topology = 0;
 
     argp_parse (&argp, argc, argv, 0, 0, &arguments);
 

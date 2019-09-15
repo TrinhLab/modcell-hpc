@@ -15,7 +15,7 @@ void add_individuals(MCproblem *mcp, Population *combined_pop, Population *paren
 void set_inf_crowding(MCproblem *mcp, Population *population);
 void assign_crowding_distance(MCproblem *mcp, Population *pop, item *head_fi, unsigned int fi_size);
 
-void migrate(MCproblem *mcp, Population *parent_population);
+void migrate(MCproblem *mcp, Population *parent_population, Population *send_population, Population *receive_population);
 
 /* Macros */
 #define FREE_LIST(list_head) \
@@ -27,8 +27,8 @@ void migrate(MCproblem *mcp, Population *parent_population);
 /*Function definitions */
 
 /* Main loop of the MOEA
-Notes:
-- The combined population is allocated and copied, this is likely avoidable by representing it through pointers.
+ * Notes:
+ *      - The combined population is allocated and copied, this is likely avoidable by representing it through pointers.
 */
 void
 run_moea(MCproblem *mcp, Population *parent_population)
@@ -39,6 +39,12 @@ run_moea(MCproblem *mcp, Population *parent_population)
     Population *combined_population = malloc(sizeof(Population));
     allocate_population(mcp, offspring_population, mcp->population_size);
     allocate_population(mcp, combined_population, 2*mcp->population_size);
+
+    Population *send_population = malloc(sizeof(Population));
+    Population *receive_population = malloc(sizeof(Population));
+    allocate_population(mcp, send_population, mcp->migration_size);
+    allocate_population(mcp, receive_population, mcp->migration_size);
+
 
     /* This is not needed, but otherwise individuals can be uninitialized leading to hideous bugs. */
     set_blank_population(mcp, offspring_population);
@@ -59,54 +65,119 @@ run_moea(MCproblem *mcp, Population *parent_population)
 
         /* Migration */
         if (n_generations % mcp->migration_interval == 0)
-            migrate(mcp, parent_population);
+            migrate(mcp, parent_population, send_population, receive_population);
 
        /* Book keeping */
         n_generations++;
         run_time = (double)(clock() - begin) / CLOCKS_PER_SEC;
 
         if (mcp->verbose && ( (n_generations-1) % PRINT_INTERVAL == 0))
-            printf("PE: %i\t Geneneration:%i\t Time:%.2f\n",mpi_pe, n_generations-1, run_time);
+            printf("PE: %i\t Generation:%i\t Time:%.2f\n",mpi_pe, n_generations-1, run_time);
     }
 
     free_population(mcp, offspring_population);
     free_population(mcp, combined_population);
 }
 
-/* Sends top individuals to other islands and replaces bottom individuals. Assumes the popualtion is sorted.
-Notes:
-- Currently uses ring topology, in the future could parse a graph (edge list, with nodes corresponding to PEs) with an arbitrary. Then each PE would go thorugh a list of senders.
-- How to avoid sync issues? e.g., send without waiting for response and raise a flag to do a pending migration and only perform when response is available
-*/
+
+
+/* Sends and receives individuals from other islands (PEs)
+ * Notes:
+ *      - Migration policies other than random depend on how parent_population is sorted.
+ *      - MPI is designed to send arrays of structures made of simple types, but not structure of arrays. So the fields of the individual struct are sent independently, which of course requires more messages.
+ * Asynchronous notes:
+ *      - Individuals could  be replaced directly in the parent population, but copying to send and receive populations allows asynchronous message passing.
+ *      - Currently non-blocking communication is likely not beneficial. To increase performance with non-blocking message passing, use migration flag in main loop that can be checked each generation, migrate sets it to 0 if it succeeds to complete both send and receive.
+ */
 void
-migrate(MCproblem *mcp, Population *parent_population)
+migrate(MCproblem *mcp, Population *parent_population, Population *send_population, Population *receive_population)
 {
     int target_pe;
-    int tag = 10; // Random number
-    int  test_receive;
+    int i, k, tag = 10;
+    Individual *send_indv, *recv_indv;
     MPI_Status status;
-    // mpi_indv_type; // array of indv to send
+    int *send_idx = malloc(mcp->migration_size * sizeof(int));
+    int *receive_idx = malloc(mcp->migration_size * sizeof(int));
 
-    if (mpi_pe == mpi_comm_size - 1)
-        target_pe = 0;
-    else
-        target_pe = mpi_pe + 1;
+    /* Message passing topology */ // If it is not dynamic it can be determined outside of this method
+    if (mcp->migration_topology == MIGRATION_TOPOLOGY_RING) {
+        if (mpi_pe == mpi_comm_size - 1)
+            target_pe = 0;
+        else
+            target_pe = mpi_pe + 1;
+    }
+    else if (mcp->migration_topology == MIGRATION_TOPOLOGY_RANDOM) {
+        do {
+            target_pe = (int)pcg32_boundedrand(mpi_comm_size);
+        } while (target_pe != mpi_pe);
+    } else { fprintf (stderr, "error: Invalid migration topology option"); exit(-1); }
 
-    /* Send */
-    MPI_Send(&mpi_pe, 1, MPI_INT, target_pe, tag, MPI_COMM_WORLD);
+    /* Determine individuals to send and receive */
+    if (mcp->migration_policy == MIGRATION_POLICY_REPLACE_SENT) {
+        for (i=0; i < mcp->migration_size; i++) {
+            send_idx[i] = i;
+            receive_idx[i] = i;
+        }
+    }
+    else if (mcp->migration_policy == MIGRATION_POLICY_REPLACE_BOTTOM) {
+        for (i=0; i < mcp->migration_size; i++) {
+            send_idx[i] = i;
+            receive_idx[i] = mcp->population_size - 1 - i;
+        }
+    }
+    else if (mcp->migration_policy == MIGRATION_POLICY_RANDOM) {
+        for (i=0; i < mcp->migration_size; i++) {
+            send_idx[i] = i; (int)pcg32_boundedrand(mcp->population_size);
+            receive_idx[i] = send_idx[i];
+        }
+    } else { fprintf (stderr, "error: Invalid migration policy option"); exit(-1); }
 
-    /* Recieve */
-    MPI_Recv(&test_receive, 1, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 
-    //printf("Migration\t PE:%i\t Received: %i\n", mpi_pe, test_receive);
+    /* Message exchange */
+    for (i=0; i < mcp->migration_size; i++) {
+
+        copy_individual(mcp,  &(parent_population->indv[send_idx[i]]), &(send_population->indv[i]));
+        send_indv = &(send_population->indv[i]);
+        recv_indv = &(receive_population->indv[i]);
+
+        /* Deletions */
+        MPI_Send(send_indv->deletions, mcp->n_vars, MPI_INT, target_pe, tag, MPI_COMM_WORLD);
+        MPI_Recv(recv_indv->deletions, mcp->n_vars, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+        /* Module reactions */
+        if (mcp->beta > 0) {
+        // 2D arrays can be passed as one so long as memory is contigous but not sure about this yet
+        //MPI_Send(send_indv->modules[k], mcp->n_models*mcp->n_vars, MPI_INT, target_pe, tag, MPI_COMM_WORLD);
+        //MPI_Recv(recv_indv->modules[k], mcp->n_models*mcp->n_vars, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+            for (k=0; k < mcp->n_models; k++) {
+                MPI_Send(send_indv->modules[k], mcp->n_vars, MPI_INT, target_pe, tag, MPI_COMM_WORLD);
+                MPI_Recv(recv_indv->modules[k], mcp->n_vars, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+            }
+        }
+        /* Objectives */
+        MPI_Send(send_indv->objectives, mcp->n_models, MPI_DOUBLE, target_pe, tag, MPI_COMM_WORLD);
+        MPI_Recv(recv_indv->objectives, mcp->n_models, MPI_DOUBLE, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+        /* Penalty_Objectives */
+        MPI_Send(send_indv->penalty_objectives, mcp->n_models, MPI_DOUBLE, target_pe, tag, MPI_COMM_WORLD);
+        MPI_Recv(recv_indv->penalty_objectives, mcp->n_models, MPI_DOUBLE, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+        /* Crowding distance */
+        MPI_Send(&(send_indv->crowding_distance), 1, MPI_DOUBLE, target_pe, tag, MPI_COMM_WORLD);
+        MPI_Recv(&(recv_indv->crowding_distance), 1, MPI_DOUBLE, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+    }
+
+    /* Copy received individuals into parent population */
+    for (i=0; i < mcp->migration_size; i++)
+        copy_individual(mcp,  &(receive_population->indv[i]), &(parent_population->indv[receive_idx[i]]));
+
+    free(send_idx);
+    free(receive_idx);
 }
 
 
 /* Creates offspring population by tournament selection, crossover, and mutation.
-Notes:
-    - TODO: Candidate parents for tournament selection are selected purely at randomly. It might be valuable to consider a scheme where such candidates cannot repeat themselves, which might lead to better diversity.
-    - The new individuals will have some un-initialized fields.
-*/
+ * Notes:
+ *      - TODO: Candidate parents for tournament selection are selected purely at random. It might be valuable to consider a scheme where such candidates cannot repeat themselves, which might lead to better diversity.
+ *      - The new individuals will have some uninitialized fields.
+ */
 void
 selection_and_variation(MCproblem *mcp, Population *parent_population, Population *offspring_population)
 {
@@ -152,9 +223,9 @@ evaluate_population(MCproblem *mcp, Population *population)
 }
 
 /* Selects most fit individuals from both parents and offspring populations to create a new parent_population
-
-   - Do non-dominated sorting of each front, calculate distances (if needed, i.e., front size is greater than individuals left to fill pop), then stop when pop is filled
-*/
+ * Notes:
+ *      - Do non-dominated sorting of each front, calculate distances (if needed, i.e., front size is greater than individuals left to fill pop), then stop when pop is filled
+ */
 void
 environmental_selection(MCproblem *mcp, Population *parent_pop, Population *offspring_pop, Population *combined_pop)
 {
@@ -255,8 +326,8 @@ sortcmp(item *a, item *b)
 }
 
 /* Notes:
-   - A greater value of crowding distance is better, since the edge individuals to be preserved obtain a crowding distance of INF.
-   */
+ *   - A greater value of crowding distance is better, since the edge individuals to be preserved obtain a crowding distance of INF.
+ */
 int
 sortcrowding(item *a, item *b)
 {
@@ -268,13 +339,12 @@ sortcrowding(item *a, item *b)
 }
 
 /* Adds individuals and determines if crowding distance needs to be calculated
-   - list_head is the list containining a  non-dominated front.
-   - last_index is the index of the last individual in new_pop.
-
-   Notes:
-   - Sorting a list pointer within a function causes errors when trying to free that list. The solution is to work with local copies (or to use a library other than UTLIST). That is also why this function has the crowding_distance calculation embedded instead of in a smaller function
-    - Alternative metrics can be used instead of crowding distance, such as reference point distance.
-*/
+ *      - list_head is the list containing a  non-dominated front.
+ *      - last_index is the index of the last individual in new_pop.
+ * Notes:
+ *      - Sorting a list pointer within a function causes errors when trying to free that list. The solution is to work with local copies (or to use a library other than UTLIST). That is also why this function has the crowding_distance calculation embedded instead of in a smaller function
+ *      - Alternative metrics can be used instead of crowding distance, such as reference point distance.
+ */
 
 void
 add_individuals(MCproblem *mcp, Population *combined_pop, Population *parent_pop, item *head_fi_og, unsigned int fi_size, unsigned int *individuals_added)
@@ -343,7 +413,7 @@ add_individuals(MCproblem *mcp, Population *combined_pop, Population *parent_pop
             return;
     }
 
-    FREE_LIST(head_fi); /*free local copy of head_fi */
+    FREE_LIST(head_fi); /* free local copy of head_fi */
 
 }
 

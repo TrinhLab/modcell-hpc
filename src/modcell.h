@@ -12,6 +12,12 @@
 #define A_DOMINATES_B 1
 #define B_DOMINATES_A -1
 #define NONDOMINATED 0
+/* Parameter notation */
+#define MIGRATION_POLICY_REPLACE_BOTTOM 0
+#define MIGRATION_POLICY_REPLACE_SENT 1
+#define MIGRATION_POLICY_RANDOM 2
+#define MIGRATION_TOPOLOGY_RING 0
+#define MIGRATION_TOPOLOGY_RANDOM 1
 
 /* Definitions */
 #define INF 1.0e14 /* A value to simulate infinity */
@@ -31,11 +37,13 @@ int mpi_comm_size;
 #define PRINT_INTERVAL 10
 
 /* Structures */
+
+/* IMPORTANT NOTE: Any change to the Individual structure needs to be reflected in the MPI datatype */
 typedef struct {
  	/* ModCell */
  	bool *deletions; 		/* [n_variables]*/
      	bool **modules; 		/* [n_models][n_variables] */
-	/* MOEA */ //IMPORTANT: Would these fields interfere (or slow down) the hash table look up? Maybe a hashkey struct should be created independently
+	/* MOEA */
 	double *objectives; 		/* [n_models] */
 	double *penalty_objectives; 	/* [n_models] */
 	int rank; // This is currently unused.
@@ -79,7 +87,9 @@ typedef struct {
 
 	/* Parallelization  */
     	unsigned int migration_interval;
-    	unsigned int migration_fraction;
+    	unsigned int migration_size;
+    	unsigned int migration_policy;
+    	unsigned int migration_topology;
 
 	/* Other */
 	int verbose;

@@ -18,5 +18,8 @@ Cases:
 - 2 : Basic test with beta > 0
 - 3 : Test reading from an initial population
 - 4 : Basic test with beta = 0 + MPI
-- 5 : Read one initial population with MPI
-- 6 : Read multiple initial populations with MPI
+- 5 : Basic test with beta > 0 + MPI
+- 6 : MPI test random migration topology
+- 7 : MPI test migration policies
+- 8 : Read one initial population with MPI
+- 9 : Read multiple initial populations with MPI
