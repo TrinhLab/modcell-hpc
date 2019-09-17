@@ -130,6 +130,11 @@ migrate(MCproblem *mcp, Population *parent_population, Population *send_populati
     int *send_idx = malloc(mcp->migration_size * sizeof(int));
     int *receive_idx = malloc(mcp->migration_size * sizeof(int));
 
+    /* Number of MPI messages (send and receive). Max calls when using modules, min otherwise*/
+    int n_core_calls = 8, n_module_calls = 2;
+    MPI_Request requests[n_core_calls], requests_m[n_module_calls];
+    MPI_Status statuses[n_core_calls], statuses_m[n_module_calls];
+
     /* Message passing topology */ // If it is not dynamic it can be determined outside of this method
     if (mcp->migration_topology == MIGRATION_TOPOLOGY_RING) {
         if (mpi_pe == mpi_comm_size - 1)
@@ -172,23 +177,27 @@ migrate(MCproblem *mcp, Population *parent_population, Population *send_populati
         recv_indv = &(receive_population->indv[i]);
 
         /* Deletions */
-        MPI_Send(send_indv->deletions, mcp->n_vars, MPI_INT, target_pe, tag, MPI_COMM_WORLD);
-        MPI_Recv(recv_indv->deletions, mcp->n_vars, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+        MPI_Isend(send_indv->deletions, mcp->n_vars, MPI_INT, target_pe, tag, MPI_COMM_WORLD, &requests[0] );
+        MPI_Irecv(recv_indv->deletions, mcp->n_vars, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &requests[1]);
+        /* Objectives */
+        MPI_Isend(send_indv->objectives, mcp->n_models, MPI_DOUBLE, target_pe, tag, MPI_COMM_WORLD, &requests[2]);
+        MPI_Irecv(recv_indv->objectives, mcp->n_models, MPI_DOUBLE, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &requests[3]);
+        /* Penalty_Objectives */
+        MPI_Isend(send_indv->penalty_objectives, mcp->n_models, MPI_DOUBLE, target_pe, tag, MPI_COMM_WORLD, &requests[4]);
+        MPI_Irecv(recv_indv->penalty_objectives, mcp->n_models, MPI_DOUBLE, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &requests[5]);
+        /* Crowding distance */
+        MPI_Isend(&(send_indv->crowding_distance), 1, MPI_DOUBLE, target_pe, tag, MPI_COMM_WORLD, &requests[6]);
+        MPI_Irecv(&(recv_indv->crowding_distance), 1, MPI_DOUBLE, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &requests[7]);
         /* Module reactions */
         if (mcp->use_modules) {
-            MPI_Send(send_indv->modules, mcp->n_models * mcp->n_vars, MPI_INT, target_pe, tag, MPI_COMM_WORLD);
-            MPI_Recv(recv_indv->modules, mcp->n_models * mcp->n_vars, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+            MPI_Isend(send_indv->modules, mcp->n_models * mcp->n_vars, MPI_INT, target_pe, tag, MPI_COMM_WORLD, &requests_m[0]);
+            MPI_Irecv(recv_indv->modules, mcp->n_models * mcp->n_vars, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &requests_m[1]);
         }
-        /* Objectives */
-        MPI_Send(send_indv->objectives, mcp->n_models, MPI_DOUBLE, target_pe, tag, MPI_COMM_WORLD);
-        MPI_Recv(recv_indv->objectives, mcp->n_models, MPI_DOUBLE, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
-        /* Penalty_Objectives */
-        MPI_Send(send_indv->penalty_objectives, mcp->n_models, MPI_DOUBLE, target_pe, tag, MPI_COMM_WORLD);
-        MPI_Recv(recv_indv->penalty_objectives, mcp->n_models, MPI_DOUBLE, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
-        /* Crowding distance */
-        MPI_Send(&(send_indv->crowding_distance), 1, MPI_DOUBLE, target_pe, tag, MPI_COMM_WORLD);
-        MPI_Recv(&(recv_indv->crowding_distance), 1, MPI_DOUBLE, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
     }
+
+    MPI_Waitall(n_core_calls, requests, statuses);
+    if (mcp->use_modules)
+        MPI_Waitall(n_module_calls, requests_m, statuses_m);
 
     /* Copy received individuals into parent population */
     for (i=0; i < mcp->migration_size; i++)
