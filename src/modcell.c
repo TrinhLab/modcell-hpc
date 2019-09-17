@@ -184,6 +184,8 @@ load_parameters(MCproblem *mcp, struct arguments *arguments)
     mcp->n_generations = arguments->n_generations;
     mcp->migration_topology = arguments->migration_topology;
     mcp->migration_policy = arguments->migration_policy;
+    /* Indicate if module reactions are used */
+    mcp->use_modules = arguments->beta > 0;
 }
 
 /* CLI done */
@@ -324,8 +326,8 @@ write_population(MCproblem *mcp, Population *pop, char *out_population_path)
         for (k=0; k < mcp->n_models; k++) {
             fprintf(f, "%s", mcp->model_names[k]);
             for (j=0; j < mcp->n_vars; j++)
-                if (mcp->beta > 0) // TODO: Consider an alternative format for beta = 0?
-                    if (indv->modules[k][j] == MODULE_RXN)
+                if (mcp->use_modules)
+                    if (indv->modules[k*mcp->n_vars + j] == MODULE_RXN)
                         fprintf(f, ",%s", mcp->individual2id[j]);
             fprintf(f, "\n");
         }
@@ -430,14 +432,14 @@ read_population(MCproblem *mcp, Population *pop, const char *population_path)
             indv->deletions[rxn_idx] = DELETED_RXN;
         }
 
-        if (in_modules && (mcp->beta > 0)) {
+        if (in_modules && (mcp->use_modules)) {
             tofree = string = strdup(buff);
             assert(string != NULL);
             token = strsep(&string, ",");
             model_idx = get_model_idx(mcp, token);
             while ((token = strsep(&string, ",")) != NULL){
                 rxn_idx = get_rxn_idx(mcp, token);
-                indv->modules[model_idx][rxn_idx] = MODULE_RXN;
+                indv->modules[model_idx*mcp->n_vars + rxn_idx] = MODULE_RXN;
             }
         }
     }

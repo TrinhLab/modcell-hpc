@@ -41,7 +41,7 @@ int mpi_pe, mpi_comm_size;
 typedef struct {
  	/* ModCell */
  	bool *deletions; 		/* [n_variables]*/
-     	bool **modules; 		/* [n_models][n_variables] */
+     	bool *modules; 		/* [n_models*n_variables] */
 	/* MOEA */
 	double *objectives; 		/* [n_models] */
 	double *penalty_objectives; 	/* [n_models] */
@@ -68,6 +68,7 @@ typedef struct {
 } LPproblem;
 
 typedef struct {
+	/* modcell */
 	char objective_type[256]; // maybe use enum for this or otherwise assert that the input is valid
 	unsigned int alpha;
 	unsigned int beta;
@@ -75,6 +76,7 @@ typedef struct {
 	char **model_names; 	/* [nvars] */
 	LPproblem *lps; 	/* [n_models] Contains everything needed to calculate an individuals fitness function */
 	char **individual2id; 	/* [nvars] Maps individual indices to reaction ID. */
+
 	/* MOEA */
     	size_t n_vars;
     	unsigned int population_size; // TODO: Use size_t consistently
@@ -92,7 +94,7 @@ typedef struct {
 
 	/* Other */
 	int verbose;
-
+    	int use_modules;  /*  mcp.beta > 0 */
 } MCproblem;
 
 typedef struct item { /* list item */

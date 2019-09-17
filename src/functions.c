@@ -25,10 +25,10 @@ copy_individual(MCproblem *mcp, Individual *indv_source, Individual *indv_dest)
     for (j=0; j < mcp->n_vars; j++)
         indv_dest->deletions[j] = indv_source->deletions[j];
 
-    if (mcp->beta > 0 ) {
+    if (mcp->use_modules) {
         for (k=0; k < mcp->n_models; k++)
             for (j=0; j < mcp->n_vars; j++)
-                indv_dest->modules[k][j] = indv_source->modules[k][j];
+                indv_dest->modules[k*mcp->n_vars + j] = indv_source->modules[k*mcp->n_vars + j];
     }
 
     for (k=0; k < mcp->n_models; k++) {
@@ -87,10 +87,10 @@ find_domination(MCproblem *mcp, Individual *indv_a, Individual *indv_b)
     child2->deletions[j] = parent2->deletions[j];
 
 #define  FILLB \
-    if (mcp->beta > 0) { \
+    if (mcp->use_modules) { \
         for (k=0; k < mcp->n_models; k++) { \
-            child1->modules[k][j] = parent1->modules[k][j]; \
-            child2->modules[k][j] = parent2->modules[k][j]; \
+            child1->modules[k*mcp->n_vars + j] = parent1->modules[k*mcp->n_vars + j]; \
+            child2->modules[k*mcp->n_vars + j] = parent2->modules[k*mcp->n_vars + j]; \
         }\
     }
 
@@ -114,10 +114,10 @@ crossover(MCproblem *mcp, Individual *parent1, Individual *parent2, Individual *
         for (j=site1; j < site2; j++){
             child1->deletions[j] = parent2->deletions[j];
             child2->deletions[j] = parent1->deletions[j];
-            if (mcp->beta > 0) {
+            if (mcp->use_modules) {
                 for (k=0; k < mcp->n_models; k++) {
-                    child1->modules[k][j] = parent2->modules[k][j];
-                    child2->modules[k][j] = parent1->modules[k][j];
+                    child1->modules[k*mcp->n_vars + j] = parent2->modules[k*mcp->n_vars + j];
+                    child2->modules[k*mcp->n_vars + j] = parent1->modules[k*mcp->n_vars + j];
                 }
             }
         }
@@ -147,11 +147,11 @@ mutation(MCproblem *mcp, Individual *indv)
         indv->deletions[site] = !indv->deletions[site];
     }
 
-    if (mcp->beta > 0) {
+    if (mcp->use_modules) {
         for (k=0; k < mcp->n_models; k++) {
             if ( (double)pcg32_boundedrand(100)/100 <= mcp->mutation_probability)  {
                 site = pcg32_boundedrand(mcp->n_vars);
-                indv->modules[k][site] = !indv->modules[k][site];
+                indv->modules[k*mcp->n_vars + site] = !indv->modules[k*mcp->n_vars + site];
             }
         }
     }
@@ -159,12 +159,12 @@ mutation(MCproblem *mcp, Individual *indv)
 
 
 /* After crossover and mutation are done, they may generate individuals that violate the two module reaction related constraints. This method enforces both constraints as follows:
-   1. Removes modules that are not deletions
-   2. If number of modules is above limit (beta), randomly removes modules until within limit.
-Notes:
-    - Refactor with linked lists?
-    - pcg32 does not provide a method to obtain a list of non-repeated random numbers.
-*/
+ *       1. Removes modules that are not deletions
+ *       2. If number of modules is above limit (beta), randomly removes modules until within limit.
+ * Notes:
+ *      - Refactor with linked lists?
+ *      - pcg32 does not provide a method to obtain a list of non-repeated random numbers.
+ */
 void
 enforce_module_constraints(MCproblem *mcp, Individual *indv)
 {
@@ -174,8 +174,8 @@ enforce_module_constraints(MCproblem *mcp, Individual *indv)
    /*  Removes modules that are not deletions */
     for (k=0; k < mcp->n_models; k++) {
         for (j=0; j < mcp->n_vars; j++) {
-            if ( (indv->deletions[j] == !DELETED_RXN) && (indv->modules[k][j] == MODULE_RXN)) {
-                indv->modules[k][j] = !MODULE_RXN;
+            if ( (indv->deletions[j] == !DELETED_RXN) && (indv->modules[k*mcp->n_vars + j] == MODULE_RXN)) {
+                indv->modules[k*mcp->n_vars + j] = !MODULE_RXN;
             }
         }
     }
@@ -184,7 +184,7 @@ enforce_module_constraints(MCproblem *mcp, Individual *indv)
         /* Identify module reactions */ //optimization: this could be merged with the above loop and likely minimize some calculations
         n_module_rxn = 0;
         for (j=0; j < mcp->n_vars; j++) {
-            if (indv->modules[k][j] == MODULE_RXN) {
+            if (indv->modules[k*mcp->n_vars + j] == MODULE_RXN) {
                 module_rxn_idx[n_module_rxn] = j;
                 n_module_rxn++;
             }
@@ -200,7 +200,7 @@ enforce_module_constraints(MCproblem *mcp, Individual *indv)
                 if (is_removed_module[target] == 0) {
                     is_removed_module[target] = 1;
                     n_removed_module++;
-                    indv->modules[k][module_rxn_idx[target]] = 0; /* apply removal */
+                    indv->modules[k*mcp->n_vars + module_rxn_idx[target]] = 0; /* apply removal */
                 }
             }
         }
@@ -247,7 +247,7 @@ calculate_objectives(MCproblem *mcp, Individual *indv)
             change_bound[j] = 0;
             if ((lp->cand_col_idx[j] != NOT_CANDIDATE) && (indv->deletions[j] == DELETED_RXN)) {
                 change_bound[j] = 1; /* Reaction deleted in the chassis */
-                if((mcp->beta > 0) && (indv->modules[k][j] == 1))
+                if(mcp->use_modules && (indv->modules[k*mcp->n_vars + j] == 1))
                         change_bound[j] = 0; /* Reaction inserted back as module */
             }
         }

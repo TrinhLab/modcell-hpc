@@ -48,12 +48,9 @@ allocate_population(MCproblem *mcp,  Population *pop, size_t pop_size)
 void
 allocate_individual(MCproblem *mcp,  Individual *indv)
 {
-    indv->deletions = malloc(mcp->n_vars * sizeof(mcp->n_vars));
-    if (mcp->beta > 0) {
-        indv->modules = malloc(mcp->n_models * sizeof( *(indv->modules) ));
-        for (int k = 0; k < mcp->n_models; k++)
-            indv->modules[k] = malloc(mcp->n_vars * sizeof( **(indv->modules) ));
-    }
+    indv->deletions = malloc(mcp->n_vars * sizeof(indv->deletions));
+    if (mcp->use_modules)
+        indv->modules = malloc(mcp->n_models * mcp->n_vars * sizeof(indv->modules));
     indv->objectives = malloc(mcp->n_models * sizeof(indv->objectives));
     indv->penalty_objectives = malloc(mcp->n_models * sizeof(indv->penalty_objectives));
 }
@@ -72,11 +69,8 @@ void
 free_individual(MCproblem *mcp, Individual *indv)
 {
     free(indv->deletions);
-    if (mcp->beta > 0) {
-        for (int k = 0; k < mcp->n_models; k++)
-            free(indv->modules[k]);
+    if (mcp->use_modules)
         free(indv->modules);
-    }
     free(indv->objectives);
     free(indv->penalty_objectives);
 }
@@ -98,11 +92,11 @@ set_random_individual(MCproblem *mcp,  Individual *indv)
         indv->deletions[deleted_rxns[i]] = DELETED_RXN;
     }
     /* init modules. Only one module reaction is inserted regardless of beta, this heuristic leads to better individuals */
-    if (mcp->beta > 0) {
+    if (mcp->use_modules) {
         for (k = 0; k < mcp->n_models; k++) {
             for (j = 0; j < mcp->n_vars; j++)
-                    indv->modules[k][j] = !MODULE_RXN;
-            indv->modules[k][deleted_rxns[(int)pcg32_boundedrand(mcp->alpha)]] = MODULE_RXN;
+                    indv->modules[k*mcp->n_vars + j] = !MODULE_RXN;
+            indv->modules[k*mcp->n_vars + deleted_rxns[(int)pcg32_boundedrand(mcp->alpha)]] = MODULE_RXN;
         }
      }
     calculate_objectives(mcp, indv);
@@ -118,10 +112,10 @@ set_blank_individual(MCproblem *mcp,  Individual *indv)
     for (j = 0; j < mcp->n_vars; j++)
         indv->deletions[j] = !DELETED_RXN;
     /* init modules */
-    if (mcp->beta > 0) {
+    if (mcp->use_modules) {
         for (k = 0; k < mcp->n_models; k++)
             for (j = 0; j < mcp->n_vars; j++)
-                indv->modules[k][j] = !MODULE_RXN;
+                indv->modules[k*mcp->n_vars + j] = !MODULE_RXN;
      }
     for (k = 0; k < mcp->n_models; k++) {
         indv->objectives[k] = UNKNOWN_OBJ;

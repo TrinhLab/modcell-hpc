@@ -124,7 +124,7 @@ void
 migrate(MCproblem *mcp, Population *parent_population, Population *send_population, Population *receive_population)
 {
     int target_pe;
-    int i, j, k, tag = 10;
+    int i, tag = 10;
     Individual *send_indv, *recv_indv;
     MPI_Status status;
     int *send_idx = malloc(mcp->migration_size * sizeof(int));
@@ -175,16 +175,9 @@ migrate(MCproblem *mcp, Population *parent_population, Population *send_populati
         MPI_Send(send_indv->deletions, mcp->n_vars, MPI_INT, target_pe, tag, MPI_COMM_WORLD);
         MPI_Recv(recv_indv->deletions, mcp->n_vars, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
         /* Module reactions */
-        if (mcp->beta > 0) {
-            for (k=0; k < mcp->n_models; k++) {
-                // Sending the array leads to segfaults in glpk...
-                //MPI_Send(&(send_indv->modules[k]), mcp->n_vars, MPI_INT, target_pe, tag, MPI_COMM_WORLD);
-                //MPI_Recv(&(recv_indv->modules[k]), mcp->n_vars, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
-                for (j=0; j < mcp->n_vars; j++) {
-                    MPI_Send(&(send_indv->modules[k][j]), 1, MPI_INT, target_pe, tag, MPI_COMM_WORLD);
-                    MPI_Recv(&(recv_indv->modules[k][j]), 1, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
-                }
-            }
+        if (mcp->use_modules) {
+            MPI_Send(send_indv->modules, mcp->n_models * mcp->n_vars, MPI_INT, target_pe, tag, MPI_COMM_WORLD);
+            MPI_Recv(recv_indv->modules, mcp->n_models * mcp->n_vars, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
         }
         /* Objectives */
         MPI_Send(send_indv->objectives, mcp->n_models, MPI_DOUBLE, target_pe, tag, MPI_COMM_WORLD);
@@ -231,7 +224,7 @@ selection_and_variation(MCproblem *mcp, Population *parent_population, Populatio
         mutation(mcp, &(offspring_population->indv[i]));
 
     /* Constraint enforcement */
-    if (mcp->beta > 0)
+    if (mcp->use_modules)
         for (i=0; i < mcp->population_size; i++)
             enforce_module_constraints(mcp, &(offspring_population->indv[i]));
 }
