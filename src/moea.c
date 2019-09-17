@@ -11,9 +11,10 @@ void evaluate_population(MCproblem *mcp, Population *population);
 void environmental_selection(MCproblem *mcp, Population *parent_population, Population *offspring_population, Population *combined_population);
 Individual * tournament_k2(MCproblem *mcp, Individual *indv1, Individual *indv2);
 void add_individuals(MCproblem *mcp, Population *combined_pop, Population *parent_pop, item *head_fi, unsigned int fi_size, unsigned int *individuals_added);
-
 void set_inf_crowding(MCproblem *mcp, Population *population);
 void assign_crowding_distance(MCproblem *mcp, Population *pop, item *head_fi, unsigned int fi_size);
+
+extern int mpi_pe, mpi_comm_size;
 
 void migrate(MCproblem *mcp, Population *parent_population, Population *send_population, Population *receive_population);
 
@@ -29,7 +30,8 @@ void migrate(MCproblem *mcp, Population *parent_population, Population *send_pop
 /* Main loop of the MOEA
  * Notes:
  *      - The combined population is allocated and copied, this is likely avoidable by representing it through pointers.
-*/
+ *      - When a PE finishes all others should terminate as well. This can be implemented with an MPI_Allreduce where one process sends 1. However, given the current synchronous nature of migration, syncing each generation would not add much of a performance overhad, and it is a much simple way of dealing with this problem.
+ */
 void
 run_moea(MCproblem *mcp, Population *parent_population)
 {
@@ -45,10 +47,11 @@ run_moea(MCproblem *mcp, Population *parent_population)
     allocate_population(mcp, send_population, mcp->migration_size);
     allocate_population(mcp, receive_population, mcp->migration_size);
 
-
-    /* This is not needed, but otherwise individuals can be uninitialized leading to hideous bugs. */
+    /* Avoid uninitialized individuals  */
     set_blank_population(mcp, offspring_population);
     set_blank_population(mcp, combined_population);
+    set_blank_population(mcp, send_population);
+    set_blank_population(mcp, receive_population);
 
     clock_t begin = clock();
     evaluate_population(mcp, parent_population);
@@ -57,26 +60,51 @@ run_moea(MCproblem *mcp, Population *parent_population)
     set_inf_crowding(mcp, parent_population);
     set_inf_crowding(mcp, offspring_population);
 
-    while( (run_time < mcp->max_run_time) & (n_generations < mcp->n_generations) ) {
+    int done=0;
+    while(1) {
+
+        MPI_Barrier(MPI_COMM_WORLD); /* sync iterations. See notes in above function name for more details */
+        if (run_time > mcp->max_run_time) { /* Simply re-check run time limit. E.g., one process has been waiting but was not done in prev iteration, but a slower one arrived here with done=1 due to time limit. Re-checking time limit should prevent issues. But mroe generally, when a process is done it should just send a message ot others to stop (specially to not attemt any further migrations)*/
+            done = 1;
+            if (mcp->verbose) printf("PE: %i\t Run time limit reached \t Time:%.1fs\n", mpi_pe, run_time);
+        }
+        if (done) break;
+
         /* Core procedure */
         selection_and_variation(mcp, parent_population, offspring_population);
         evaluate_population(mcp, offspring_population);
         environmental_selection(mcp, parent_population, offspring_population, combined_population);
 
         /* Migration */
-        if (n_generations % mcp->migration_interval == 0)
+        if ( (mpi_comm_size > 1) && (n_generations % mcp->migration_interval == 0) ) {
+            if (mcp->verbose) printf("PE: %i Begin migration: %.0fs ...\n", mpi_pe, (double)(clock() - begin) / CLOCKS_PER_SEC);
+
             migrate(mcp, parent_population, send_population, receive_population);
 
-       /* Book keeping */
+            if (mcp->verbose) printf("...PE: %i end migration: %.0fs ...\n", mpi_pe, (double)(clock() - begin) / CLOCKS_PER_SEC);
+        }
+
+       /* Local book keeping */
         n_generations++;
         run_time = (double)(clock() - begin) / CLOCKS_PER_SEC;
 
         if (mcp->verbose && ( (n_generations-1) % PRINT_INTERVAL == 0))
-            printf("PE: %i\t Generation:%i\t Time:%.2f\n",mpi_pe, n_generations-1, run_time);
+            printf("PE: %i\t Generation:%i\t Time:%.1fs\n", mpi_pe, n_generations-1, run_time);
+
+        if (run_time > mcp->max_run_time) {
+            done = 1;
+            if (mcp->verbose) printf("PE: %i\t Run time limit reached \t Time:%.1fs\n", mpi_pe, run_time);
+        }
+        if (n_generations > mcp->n_generations) {
+            done = 1;
+            if (mcp->verbose) printf("PE: %i\t Generation limit reached \t Time:%.1fs\n", mpi_pe, run_time);
+        }
     }
 
     free_population(mcp, offspring_population);
     free_population(mcp, combined_population);
+    free_population(mcp, send_population);
+    free_population(mcp, receive_population);
 }
 
 
@@ -86,14 +114,17 @@ run_moea(MCproblem *mcp, Population *parent_population)
  *      - Migration policies other than random depend on how parent_population is sorted.
  *      - MPI is designed to send arrays of structures made of simple types, but not structure of arrays. So the fields of the individual struct are sent independently, which of course requires more messages.
  * Asynchronous notes:
- *      - Individuals could  be replaced directly in the parent population, but copying to send and receive populations allows asynchronous message passing.
+ *      - Individuals could  be replaced directly in the parent population, but copying to send and receive populations allows asynchronous message passing. It can also avoid data race conditions.
  *      - Currently non-blocking communication is likely not beneficial. To increase performance with non-blocking message passing, use migration flag in main loop that can be checked each generation, migrate sets it to 0 if it succeeds to complete both send and receive.
+ *      - Using async calls also allows for a timeout mechanism or some other way to cancel the message passing. This might be necessary since a PE might be in the middle of sending migration messages while another one is finished? The barrier (coupled with other PE termination message) should prevent that.
+ *      - FIXME: Current blocking calls could end up in deadlock since messages "cross" each other. So this should use non-blocking messages.
  */
+
 void
 migrate(MCproblem *mcp, Population *parent_population, Population *send_population, Population *receive_population)
 {
     int target_pe;
-    int i, k, tag = 10;
+    int i, j, k, tag = 10;
     Individual *send_indv, *recv_indv;
     MPI_Status status;
     int *send_idx = malloc(mcp->migration_size * sizeof(int));
@@ -145,12 +176,14 @@ migrate(MCproblem *mcp, Population *parent_population, Population *send_populati
         MPI_Recv(recv_indv->deletions, mcp->n_vars, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
         /* Module reactions */
         if (mcp->beta > 0) {
-        // 2D arrays can be passed as one so long as memory is contigous but not sure about this yet
-        //MPI_Send(send_indv->modules[k], mcp->n_models*mcp->n_vars, MPI_INT, target_pe, tag, MPI_COMM_WORLD);
-        //MPI_Recv(recv_indv->modules[k], mcp->n_models*mcp->n_vars, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
             for (k=0; k < mcp->n_models; k++) {
-                MPI_Send(send_indv->modules[k], mcp->n_vars, MPI_INT, target_pe, tag, MPI_COMM_WORLD);
-                MPI_Recv(recv_indv->modules[k], mcp->n_vars, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+                // Sending the array leads to segfaults in glpk...
+                //MPI_Send(&(send_indv->modules[k]), mcp->n_vars, MPI_INT, target_pe, tag, MPI_COMM_WORLD);
+                //MPI_Recv(&(recv_indv->modules[k]), mcp->n_vars, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+                for (j=0; j < mcp->n_vars; j++) {
+                    MPI_Send(&(send_indv->modules[k][j]), 1, MPI_INT, target_pe, tag, MPI_COMM_WORLD);
+                    MPI_Recv(&(recv_indv->modules[k][j]), 1, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+                }
             }
         }
         /* Objectives */
@@ -170,6 +203,8 @@ migrate(MCproblem *mcp, Population *parent_population, Population *send_populati
 
     free(send_idx);
     free(receive_idx);
+
+    MPI_Barrier(MPI_COMM_WORLD); // This is for rare cases and general safety. Specially for certain topologies.E.g., one process finished and writes its population while an others tries to send to it. Given the current blocking calls the performance overhead is likely irrelevant. If async is implemented this obviously needs to be modified.
 }
 
 

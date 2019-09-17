@@ -5,3 +5,5 @@ src/modcell
 rtest.sh
 template/
 old/
+TIMES
+runs/

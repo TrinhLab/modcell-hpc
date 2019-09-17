@@ -10,8 +10,13 @@ ifeq ($(flags), optimize)
 	CFLAGS = -O3 -march=native -Wall
 endif
 
+ifeq ($(flags), portable)
+	CFLAGS = -O3 -Wall
+	LIBS = ../bin/libglpk.a -lm
+endif
+
 ifeq ($(link), static)
-	LIBS = ../notes/glpk-4.65/src/.libs/libglpk.a -lm
+	LIBS = ../bin/libglpk.a -lm
 endif
 ifeq ($(link), dynamic)
 	LIBS = -lglpk

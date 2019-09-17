@@ -1,5 +1,5 @@
 /* Main file, essentially handles IO */
-
+#pragma GCC diagnostic ignored "-Wmissing-field-initializers" /* Remove warnings about argp structures */
 #include <string.h>
 #include <assert.h>
 #include "mcutils.h"
@@ -43,7 +43,7 @@ int get_rxn_idx(MCproblem *mcp, const char *rxn_id);
 int get_model_idx(MCproblem *mcp, const char *model_id);
 
 extern glp_smcp param;
-extern int mpi_pe;
+extern int mpi_pe, mpi_comm_size;
 
 /* Function definitions */
 
@@ -58,7 +58,7 @@ static char doc[] ="Neccessary arguments:\n\t- PROBLEM_DIR: Path to problem dire
 static char args_doc[] = "PROBLEM_DIR OUTPUT_FILE";
 
 /* Keys for options without short-options. */
-#define OPT_ABORT  1            /* –abort */
+#define OPT_ABORT  1            /* –abort */ //TODO: This is an example, maybe only the most frequent options should have a short-option
 
 /* The options we understand. */
 static struct argp_option options[] = {
