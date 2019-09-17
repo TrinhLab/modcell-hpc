@@ -6,9 +6,6 @@ Formats population using the table format compatible with other ModCell tools. I
 Usage examples:
     pop2csv.py problem_path population_path
     pop2csv.py problem_path population_path -o ouput_path
-
-Notes:
-    - Add option to keep dominated individuals?
 """
 
 import os, argparse
