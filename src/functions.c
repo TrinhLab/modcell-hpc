@@ -54,10 +54,10 @@ combine_populations(MCproblem *mcp, Population *pop1, Population *pop2, Populati
 }
 
 /* Checks if indv1 dominates indv2. Assumes objectives are maximized! Returns:
-   1DOMINATES2 if indv1 dominates indv2
-   2DOMINATES1 if indv2 dominates indv1
-   NONDOMINATED if both are non dominated
-*/
+ *      1DOMINATES2 if indv1 dominates indv2
+ *      2DOMINATES1 if indv2 dominates indv1
+ *      NONDOMINATED if both are non dominated
+ */
 int
 find_domination(MCproblem *mcp, Individual *indv_a, Individual *indv_b)
 {
@@ -77,10 +77,9 @@ find_domination(MCproblem *mcp, Individual *indv_a, Individual *indv_b)
 }
 
 /* Two point binary crossover of two individuals
-   - The crossover probability  is evaluated here and if crossoverr is not perform the childs will match the parents
-   - Crossover on module reactions is done on each model indepently. However, the  crossover  sites are the same that in deletions, given the relation between both variables this is a better way to preserve blocks. This is tricky since it might also be good to be able to get rid of modules.
-   -TODO: Could refactor for contiguous memory access (e.g.  for [k][j] variables, loop through j within loop through k) but this would lead to additional for loops. Although currently if(mcp->beta>0) is checked redundantly.
-*/
+ *      - The crossover probability  is evaluated here and if crossoverr is not perform the childs will match the parents
+ *      - Crossover on module reactions is done on each model indepently. However, the  crossover  sites are the same that in deletions, given the relation between both variables this is a better way to preserve blocks. This is tricky since it might also be good to be able to get rid of modules.
+ */
 
 #define  FILL \
     child1->deletions[j] = parent1->deletions[j]; \
@@ -135,8 +134,8 @@ crossover(MCproblem *mcp, Individual *parent1, Individual *parent2, Individual *
 
 
 /* Binary mutation of individual
-- A random bit might be flipped in deletion array and each module reaction array independently. Flipping the same bit for deletions and all modules would be useless.
-*/
+ *      - A random bit might be flipped in deletion array and each module reaction array independently. Flipping the same bit for deletions and all modules would be useless.
+ */
 void
 mutation(MCproblem *mcp, Individual *indv)
 {
@@ -208,15 +207,13 @@ enforce_module_constraints(MCproblem *mcp, Individual *indv)
 }
 
 /*
-   This function will set indv->objectives and indv->penalty_objectives
-
-   Notes:
-   - Currently the objective type is specified as part of the input file, this method does not do any manipulation of the models to set the appropriate design objective.
-   - Currently only computes wGCP.
-
-    Optimizations (perform them prior to calling this function?):
-        - TODO: Look up hash table of known solutions
-*/
+ * This function will set indv->objectives and indv->penalty_objectives
+ *
+ * Notes:
+ *      - Currently the objective type is specified as part of the input file, this method does not do any manipulation of the models to set the appropriate design objective.
+ *      - Currently only computes wGCP.
+ *      - TODO: Optimizations (perform them prior to calling this function?): Look up hash table of known solutions
+ */
 void
 calculate_objectives(MCproblem *mcp, Individual *indv)
 {

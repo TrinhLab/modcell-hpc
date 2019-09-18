@@ -365,9 +365,9 @@ get_model_idx(MCproblem *mcp, const char *model_id)
 
 
 /* Loads a population file:
-Notes:
-- Objectives could be calculated here and checked for consitency, currently objectives are not calculated until the moea procdure.
-*/
+ * Notes:
+ *      - Objectives could be calculated here and checked for consitency, currently objectives are not calculated until the moea procdure.
+ */
 void
 read_population(MCproblem *mcp, Population *pop, const char *population_path)
 {

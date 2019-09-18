@@ -126,10 +126,8 @@ migrate(MCproblem *mcp, Population *parent_population, Population *send_populati
     int target_pe;
     int i, tag = 10;
     Individual *send_indv, *recv_indv;
-    MPI_Status status;
     int *send_idx = malloc(mcp->migration_size * sizeof(int));
     int *receive_idx = malloc(mcp->migration_size * sizeof(int));
-
     /* Number of MPI messages (send and receive). Max calls when using modules, min otherwise*/
     int n_core_calls = 8, n_module_calls = 2;
     MPI_Request requests[n_core_calls], requests_m[n_module_calls];
@@ -348,7 +346,7 @@ cleanup:   free(domination_count);
 
 
 /* UTLIST: "The comparison function must return an int that is negative, zero, or positive, which specifies whether the first item should sort before, equal to, or after the second item, respectively." (i.e., sort is in ascending order)
-*/
+ */
 Population *g_pop;
 int g_k;
 int
