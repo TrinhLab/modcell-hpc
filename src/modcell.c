@@ -392,12 +392,12 @@ read_population(MCproblem *mcp, Population *pop, const char *population_path)
     READMETADAT(alpha, d)
     READMETADAT(beta, d)
 
-        /* Deal with discrepancies between imput parameters and population file */
-        if (population_size > mcp->population_size)
-            printf("Population size in parameters (%i) below that of input population (%i), last individuals will be discarded\n", population_size, mcp->population_size);
+    /* Deal with discrepancies between imput parameters and population file */
+    if (population_size > mcp->population_size)
+        printf("Population size in parameters (%i) below that of input population (%i), last individuals will be discarded\n", mcp->population_size, population_size);
 
     if (population_size < mcp->population_size)
-        printf("Population size in parameters (%i) above that of input population (%i), missing individuals will be created randomly\n", population_size, mcp->population_size);
+        printf("Population size in parameters (%i) above that of input population (%i), missing individuals will be created randomly\n", mcp->population_size,  population_size);
 
     /* Currently ignoring discrepancies in alpha and beta parameters */
 

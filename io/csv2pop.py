@@ -45,7 +45,11 @@ def main():
             new_rxns=""
             if item != "nan":
                 new_rxns = ",".join([r_map[rxn] for rxn in item.split(", ")])
-            f.write('{},{}\n'.format(m_map[model_id], new_rxns))
+            if new_rxns != "":
+                f.write('{},{}\n'.format(m_map[model_id], new_rxns))
+            else:
+                f.write('{}\n'.format(m_map[model_id]))
+
         f.write("#OBJECTIVES\n")
 
     with open(output_path, 'w') as f:

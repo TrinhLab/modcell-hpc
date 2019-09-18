@@ -42,8 +42,9 @@ def main():
     indv = None
 
     def append_indv(indv):
-        indv['Deletion_id'] = ', '.join(indv['Deletion_id'])
-        individuals.append(indv)
+        if indv['Deletion_id']: # Drop individuals without deletions
+            indv['Deletion_id'] = ', '.join(indv['Deletion_id'])
+            individuals.append(indv)
 
     with open(args.pop_path, 'r') as f:
         for rline in f:
