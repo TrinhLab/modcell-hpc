@@ -2,8 +2,11 @@ TODO*
 notes
 *.o
 src/modcell
-rtest.sh
 template/
 old/
 TIMES
+runs/
+test_test_objectives/
+rtest.sh
+testfiles/
 runs/

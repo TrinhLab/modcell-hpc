@@ -1,4 +1,4 @@
-Sat 14 Sep 2019 06:21:24 PM EDT
+Wed 18 Sep 2019 10:47:16 AM EDT
 PE number: 0.
 Comm size: 1.
 /home/sg/wrk/s/matlab/modcell-hpc/cases/ecoli-core/cand
@@ -67,18 +67,20 @@ Constructing initial basis...
 Size of triangular part is 63
 -------------------------------------------------------------------
 Initial population not specified (initialize at random)
-PE: 0	 Geneneration:10	 Time:0.76
-PE: 0	 Geneneration:20	 Time:1.19
-PE: 0	 Geneneration:30	 Time:1.60
-PE: 0	 Geneneration:40	 Time:1.96
-PE: 0	 Geneneration:50	 Time:2.29
-PE: 0	 Geneneration:60	 Time:2.59
-PE: 0	 Geneneration:70	 Time:2.96
-PE: 0	 Geneneration:80	 Time:3.38
-PE: 0	 Geneneration:90	 Time:3.79
+PE: 0	 Generation:10	 Time:0.8s
+PE: 0	 Generation:20	 Time:1.2s
+PE: 0	 Generation:30	 Time:1.6s
+PE: 0	 Generation:40	 Time:1.9s
+PE: 0	 Generation:50	 Time:2.3s
+PE: 0	 Generation:60	 Time:2.6s
+PE: 0	 Generation:70	 Time:2.9s
+PE: 0	 Generation:80	 Time:3.3s
+PE: 0	 Generation:90	 Time:3.7s
+PE: 0	 Generation:100	 Time:4.1s
+PE: 0	 Generation limit reached 	 Time:4.1s
 Output population written to: /home/sg/wrk/s/matlab/modcell-hpc/test/2/out.pop
-Unique solutions: 22/100
-Non-dominated solutions: 7/22
+Unique solutions: 26/100
+Non-dominated solutions: 6/26
 
                             < M A T L A B (R) >
                   Copyright 1984-2018 The MathWorks, Inc.
@@ -93,17 +95,6 @@ For product information, visit www.mathworks.com.
 The original names are saved in the VariableDescriptions property.] 
 [Warning: Variable names were modified to make them valid MATLAB identifiers.
 The original names are saved in the VariableDescriptions property.] 
-Sol idx:0 	 Obj:etoh 	 In obj.: 0.86 	 Calc. obj.: 0.95
-Sol idx:0 	 Obj:lac__D 	 In obj.: 0.92 	 Calc. obj.: 0.00
-Sol idx:0 	 Obj:ac 	 In obj.: 0.94 	 Calc. obj.: 0.00
-Sol idx:1 	 Obj:etoh_pdc 	 In obj.: 0.97 	 Calc. obj.: 0.00
-Sol idx:2 	 Obj:etoh 	 In obj.: 0.05 	 Calc. obj.: 0.51
-Sol idx:2 	 Obj:succ 	 In obj.: 0.57 	 Calc. obj.: 0.00
-Sol idx:2 	 Obj:lac__D 	 In obj.: 0.93 	 Calc. obj.: 0.00
-Sol idx:4 	 Obj:etoh_pdc 	 In obj.: 0.97 	 Calc. obj.: 0.00
-Sol idx:4 	 Obj:ac 	 In obj.: 0.37 	 Calc. obj.: 0.00
-Sol idx:5 	 Obj:ac 	 In obj.: 0.02 	 Calc. obj.: 0.00
-Sol idx:6 	 Obj:etoh 	 In obj.: 0.48 	 Calc. obj.: 0.00
-Sol idx:6 	 Obj:etoh_pdc 	 In obj.: 0.81 	 Calc. obj.: 0.00
-Sol idx:6 	 Obj:succ 	 In obj.: 0.58 	 Calc. obj.: 0.00
+No issues found!
+
 >> 
