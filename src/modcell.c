@@ -71,7 +71,7 @@ static struct argp_option options[] = {
   {"population_size",           's', "INT",       0, "Number of individuals" },
   {"crossover_probability",     'c', "FLOAT",       0, "Value between 0 and 1 that indicates the chances of crossover for each individual" },
   {"mutation_probability",      'm', "FLOAT",       0, "Value between 0 and 1 that indicates the chances of mutation for each individual" },
-  {"migration_interval",        'g', "INT",       0, "Number of generations in between migrations" },
+  {"migration_interval",        'g', "INT",       0, "Number of generations in between migrations. Note that since migration is asynchronous, this value indicates when migration will be initiated (assuming no migrations are pending, in such case new migration attempts will not be made until ongoing migrations are completed)" },
   {"migration_fraction",        'z', "FLOAT",     0, "Value between 0 and 1 of the population that will be transfered during migration" },
   {"migration_topology",        'y', "INT",       0, "0: Ring topology, islands communicate as a directed ring graph; 1: Random topology, each migration will send and receive from a random island other than itself." },
   {"migration_policy",          'p', "INT",       0, "0: replace_bottom, the top individuals are sent and the bottom replaced, 1, :replace_sent, the top individuals are sent and replaced; 2, random, Random individuals are sent and replaced. Option 0 maintains the sent individuals in the original population, 1 or 2 do not." },
