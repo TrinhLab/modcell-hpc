@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-Formats population using the table format compatible with other ModCell tools. It only keeps non-dominated individuals.
+Formats population using the table format compatible with other ModCell tools. It only keeps non-dominated individuals.Ignores metadata in the .pop file.
 
 Usage examples:
     pop2csv.py problem_path population_path
@@ -10,6 +10,8 @@ Usage examples:
 
 import os, argparse
 import pandas as pd
+import numpy as np
+from scipy.spatial.distance import cdist
 
 def main():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -100,16 +102,17 @@ def main():
     if not args.write_all:
         # Only keep non-dominated solutions
         obj_idx = df.columns.str.contains(r'\(objective\)')
-        idx_to_drop = []
-        for idx, row in df.iterrows():
-            for idx_b, row_b in df.iterrows():
-                if idx_b != idx:
-                    comp = row[obj_idx] <= row_b[obj_idx]
-                    if comp.all():
-                        idx_to_drop.append(idx)
-                        break
-        print("Non-dominated solutions: {}/{}".format(df.shape[0] - len(idx_to_drop), df.shape[0]))
-        df = df.drop(idx_to_drop)
+        a = df.iloc[:,obj_idx].values
+        def dominates(a, b):
+            return (np.asarray(a) >= b).all()
+
+        X = cdist(a, a, metric=dominates).astype(np.bool) # pairwise metric comparison
+        np.fill_diagonal(X, False) # Fix diagonal since a == b is not non-dominated
+        non_dominated_idx = np.logical_not(np.any(X, axis=0))
+
+        print("Non-dominated solutions: {}/{}".format(np.sum(non_dominated_idx), df.shape[0]))
+        df = df.iloc[non_dominated_idx,:]
+        df.reset_index(inplace=True, drop=True)
 
     # Add solution index
     df.insert(loc=0, column='Solution index', value=[_ for _ in range(df.shape[0])])
