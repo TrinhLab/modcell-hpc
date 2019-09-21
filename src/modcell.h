@@ -33,7 +33,7 @@ glp_smcp param;
 int mpi_pe, mpi_comm_size;
 
 /* Paramters */ //Some (or all) can eventually move to CLI
-#define PRINT_INTERVAL 10
+#define PRINT_INTERVAL 10 /* Generations interval when info is printed */
 
 /* Structures */
 

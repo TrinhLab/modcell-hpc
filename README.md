@@ -18,46 +18,56 @@ Another relevant study  is:
 (moea-comparison)
 ~~~
 
-## Input files
-The input files correspond to LP problems for each production network (in .mps format) and information about candidates (IDs of reactions that can be deleted). These can be generated with the assistance of [ModCell's Matlab implementation](https://github.com/TrinhLab/ModCell2), but that is not a necessity.
+## Usage
+### Input files
+The input files correspond to LP problems for each production network (in `.mps` format) and information about candidates (IDs of reactions that can be deleted). These can be generated with the assistance of [ModCell's Matlab implementation](https://github.com/TrinhLab/ModCell2), but that is not a necessity.
 
-## Output files
+### Output files
 The output of the main method corresponds to a plain text files with information about each individual in the Population (design variables, design objectives, etc). This file can be converted into a table that only preserves Pareto optimal solutions and is useful for further analysis using the program `src/formatpopulation.py`. The resulting table can be analyzed with the help the small programs provided in [modcell-designs](https://github.com/TrinhLab/modcell-designs/tree/master/src).
 
+### Running modcell-hpc scripts
+You must define several paths as environment variables in your shell by running `source paths`. This needs to be done for every new shell, so instead you can add a line like this to your `~/.profile` or shellrc:
+`[ -f "$path/to/modcell-hpc/paths" ] && source "$path/to/modcell-hpc/paths"`
+
 ## Compiling
-You can use the provided Makefile. For optimal performance adjust compilation flags for the processor architecture of choice. The following dependencies are needed:
+You can use the provided Makefile. The following dependencies are needed:
 - [GLPK](https://www.gnu.org/software/glpk/) (In Arch linux install with `sudo pacman -S glpk`)
 - MPI (Your favorite implementation, e.g.,in Arch linux install with `sudo pacman -S openmpi`)
 
 ### Compilation examples
-Compile with optimize flag:
-`make flags=optimize`
-Compile with optimize flag and static linking (will increase executable size, but remove the need for glpk installation, might also be a bit faster):
-`make flags=optimize link=static`
+Run within `modcell-hpc/src`:
+	- Compile with optimize flag:
+		- `make flags=optimize`
+	- Compile with optimize flag and static linking (will increase executable size, but remove the need for glpk installation, might also be a bit faster):
+		- `make flags=optimize link=static`
 
 ### Compiling GLPK
-To statically link glpk it must be compiled locally. A nice thing about this is that compilation flags can be tuned. The steps are as follows:
-1. extract tarball and cd into glpk-X-YY
-2. ./configure
-3. make clean && make CFLAGS="-O3"
-4. The desired file is found under glpk-X-YY/src/.libs/libglpk.a
+To statically link glpk you probably need to compile it locally (unless your installation includes static libraries which is not common). A nice thing about this is that compilation flags can be tuned. The steps are as follows:
+0. Obtain glpk:
+	- wget ftp://ftp.gnu.org/gnu/glpk/glpk-4.65.tar.gz
+	Verify download (optional):
+		- wget ftp://ftp.gnu.org/gnu/glpk/glpk-4.65.tar.gz.sig
+		- gpg --recv-key 0xD17BF2305981E818 # Can be determined from running gpg glpk-4.65.tar.gz.sig , obviously you should check the key and make sure is still valid
+		- gpg  glpk-4.65.tar.gz.sig
 
-# Running modcell-hpc scripts
-You must define several paths as environment variables by running `source paths.tcl`. This needs to be done for every new shell, so instead you can add a line like this to your `~/.profile` or shellrc:
-`[ -f "$path/to/modcell-hpc/paths.tcl" ] && source "$path/to/modcell-hpc/paths.tcl"`
+2. extract tarball and cd into glpk-X-YY:
+	- tar -xzvf glpk-4.65.tar.gz
+	- cd glpk-4.65
+4. ./configure
+5. make clean && make CFLAGS="-O3"
+6. The desired file is found under glpk-X-YY/src/.libs/libglpk.a
 
-# Tests
+## Notes
 
-# Notes
-
-## How does it work?
+### How does it work?
 - The MOEA of choice is the proven NSGA-II.
 - The ``flux balance analysis" linear programming problems that determine metabolic fluxes are solved using GLPK.
 
-## Why not use existing GA/MOEA libraries?
+### Why not use existing GA/MOEA libraries?
 There are many libraries in various fast languages to do GA/MOEA. However, the very particular specifications and overall small size of this program have led me to conclude that avoiding these libraries will be beneficial for simplicity and optimization.
 
-## Credits
+### Credits
 - [GLPK](https://www.gnu.org/software/glpk/) is used to solve LP problems.
 - [PCG Random Number Generator](http://www.pcg-random.org/) is used to obtain fastly generated and uniformly distributed random numbers.
 - [UTLIST and UTHASH](https://troydhanson.github.io/uthash/) are used for linked list and hash table data structures, respectively.
+- [MPS format exporitg tool](https://www.mathworks.com/matlabcentral/fileexchange/19618-mps-format-exporting-tool) is used to convert from the production networks generated by the modcell2 Matlab package to plain text .mps format.

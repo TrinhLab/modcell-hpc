@@ -1,6 +1,7 @@
 TODO*
 notes
 *.o
+# Temporary
 src/modcell
 template/
 old/
@@ -10,3 +11,6 @@ test_test_objectives/
 rtest.sh
 testfiles/
 runs/
+glpk/
+bin/
+compile.sh

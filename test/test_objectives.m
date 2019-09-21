@@ -61,7 +61,12 @@ for i = 1:length(T.SolutionIndex)
 	module_prod_id = cellfun(@(x)(strrep(x,'_module_','')),var_module_id,'UniformOutput',false);
 	for k = 1:length(prodnet.prod_id)
 		if ~isempty(intersect(module_prod_id, prodnet.prod_id{k}))
-			module_rxn = parse_list(T{i,[prodnet.prod_id{k},'_module_']}{1});
+            modules = T{i,[prodnet.prod_id{k},'_module_']};
+            if isnan(modules)
+                module_rxn = {};
+            else
+                module_rxn = parse_list(T{i,[prodnet.prod_id{k},'_module_']}{1});
+            end
 			[~,model_del_ind] = intersect(prodnet.parent_model.rxns, module_rxn,'stable');
 			[~,cand_del_ind] = intersect(prodnet.cand_ind,model_del_ind,'stable');
 			Z(k, cand_del_ind) = true;
