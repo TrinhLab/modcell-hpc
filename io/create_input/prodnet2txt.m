@@ -22,6 +22,7 @@ case {'wGCP', 'sGCP', 'lsGCP'}
 case {'NGP'}
 	state='nongrowth';
 end
+global salt_counter;
 
 pn = getfield(load(prodnet_path), 'prodnet');
 
@@ -38,7 +39,15 @@ for i=1:length(pn.prod_id)
 	new_model_ids{i,1} = truncatestr_nosalt(og_model_ids{i}, 7);
 end
 if length(og_model_ids) ~= length(unique(new_model_ids))
-    error('Truncated model ids non-unique, add some salt')
+    salt_counter = 10;
+	new_model_ids = {};
+	for i=1:length(pn.prod_id)
+		new_model_ids{i,1} = truncatestr(og_model_ids{i}, 7);;
+	end
+
+	if length(og_model_ids) ~= length(unique(new_model_ids))
+    		error('Truncated model ids non-unique, add more salt')
+	end
 end
 writetable(table(og_model_ids, new_model_ids), fullfile(output_dir, 'modelidmap.csv'))
 pn.prod_id = new_model_ids;
@@ -54,7 +63,6 @@ for i =1:length(pn.prod_id)
     all_ids = union(all_ids, pn.model_array(i).rxns);
 end
 max_length = 8;
-global salt_counter;
 salt_counter = 10;
 new_ids = cellfun(@(x)(truncatestr(x, max_length)),all_ids, 'UniformOutput',false);
 if length(new_ids) ~= length(unique(new_ids))
