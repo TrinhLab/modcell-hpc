@@ -28,6 +28,9 @@
 /* Macros */
 #define SAFE_ALLOC(expr) if( (expr) == NULL) { printf("Memory allocation failed, exiting...\n"); exit(-1);}
 
+/* ifdef settings */
+#define MIN_LOG 1
+
 /* Globals */
 glp_smcp param;
 int mpi_pe, mpi_comm_size;

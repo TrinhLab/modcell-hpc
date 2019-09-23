@@ -7,6 +7,12 @@
 #include <stdlib.h>
 #include <argp.h>
 #include <error.h>
+#if MIN_LOG
+    #include <unistd.h>
+    #include <sys/types.h>
+    #include <sys/stat.h>
+    #include <fcntl.h>
+#endif
 
 
 /* Macro and function declarations */
@@ -208,7 +214,7 @@ read_problem(const char *problem_dir_path)
             n_models++;
         if(strcmp(pd.array[i], "cand") == 0) {
             set_full_path(cand_path, problem_dir_path, pd.array[i]);
-            printf("%s\n", cand_path);
+            //printf("%s\n", cand_path);
             cand_file = read_file(cand_path);
         }
     }
@@ -219,6 +225,16 @@ read_problem(const char *problem_dir_path)
     for (j=0; j < mcp.n_vars; j++)
         mcp.individual2id[j] = strdup(cand_file.array[j]);
     free_charlist(cand_file);
+
+    #if MIN_LOG
+        /* Temporary redirection of stdout to silence glpk */
+        int bak, new;
+        fflush(stdout);
+        bak = dup(1);
+        new = open("/dev/null", O_WRONLY);
+        dup2(new, 1);
+        close(new);
+    #endif
 
     /* Load problems */
     k=0;
@@ -239,6 +255,12 @@ read_problem(const char *problem_dir_path)
         }
     }
     free_charlist(pd);
+
+    #if MIN_LOG
+        fflush(stdout);
+        dup2(bak, 1);
+        close(bak);
+    #endif
 
     /* Gather info to modify LP problems by individuals */
     for (k=0; k < mcp.n_models; k++){
@@ -487,7 +509,7 @@ main (int argc, char **argv)
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_comm_size);
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_pe);
 
-    printf("PE number: %d.\n", mpi_pe);
+    //printf("PE number: %d.\n", mpi_pe);
     if (mpi_pe == 0) printf("Comm size: %d.\n", mpi_comm_size);
 
     /* Intialize global GLPK parameters*/
@@ -498,7 +520,7 @@ main (int argc, char **argv)
     MCproblem mcp = read_problem(arguments.args[0]);
     load_parameters(&mcp, &arguments);
     fflush(stdout);
-    printf("-------------------------------------------------------------------\n");
+    //printf("-------------------------------------------------------------------\n");
 
     /* Seed global RNG */
     pcg32_srandom(mcp.seed+mpi_pe, 54u);
@@ -507,11 +529,11 @@ main (int argc, char **argv)
     Population *initial_population = malloc(sizeof(Population));
     allocate_population(&mcp, initial_population, mcp.population_size);
     if (arguments.initial_population[0] == '\0') {
-        printf("Initial population not specified (initialize at random)\n");
+        if (mpi_pe == 0)  printf("(PE=0) Initial population not specified (initialize at random)\n");
         set_random_population(&mcp, initial_population);
     }
     else {
-        printf("Reading initial population (path: %s)...", arguments.initial_population);
+        if (mpi_pe == 0) printf("(PE=0) Reading initial population (path: %s)...", arguments.initial_population);
         read_population(&mcp, initial_population, arguments.initial_population);
         printf("done\n");
     }
