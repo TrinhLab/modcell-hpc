@@ -114,9 +114,9 @@ run_moea(MCproblem *mcp, Population *parent_population)
         }
     }
 
-    /* Do not attempt since this can lead to errors in MPI_Cancel (maybe one of the PEs involved is finished?)
-    //if (active_migration)
-        //migration_cancel(mcp);
+    /* Do not attempt since this can lead to errors in MPI_Cancel (maybe one of the PEs involved is finished?) Also seems to fail if a PE is far ahead of others
+    if (active_migration)
+        migration_cancel(mcp);
     */
 
     free_population(mcp, offspring_population);

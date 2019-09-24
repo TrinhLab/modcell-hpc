@@ -549,6 +549,10 @@ main (int argc, char **argv)
         sprintf(pop_path, "%s", arguments.args[1]);
     write_population(&mcp, initial_population, pop_path);
 
+    /* Wait for all processes before exiting (Avoid attempts to communicate with finished processes).*/
+    MPI_Barrier(MPI_COMM_WORLD);
+    if (mpi_pe == 0) printf("(PE=0) Barrier reached, all processes exiting...\n");
+
     /* Cleanup */
     free_population(&mcp, initial_population);
     MPI_Finalize();
