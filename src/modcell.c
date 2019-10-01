@@ -58,7 +58,8 @@ const char *argp_program_version = "ModCell-HPC 1.0";
 const char *argp_program_bug_address = "https://github.com/trinhlab/modcell-hpc/issues";
 
 /* Program documentation. */
-static char doc[] ="Neccessary arguments:\n\t- PROBLEM_DIR: Path to problem directory with a .mps file for each production network, cand file (with a list of reaction candidates) and .ncand file for each production network with a list of fixed reactions per network.\n\t- OUTPUT_FILE: Path to output population file in .pop format. The file does not need to exist (In general it should not exist, since it would be overwritten) but the DIRECTORY containing the file MUST EXIST!\n";
+static char doc[] ="Neccessary arguments:\n\t- PROBLEM_DIR: Path to problem directory with a .mps file for each production network, cand file (with a list of reaction candidates) and .ncand file for each production network with a list of fixed reactions per network.\n\t- OUTPUT_FILE: Path to output population file in .pop format. The file does not need to exist (In general it should not exist, since it would be overwritten) but the DIRECTORY containing the file MUST EXIST!\n\
+\v modcell-hpc does not check argument bounds, so make sure the values you enter are valid.";
 
 /* A description of the arguments we accept. */
 static char args_doc[] = "PROBLEM_DIR OUTPUT_FILE";
@@ -73,12 +74,12 @@ static struct argp_option options[] = {
   {"objective_type",            'd', "STRING",    0, "Design objective. Current options are \"wgcp\"" },
   {"alpha",                     'a', "INT",       0, "Max. number of deletions" },
   {"beta",                      'b', "INT",       0, "Max. number of module reactions" },
-  {"seed",                      'r', "INT",       0, "RNG seed, note that it will be modified by PE number" },
+  {"seed",                      'r', "INT",       0, "RNG seed. Note that actual seed will be seed + PE_number" },
   {"population_size",           's', "INT",       0, "Number of individuals" },
   {"crossover_probability",     'c', "FLOAT",       0, "Value between 0 and 1 that indicates the chances of crossover for each individual" },
   {"mutation_probability",      'm', "FLOAT",       0, "Value between 0 and 1 that indicates the chances of mutation for each individual" },
   {"migration_interval",        'g', "INT",       0, "Number of generations in between migrations. Note that since migration is asynchronous, this value indicates when migration will be initiated (assuming no migrations are pending, in such case new migration attempts will not be made until ongoing migrations are completed)" },
-  {"migration_fraction",        'z', "FLOAT",     0, "Value between 0 and 1 of the population that will be transfered during migration" },
+  {"migration_fraction",        'z', "FLOAT",     0, "Value between 0 and 1. Fraction of the population that will be transfered during migration" },
   {"migration_topology",        'y', "INT",       0, "0: Ring topology, islands communicate as a directed ring graph; 1: Random topology, each migration will send and receive from a random island other than itself." },
   {"migration_policy",          'p', "INT",       0, "0: replace_bottom, the top individuals are sent and the bottom replaced, 1, :replace_sent, the top individuals are sent and replaced; 2, random, Random individuals are sent and replaced. Option 0 maintains the sent individuals in the original population, 1 or 2 do not." },
   {"max_run_time",              't', "INT",       0, "Wall-clock run time in seconds for the main MOEA loop (allow some extra time for IO)" },
@@ -240,14 +241,13 @@ read_problem(const char *problem_dir_path)
     k=0;
     for (i=0; i < pd.n; i++) {
         if(is_extension(pd.array[i], "mps")) {
-            printf("----Reading problem %i---\n", k+1);
             char *model_name = remove_file_extension(pd.array[i]);
             mcp.model_names[k] = strdup(model_name);
 
             set_full_path(prob_path, problem_dir_path, pd.array[i]);
 
             lp = &(mcp.lps[k]);
-            glp_read_mps(lp->P, GLP_MPS_FILE, NULL, prob_path); // TODO: Silence this or redirect to log:
+            glp_read_mps(lp->P, GLP_MPS_FILE, NULL, prob_path);
             /* Calculate basis and solve so subsequent computations are warm-started */
             glp_adv_basis(lp->P, 0);
             glp_simplex(lp->P, &param);
@@ -301,7 +301,7 @@ read_problem(const char *problem_dir_path)
 
         /* Objective values without deletions */
         glp_simplex(lp->P, &param);
-        lp->no_deletion_objective = glp_get_col_prim(lp->P, lp->prod_col_idx)/lp->max_prod_growth; //FIXME: Assumes wGCP
+        lp->no_deletion_objective = glp_get_col_prim(lp->P, lp->prod_col_idx)/lp->max_prod_growth; //FIXME: Assumes wGCP. Needs to be calculated after parameters are parsed.
     }
 
     return mcp;
@@ -509,7 +509,6 @@ main (int argc, char **argv)
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_comm_size);
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_pe);
 
-    //printf("PE number: %d.\n", mpi_pe);
     if (mpi_pe == 0) printf("Comm size: %d.\n", mpi_comm_size);
 
     /* Intialize global GLPK parameters*/
@@ -520,7 +519,6 @@ main (int argc, char **argv)
     MCproblem mcp = read_problem(arguments.args[0]);
     load_parameters(&mcp, &arguments);
     fflush(stdout);
-    //printf("-------------------------------------------------------------------\n");
 
     /* Seed global RNG */
     pcg32_srandom(mcp.seed+mpi_pe, 54u);
@@ -551,7 +549,7 @@ main (int argc, char **argv)
 
     /* Wait for all processes before exiting (Avoid attempts to communicate with finished processes).*/
     MPI_Barrier(MPI_COMM_WORLD);
-    if (mpi_pe == 0) printf("(PE=0) Barrier reached, all processes exiting...\n");
+    if (mpi_pe == 0) printf("Barrier reached, all processes exiting...\n");
 
     /* Cleanup */
     free_population(&mcp, initial_population);

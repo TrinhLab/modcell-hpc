@@ -114,6 +114,10 @@ run_moea(MCproblem *mcp, Population *parent_population)
         }
     }
 
+    /* Avoid errors that seem to occur when PEs desync*/
+    MPI_Barrier(MPI_COMM_WORLD);
+    if (mpi_pe == 0) printf("Barrier reached, writting populations...\n");
+
     /* Do not attempt since this can lead to errors in MPI_Cancel (maybe one of the PEs involved is finished?) Also seems to fail if a PE is far ahead of others
     if (active_migration)
         migration_cancel(mcp);

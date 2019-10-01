@@ -21,7 +21,7 @@
 
 /* Definitions */
 #define INF 1.0e14 /* A value to simulate infinity */
-#define MAX_MODULES 200 /* A value above any practical beta expected, used for array allocation. */
+#define MAX_MODULES 200 /* A value above any practical beta expected, used for array allocation. FIXME: This should be done dynamically*/
 #define LP_TIME_LIMIT_MILISEC 10000 /* Ensures GLPK does not get stuck trying to solve an LP */
 #define LP_MSG_LEV GLP_MSG_OFF /* GLP output, options are: GLP_MSG_ERR  (will sometimes indicate that an LP could not be solved due to numerical issues), GLP_MSG_ALL (usefull for debuggin), or GLP_MSG_OFF (to avoid output)*/
 
@@ -29,7 +29,7 @@
 #define SAFE_ALLOC(expr) if( (expr) == NULL) { printf("Memory allocation failed, exiting...\n"); exit(-1);}
 
 /* ifdef settings */
-#define MIN_LOG 1
+#define MIN_LOG 0 /* Turning this on messes up output buffering in MPI so only PE=0 prints in real time, while the rest print at the end */
 
 /* Globals */
 glp_smcp param;
@@ -97,7 +97,7 @@ typedef struct {
 
 	/* Other */
 	int verbose;
-    	int use_modules;  /*  mcp.beta > 0 */
+    	int use_modules;  /* = hmcp.beta > 0 */
 } MCproblem;
 
 typedef struct item { /* list item */
