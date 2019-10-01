@@ -1,7 +1,10 @@
-#CC = gcc
 CC=mpicc
 LIBS = -lglpk
 CFLAGS = -O3 -march=native
+
+ifeq ($(compiler), intel)
+	CC=mpiicc
+endif
 
 ifeq ($(flags), develop)
 	CFLAGS = -Wall -Wpedantic -g -Wextra -Wno-sign-compare
