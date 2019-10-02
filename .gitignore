@@ -1,6 +1,7 @@
 TODO*
 notes
 *.o
+__pycache__
 # Temporary
 src/modcell
 template/

@@ -24,8 +24,8 @@ for i = 1:length(T_in.SolutionIndex)
 		T_in_idx = contains(T_in.Properties.VariableNames, [pn.prod_id{k},'_objective_']);
 		T_calc_idx = contains(T_calc.Properties.VariableNames, [pn.prod_id{k},'_objective_calc']);
 		if (abs(T_in{i, T_in_idx} - T_calc{i, T_calc_idx}) > tol)
-			fprintf("Sol idx:%d \t Obj:%s \t In obj.: %2.2f \t Calc. obj.: %2.2f\n", ...
-			T_in.SolutionIndex(i), pn.prod_id{k}, T_in{i, T_in_idx}, T_calc{i, T_calc_idx});
+			fprintf("Sol idx:%d \t Obj:%s \t In obj.: %2.2f \t Calc. obj.: %2.2f\t In-Out: %2.2f\n", ...
+			T_in.SolutionIndex(i), pn.prod_id{k}, T_in{i, T_in_idx}, T_calc{i, T_calc_idx}, T_in{i, T_in_idx} - T_calc{i, T_calc_idx});
 			inconsitency_found = 1;
 		end
 	end
@@ -62,7 +62,7 @@ for i = 1:length(T.SolutionIndex)
 	for k = 1:length(prodnet.prod_id)
 		if ~isempty(intersect(module_prod_id, prodnet.prod_id{k}))
             modules = T{i,[prodnet.prod_id{k},'_module_']};
-            if isnan(modules)
+            if ~isempty(modules) || isnan(modules)
                 module_rxn = {};
             else
                 module_rxn = parse_list(T{i,[prodnet.prod_id{k},'_module_']}{1});

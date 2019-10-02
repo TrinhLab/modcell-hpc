@@ -25,7 +25,7 @@ output_file_csv="${test_path}/out.csv"
 eval "${MODCELLHPC_PATH}/src/modcell $problem_path $output_file --initial_population=$ini_pop_file --objective_type=$objective_type --alpha=$alpha --beta=$beta --population_size=$population_size --n_generations=$n_generations --seed=$seed --crossover_probability=$crossover_probability --mutation_probability=$mutation_probability --max_run_time=$max_run_time" || exit
 
 # Convert ouput
-eval "${MODCELLHPC_PATH}/io/pop2csv.py $problem_path $output_file -o $output_file_csv" || exit
+eval "${MODCELLHPC_PATH}/io/pop2csv.py $problem_path $output_file -o $output_file_csv -a $alpha" || exit
 
 # Check with matlab
 temp_script=$(mktemp)

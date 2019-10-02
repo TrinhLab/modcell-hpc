@@ -1,0 +1,5 @@
+Wed 02 Oct 2019 05:19:08 PM EDT
+Designs that meet alpha=5:	 4/5
+Unique solutions:		 3/4
+Non-dominated solutions:	 2/3
+Expected: 5 solutions: 1 solution violates alpha, 2 are duplicate, and out of the 3 remaining, 2 have same objectives, and the 1 is dominated

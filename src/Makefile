@@ -1,10 +1,6 @@
 CC=mpicc
 LIBS = -lglpk
-CFLAGS = -O3 -march=native
-
-ifeq ($(compiler), intel)
-	CC=mpiicc
-endif
+CFLAGS = -O3
 
 ifeq ($(flags), develop)
 	CFLAGS = -Wall -Wpedantic -g -Wextra -Wno-sign-compare
@@ -12,6 +8,7 @@ endif
 ifeq ($(flags), optimize)
 	CFLAGS = -O3 -march=native -Wall
 endif
+
 
 ifeq ($(flags), portable)
 	CFLAGS = -O3 -Wall

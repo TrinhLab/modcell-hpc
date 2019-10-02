@@ -24,4 +24,5 @@ Cases:
 - 8 : Read one initial population with MPI
 - 9 : Read multiple initial populations with MPI
 
-- io_1 : tests pop2csv and csv2pop
+- io_1 : tests csv2pop
+- io_2 : tests that pop2csv correctly identifies individuals that violate constraints, duplicates, and non-dominated individuals in a  .pop file

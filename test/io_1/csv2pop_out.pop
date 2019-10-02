@@ -1,3 +1,7 @@
+#METADATA
+population_size=7
+alpha=0
+beta=0
 #INDIVIDUAL
 #DELETIONS
 ACALD10
@@ -7,7 +11,7 @@ ME282
 PYK10
 #MODULES
 etoh,FRD757
-etoh_pd,
+etoh_pd
 ibutoh,ACALD10,FRD757
 succ,FRD757,PYK10
 pyr,ME282,PYK10
@@ -25,7 +29,7 @@ PYK10
 etoh,PYK10
 etoh_pd,PFL90
 ibutoh,PFL90
-succ,
+succ
 pyr,PFL90
 lac__D,PFL90,PYK10
 ac,FRD757,PYK10
@@ -39,12 +43,12 @@ PYK10
 THD220
 #MODULES
 etoh,FRD757
-etoh_pd,
+etoh_pd
 ibutoh,THD220
 succ,FRD757,PYK10
 pyr,PYK10,THD220
 lac__D,ME282,PYK10
-ac,
+ac
 #OBJECTIVES
 #INDIVIDUAL
 #DELETIONS
@@ -73,7 +77,7 @@ PYK10
 etoh,PYK10
 etoh_pd,PFL90
 ibutoh,PFL90
-succ,
+succ
 pyr,PFL90
 lac__D,PFL90,PYK10
 ac,FRD757
@@ -89,7 +93,7 @@ NADH1683
 etoh,LDH_D77
 etoh_pd,NADH1683
 ibutoh,GLUSy69
-succ,
+succ
 pyr,LDH_D77
 lac__D,GLUSy69
 ac,LDH_D77

@@ -11,7 +11,7 @@ Usage examples:
 import os, argparse
 import pandas as pd
 import numpy as np
-from scipy.spatial.distance import cdist
+from libdomi import fdom
 
 def main():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -19,13 +19,18 @@ def main():
     parser.add_argument('pop_path', help='Path to the .pop file to be converted')
     default_output = "<pop_path>.csv"
     parser.add_argument('-o','--output_path', help='output file name', default=default_output, type=str)
-    parser.add_argument('-a','--write_all', help='writes all solutions in the population instead of only dominated ones', action='store_true')
+    parser.add_argument('-w','--write_all', help='writes all solutions in the population instead of only dominated ones', action='store_true')
+    default_alpha = 10000
+    parser.add_argument('-a','--alpha', help='Will check for solutions that violate alpha and discard them', default=default_alpha, type=int)
     args = parser.parse_args()
 
     if args.output_path == default_output:
         output_path = args.pop_path.replace('.pop', '.csv')
     else:
         output_path = args.output_path
+
+    if args.alpha == default_alpha:
+        print("Warning: Alpha constraint is not strictly enforced in .pop due to the use of a penalty function. If you do not specify --alpha for your problem, solutions that have more deletions than intended will not be discarded in the output .csv file")
 
     # Mapping dictionaries for ids
     mdf = pd.read_csv(os.path.join(args.problem_path, "modelidmap.csv"))
@@ -91,28 +96,30 @@ def main():
 
     df = pd.DataFrame(individuals)
 
+    # Check alpha
+    sizes = df['Deletion_id'].map(lambda x: len(x.split(',')))
+    if any(sizes > args.alpha):
+        df = df.loc[sizes <= args.alpha,:]
+        print(f"Designs that meet alpha={args.alpha}:\t {sum(sizes>0) - sum(sizes>args.alpha)}/{sum(sizes>0)}")
+
     # Reorganize columns
     model_ids = list(m_map.values())
     df = df[['Deletion_id'] + ['{}(module)'.format(x) for x in model_ids] + ['{}(objective)'.format(x) for x in model_ids]]
 
     # Remove duplicated solutions
-    df = df.drop_duplicates()
-    print("Unique solutions: {}/{}".format(df.shape[0], len(individuals)))
+    obj_idx = df.columns.str.contains(r'\(objective\)')
+    prior_size = df.shape[0]
+    df = df.drop_duplicates(subset=df.columns[np.logical_not(obj_idx)])  # Do  not consider objectives in case of FP error
+    print(f"Unique solutions:\t\t {df.shape[0]}/{prior_size}")
 
     if not args.write_all:
         # Only keep non-dominated solutions
-        obj_idx = df.columns.str.contains(r'\(objective\)')
         a = df.iloc[:,obj_idx].values
-        def dominates(a, b):
-            return (np.asarray(a) >= b).all()
-
-        X = cdist(a, a, metric=dominates).astype(np.bool) # pairwise metric comparison
-        np.fill_diagonal(X, False) # Fix diagonal since a == b is not non-dominated
-        non_dominated_idx = np.logical_not(np.any(X, axis=0))
-
-        print("Non-dominated solutions: {}/{}".format(np.sum(non_dominated_idx), df.shape[0]))
-        df = df.iloc[non_dominated_idx,:]
-        df.reset_index(inplace=True, drop=True)
+        non_dominated_idx = fdom(a)
+        print(f"Non-dominated solutions:\t {np.sum(non_dominated_idx)}/{df.shape[0]}")
+        if (np.sum(non_dominated_idx) < df.shape[0]):
+            df = df.iloc[non_dominated_idx.flatten(),:]
+            df.reset_index(inplace=True, drop=True)
 
     # Add solution index
     df.insert(loc=0, column='Solution index', value=[_ for _ in range(df.shape[0])])
