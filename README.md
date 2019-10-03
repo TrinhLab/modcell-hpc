@@ -31,10 +31,11 @@ You can use scripts here or in [modcell-hpc-results](https://github.com/TrinhLab
 `[ -f "$path/to/modcell-hpc/paths" ] && source "$path/to/modcell-hpc/paths"`
 
 ## Project structure
-- _src_ Contains modcell-hpc source code.
-- _io_ Small programs that help generate input and process output of modcell-hpc.
-- _tools_ Small programs to analyze the `.csv` output table containing genetic manipulations and associated design objectives for the identified Pareto optimal solutions.
-- _cases_ Input files that include metabolic networks and candidate reactions.
+- __src__ Contains modcell-hpc source code.
+- __io__ Small programs that help generate input and process output of modcell-hpc.
+- __tools__ Small programs to analyze the `.csv` output table containing genetic manipulations and associated design objectives for the identified Pareto optimal solutions.
+- __cases__ Input files that include metabolic networks and candidate reactions.
+- __test__  Programatic tests to ensure intended functionality.
 
 ## Compiling
 You can use the provided Makefile. The following dependencies are needed:
