@@ -1,8 +1,9 @@
 # These are environment variables used by modcell-hpc scripts
 export MODCELLHPC_PATH="${HOME}/wrk/s/matlab/modcell-hpc"
 export MODCELL2_PATH="${HOME}/wrk/s/matlab/modcell2/"
-export MATLAB_BIN="${HOME}/progs/matlab/bin/matlab"
-export MATLAB_SD="${HOME}/wrk/s/matlab"
+export MATLAB_BIN="${HOME}/progs/matlab/bin/matlab" # Matlab binary
 export PATH="$PATH:${HOME}/wrk/s/matlab/modcell-hpc/io"
+export PATH="$PATH:${MODCELLHPC_PATH}/tools"
 export PATH="$PATH:${HOME}/wrk/s/matlab/modcell-hpc/io/libdom"
 export PYTHONPATH="${MODCELLHPC_PATH}/io/libdom"
+export MODCELLHPC_S_PATH="${HOME}/wrk/s/matlab/modcell-hpc-results" # This is for the modcell-hpc-study repository

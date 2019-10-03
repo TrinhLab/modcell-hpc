@@ -215,7 +215,6 @@ read_problem(const char *problem_dir_path)
             n_models++;
         if(strcmp(pd.array[i], "cand") == 0) {
             set_full_path(cand_path, problem_dir_path, pd.array[i]);
-            //printf("%s\n", cand_path);
             cand_file = read_file(cand_path);
         }
     }
@@ -277,6 +276,7 @@ read_problem(const char *problem_dir_path)
                 lp->cand_col_idx[j] = NOT_CANDIDATE;
             else
                 lp->cand_col_idx[j] = col_idx;
+
             /* Bound info*/
             lp->cand_col_type[j] = glp_get_col_type(lp->P, col_idx);
             lp->cand_og_lb[j] = glp_get_col_lb(lp->P, col_idx);

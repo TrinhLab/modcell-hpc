@@ -1,0 +1,151 @@
+#!/usr/bin/env python3
+
+"""
+# Problem description
+Find the smallest number of designs, such that all products are compatible in at least one them.
+This is essentially a set covering problem, where:
+    min sum_i (x_i) s.t.:
+        sum_i d_ij x_i >= 1 for all j in J
+given
+    x_i = 1 if design i is chosen and 0 otherwise
+    d_ij = 1 if design i is compatible with product j and 0 otherwise
+- Note that there must exist at least one i in I for which d_ij = 1. Thus if a product is not compatible at all under the speciefied parameters it must be discarded or the problem would become infeasible.
+- To reduce alternative solutions it is possible to add weights (e.g. w_i = 1/sum_j g_ij where g_ij is the design objective value (e.g., wGCP, etc.))
+
+# Analysis notes
+- The cardinality of this set (together with maximum compatibility) can help gain a sense of the overall compatibility of the choosen design parameters. Note that different design parameters are comparable only if the same subset of products is ignored (due to only non-compatible designs)
+- This designs can reveal underlying metabolic clusters.
+- How to choose from the many resulting covers? Maybe sort by average compatibility (sum of each design?)
+- The frequency by which a design appears in a cover can also highlight some interesting feature.
+
+# TODO:
+    - Use solution index and objective name to formulate the optimization instead of dataframe indices
+    - The wc, compat_weigth option fails in some cases. This seems to be due to numerical issues.
+    - Deal nicely with inputs where indices begin at 0 or 1 (beginning at 0 should be the default)
+"""
+
+
+import argparse
+import pandas as pd
+import pyomo.environ as pyo
+from pyomo.opt import SolverFactory
+
+def main():
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('pf_path', help='Path to modcell output pareto front .csv input file')
+    parser.add_argument('-t','--threshold', help='Compatibility threshold', default=0.5, type=float)
+    parser.add_argument('-s','--solver', help='Optimization solver', default='glpk', type=str)
+    parser.add_argument('-m','--max_sol', help='Maximum number of solutions to seek', default=1000, type=int)
+    parser.add_argument('-wc','--compat_weight', help='Include a compatibility weight in the set cover objective function', default=False, type=lambda x: (str(x).lower() == 'true'))
+    parser.add_argument('-wo','--objective_weight', help='Include an design objective value weight in the set cover objective function', default=False, type=lambda x: (str(x).lower() == 'true'))
+    parser.add_argument('-wt','--tol', help='Tolerance in objective value difference when enumerating alternative solutions', default=1e-6, type=float)
+    args = parser.parse_args()
+
+
+    # Compatibility dataframe and  discard non-compatible products
+    df = pd.read_csv(args.pf_path)
+    df = df.sort_values('Solution index') # Needed since indices are used in optimization problem formulation
+    check_input(df)
+
+    cdf = df.loc[:,df.columns.str.contains("objective")] >= args.threshold
+    ignored_products = cdf.sum(0) == 0
+    ignored_products_n = [x.replace('(objective)','') for x in ignored_products.index[ignored_products].tolist()]
+    print("Products below compatibility in all designs ({}/{}):".format(len(ignored_products_n), ignored_products.size),ignored_products_n)
+    ncdf = cdf.loc[:, ~ignored_products.values]
+
+    odf = df.loc[:,df.columns.str.contains("objective")]
+    nodf = odf.loc[:, ~ignored_products.values]
+
+   # Solve optimization problem
+    model = pyo.ConcreteModel()
+    model.nVars = pyo.Param(initialize=ncdf.shape[0])
+    model.nObj = pyo.Param(initialize=ncdf.shape[1])
+
+    model.I = pyo.RangeSet(model.nVars)
+    model.J = pyo.RangeSet(model.nObj)
+
+    # This assumes that indices do not get shuffled
+    def d_init(model, i, j):
+        if ncdf.iloc[i-1,j-1]:
+            return 1
+        return 0
+    model.d = pyo.Param(model.I, model.J, initialize=d_init)
+
+    def weight_init(model, i):
+        if args.compat_weight:
+            return 1/ncdf.iloc[i-1,:].sum()
+        elif args.objective_weight:
+            return 1/nodf.iloc[i-1,:].sum()
+        return 1
+
+    model.w = pyo.Param(model.I, initialize=weight_init)
+
+    model.x = pyo.Var(model.I, within=pyo.Binary)
+
+    def get_obj():
+        return sum(model.x[i] * model.w[i] for i in model.I)
+
+    model.obj = pyo.Objective(expr=get_obj())
+
+    def cover_rule(model, j):
+        return sum(model.d[i, j] * model.x[i] for i in model.I) >= 1
+
+    model.coverCon = pyo.Constraint(model.J, rule=cover_rule)
+    model.cuts = pyo.ConstraintList()
+
+    # Solve model
+    covers = []
+    opt = SolverFactory('glpk')
+    opt.solve(model)
+
+    # Determine cover and add it as a cut
+    def add_cover():
+        cover = []
+        expr = 0
+        for i in model.x:
+            if pyo.value(model.x[i]) > 0.5:
+                cover.append(i) # Pyomo indices start from 0, while "Solution index" starts from 1.
+                expr += model.x[i]
+        model.cuts.add( expr <= (len(cover)-1) )
+
+        return cover
+
+    nsol = 1;
+    cover = add_cover()
+    covers.append(cover)
+    min_size = len(cover)
+
+    print('Minimal cover size:',len(cover))
+    print('Covers (Solution index) \t Objective value:')
+    print(cover, "\t", model.obj.expr())
+
+    # Contraint objective to computed value and continue to find alternative solutions meeting tolerance
+    model.cuts.add( get_obj() - model.obj.expr()  <= args.tol)
+
+    while nsol < args.max_sol:
+
+        results = opt.solve(model)
+        if (results.solver.status == pyo.SolverStatus.ok) and (results.solver.termination_condition == pyo.TerminationCondition.optimal):
+            cover = add_cover()
+            if len(cover) > min_size: # The maximum objective value constraint will take precendence over this, but it is left here in case one wants to modify it to allow enumeration beyond the minimum
+                break
+            covers.append(cover)
+            nsol += 1;
+            print(cover, "\t", model.obj.expr())
+        elif (results.solver.termination_condition == pyo.TerminationCondition.infeasible):
+            break
+        else:
+            raise("Something went wrong with the solver: ", results.solver.status)
+
+def check_input(df):
+    if df.loc[0,'Solution index'] == 0:
+        ValueError("Error, solution indices must begin at 1. Run mc_shiftindex: ")
+    # The current model formulation relays on all solutions being present in the input
+    for i in range(df.shape[0]):
+        if df.loc[i,'Solution index'] != i+1:
+            raise ValueError("Error, solution index missing: ", i)
+
+
+if __name__ == '__main__':
+   main()
+

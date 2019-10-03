@@ -13,7 +13,7 @@ If you use any part of this software please cite:
 
 For other relevant studies check [these](link/to/bibfile) references in bib format.
 
-This repository mainly contains the modcell-hpc tool with small examples. For the results and data analysis tools used in the study above visit the [modcell-hpc-results]() repository.
+This repository mainly contains the modcell-hpc tool with small examples. For the results and data analysis tools used in the study above visit the [modcell-hpc-results](https://github.com/TrinhLab/modcell-hpc-results) repository.
 
 ## Usage
 This tool and instructions are for unix-like OSs (e.g., Linux, MacOS, BSD), if you want to follow along on Windows the simplest solution would be to run it on a Linux virtual machine.
@@ -22,13 +22,19 @@ This tool and instructions are for unix-like OSs (e.g., Linux, MacOS, BSD), if y
 The input files correspond to LP problems for each production network (in `.mps` format) and information about candidates (IDs of reactions that can be deleted). These can be generated with the assistance of [ModCell's Matlab implementation](https://github.com/TrinhLab/ModCell2), but that is not a necessity.
 
 ### Output files
-The output of the main method corresponds to a plain text files with information about each individual in the Population (design variables, design objectives, etc). This file can be converted into a table that only preserves Pareto optimal solutions and is useful for further analysis using the program `io/pop2csv.py`. The resulting table can be analyzed with the help the small programs provided in [modcell-hpc-results](https://github.com/TrinhLab/modcell-hpc-resuls).
+The output of the main method corresponds to a plain text files with information about each individual in the Population (design variables, design objectives, etc). This file can be converted into a table that only preserves Pareto optimal solutions and is useful for further analysis using the program `io/pop2csv.py`. The resulting table can be analyzed with the help the small programs provided in [modcell-hpc-results](https://github.com/TrinhLab/modcell-hpc-results).
 
 ### Running modcell-hpc
-Run the binary (named `modcell`), for necessary arguments and available options run `modcell --help`.
+Run the `modcell` binary (either the released version or compile it your self as described below), the only runtime dependenci is openmpi. For necessary arguments and available options run `modcell --help`.
 
-You can use scripts here or in [modcell-hpc-results](https://github.com/TrinhLab/modcell-hpc-resuls). Note that these scripts used predefine environment variables that correspond to paths in your system. So edit the file `paths` accordingly and add it to your shell by executing `source paths`. This needs to be done for every new shell, so instead you can add a line like this to your `~/.profile` or shellrc:
+You can use scripts here or in [modcell-hpc-results](https://github.com/TrinhLab/modcell-hpc-results). Note that these scripts used predefine environment variables that correspond to paths in your system. So edit the file `paths` accordingly and add it to your shell by executing `source paths`. This needs to be done for every new shell, so instead you can add a line like this to your `~/.profile` or shellrc:
 `[ -f "$path/to/modcell-hpc/paths" ] && source "$path/to/modcell-hpc/paths"`
+
+## Project structure
+- _src_ Contains modcell-hpc source code.
+- _io_ Small programs that help generate input and process output of modcell-hpc.
+- _tools_ Small programs to analyze the `.csv` output table containing genetic manipulations and associated design objectives for the identified Pareto optimal solutions.
+- _cases_ Input files that include metabolic networks and candidate reactions.
 
 ## Compiling
 You can use the provided Makefile. The following dependencies are needed:

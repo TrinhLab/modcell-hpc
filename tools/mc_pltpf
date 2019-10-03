@@ -1,0 +1,50 @@
+#!/usr/bin/env python3
+
+import os
+import csv
+import argparse
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+from general import setup_plot_look, get_prod_id2name
+
+def main():
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('pf_path', help='Path to modcell output pareto front .csv input file')
+    parser.add_argument('-i2n','--id2name_path', help='Path to modcell output pareto front .csv input file', default=None)
+    parser.add_argument('-a','--annot', help='Include numbers in cells', default=False)
+    parser.add_argument('-w','--width', help='Figure dimensions (inches)', default=5, type=float)
+    parser.add_argument('-x','--height', help='Figure dimensions (inches)', default=5, type=float)
+    parser.add_argument('-f','--font', help='Font name', default='Helvetica', type=str)
+    args = parser.parse_args()
+
+    setup_plot_look(args)
+    prod_id2name = get_prod_id2name(args)
+
+    # Reformat table
+    df = pd.read_csv(args.pf_path)
+    df = df[df.columns.drop(list(df.filter(regex='module|Deletion')))] # Drop module columns and deletion columns
+    df = df.rename(lambda x: x.replace('(objective)', ''), axis='columns') # rename columns to product ids
+    df = df.round(2)
+    df.set_index('Solution index', inplace=True)
+
+    # Pareto front
+    if prod_id2name:
+        df_names = df.rename(prod_id2name, axis='columns')
+    else:
+        df_names = df
+    g = sns.clustermap(df_names.transpose(),
+                       cmap="Blues",linewidths=.75, figsize=tuple([args.width, args.height]),
+                       cbar_kws={"label": "Objective value", "ticks":[0,0.3,0.6,0.9]},
+                       annot=args.annot)
+    plt.setp(g.ax_heatmap.get_yticklabels(), rotation=0);
+    plt.setp(g.ax_heatmap.get_xticklabels(), rotation=90);
+
+    # Use full name
+    g.ax_heatmap.set_yticklabels(g.ax_heatmap.get_yticklabels())
+
+    # save
+    g.savefig('pf-{}.svg'.format(os.path.splitext(os.path.basename(args.pf_path))[0]), format='svg')
+
+if __name__ == '__main__':
+   main()

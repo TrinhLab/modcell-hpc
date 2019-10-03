@@ -1,0 +1,108 @@
+#!/usr/bin/env python3
+
+# Plots most used module reactions by product. Only considers compatible designs.
+# Prints to stdout the list of reactions that appear in the resulting figure
+# todo: Test module occurrence when beta > 1 (expect that reacions will be grouped)
+
+import argparse
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+#import matplotlib as rc
+import numpy as np
+#import squarify # This is my fork that allows padding
+from general import setup_plot_look, setup_plot_size, get_prod_id2name
+
+
+def main():
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('pf_path', help='Path to modcell output pareto front .csv input file')
+    parser.add_argument('-t','--threshold', help='Compatibility threshold', default=0.5, type=float)
+    parser.add_argument('-i2n','--id2name_path', help='Path to modcell output pareto front .csv input file', default=None)
+    #  Defaults
+    default_output = "module_<pf>_comp_<threshold>.svg"
+    parser.add_argument('-o','--output', help='output file name', default=default_output, type=str)
+    parser.add_argument('-f','--font', help='Font name', default='Helvetica', type=str)
+    parser.add_argument('-w','--width', help='Figure dimensions (inches)', default=5, type=float)
+    parser.add_argument('-x','--height', help='Figure dimensions (inches)', default=6, type=float)
+
+    args = parser.parse_args()
+
+    if args.pf_path[-5] != "1":
+        raise ValueError('Behaviour with beta >1 untested')
+
+    if args.output == default_output:
+        args.output = "module_{}_comp_{}.svg".format(args.pf_path[:-4], str(args.threshold).replace('.', 'p'))
+
+    # Determine module usage
+    df = pd.read_csv(args.pf_path)
+    rxns = []
+    usage = {}
+    for colname in df.columns[df.columns.str.contains("module")]:
+        comp_idx = df[colname.replace('module', 'objective')] >= args.threshold
+        tdf = df.loc[comp_idx, colname]
+        ocs = tdf.value_counts()/comp_idx.sum() # Warning this will need to be adjusted for lists.
+        if not ocs.empty:
+            sizes = ocs.values.tolist()
+            sizes.append(1-sum(ocs.values))
+            sizes = [100*s for s in sizes]
+            names = ocs.index.tolist()
+            rxns.extend(names)
+            names.append('None')
+            usage[colname] = dict(zip(names, sizes))
+    udf = pd.DataFrame(usage)
+    udf.fillna(value=0, inplace=True)
+    colors = assign_colors(udf)
+
+    # Plot time
+    setup_plot_look(args)
+    setup_plot_size(args)
+
+    barWidth = 0.7
+
+    names = [colid.replace('(module)', '') for colid in udf.columns]
+    prod_id2name = get_prod_id2name(args)
+    if prod_id2name:
+        names = [prod_id2name[n] for n in names]
+
+    r = [_ for _ in range(0,len(names))] #[0,1,2,3,4]
+
+    color_idx = 0
+    bottom = [0 for _ in range(0,len(names))]
+    for index, row in udf.iterrows():
+        plt.bar(r, row.tolist(), bottom=bottom, color=colors[color_idx], edgecolor='white', width=barWidth, label=index)
+        bottom = [b + r for b,r in zip(bottom, row.tolist())]
+        color_idx += 1
+
+    plt.xticks(r, names)
+    plt.xlabel("Module reaction")
+    plt.xticks(rotation=90)
+
+    plt.ylabel("Module usage in compatible designs (%)")
+    plt.legend(loc='upper left', bbox_to_anchor=(1,1), ncol=1)
+    plt.yticks(rotation=90)
+
+    plt.tight_layout()
+    plt.savefig(args.output)
+
+    [print(rxn) for rxn in list(set(rxns))]
+
+
+def assign_colors(udf):
+    # TODO:Assign colors based on usage frequency: udf.sum(1)
+    # Base colors
+    colors = sns.color_palette('pastel')
+    colors.extend(sns.color_palette('muted'))
+
+    # Assign gray to None and swap
+    none_idx = udf.index.get_loc('None')
+    rep_color = colors[none_idx]
+    colors[none_idx] = colors[7] # gray
+    colors[7] = rep_color
+    return colors
+
+
+if __name__ == '__main__':
+   main()
+
+

@@ -1,0 +1,103 @@
+#!/usr/bin/env python3
+
+# Plots most used module reactions by product. Only considers compatible designs.
+# Prints to stdout the list of reactions that appear in the resulting figure
+# todo: Test module occurrence when beta > 1 (expect that reacions will be grouped)
+# todo: Instead of multiple tree diagrams, consider a single stacked bar plot with reaction colors on the legend. If the number of used reactions is very diverse then labels would have to be placed on top of bars instead of relying on the legend. To do this first create a df of module vs rxn containing usage percentage. From there I can diversify to both plot options. This can also allow static color assignment instead of dynamic
+
+import argparse
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+import numpy as np
+import squarify # This is my fork that allows padding
+from general import setup_plot_look, setup_plot_size, square_plot
+
+
+def main():
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('pf_path', help='Path to modcell output pareto front .csv input file')
+    parser.add_argument('-t','--threshold', help='Compatibility threshold', default=0.5, type=float)
+    #parser.add_argument('-i2n','--id2name_path', help='Path to modcell output pareto front .csv input file', default=None)
+    #  Defaults
+    default_output = "module_<pf>_comp_<threshold>.svg"
+    parser.add_argument('-o','--output', help='output file name', default=default_output, type=str)
+    parser.add_argument('-f','--font', help='Font name', default='Helvetica', type=str)
+    parser.add_argument('-w','--width', help='Figure dimensions (inches)', default=8, type=float)
+    parser.add_argument('-x','--height', help='Figure dimensions (inches)', default=9, type=float)
+    parser.add_argument('-c','--columns', help='Number of subplot columns', default=4, type=int)
+    parser.add_argument('-r','--rows', help='Number of subplot rows', default=3, type=int)
+
+    args = parser.parse_args()
+
+    if args.pf_path[-5] != "1":
+        raise ValueError('Behaviour with beta >1 untested')
+
+    if args.output == default_output:
+        args.output = "module_{}_comp_{}.svg".format(args.pf_path[:-4], str(args.threshold).replace('.', 'p'))
+
+    setup_plot_look(args)
+    setup_plot_size(args)
+
+    df = pd.read_csv(args.pf_path)
+    # Loop through columns of the dataframe below but filter by compatibility
+    ax_ind = 0
+    fig, axes = plt.subplots(args.rows, args.columns)
+    axes = np.array(axes).reshape(-1)
+    Cols = Colors()
+    rxns = []
+    for colname in df.columns[df.columns.str.contains("module")]:
+        comp_idx = df[colname.replace('module', 'objective')] >= args.threshold
+        tdf = df.loc[comp_idx, colname]
+        ocs = tdf.value_counts()/comp_idx.sum() # Warning this will need to be adjusted for lists.
+        if not ocs.empty:
+            sizes = ocs.values.tolist()
+            sizes.append(1-sum(ocs.values))
+            sizes = [100*s for s in sizes]
+            names = ocs.index.tolist()
+            rxns.extend(names)
+            names.append('None')
+            colorc = Cols.get_cols(names)
+            label = ['{}\n{:2.0f}%'.format(a,b) for (a,b) in zip(names, sizes)]
+
+            ax = axes[ax_ind]
+            ax_ind += 1
+            squarify.plot(sizes, color=colorc, label=label, pad=True, ax=ax)
+            ax.axis('off');
+            square_plot(ax)
+            prod_id = colname.replace('(module)','')
+            ax.set_title(prod_id);
+
+    plt.savefig(args.output)
+    [print(rxn) for rxn in list(set(rxns))]
+
+
+# Maintain some consistency among reaction colors
+# todo: One way to have an overall better look is to assign colors based on overall usage frequency that would also likely remove the need for a class that dynamically assigns colors
+class Colors:
+    def __init__(self):
+        self.col_counter = 0
+        self.base_cols = sns.color_palette('pastel')
+        self.base_cols.extend(sns.color_palette('muted'))
+        self.col_dict = {}
+        self.col_dict['None'] = self.base_cols.pop(7)
+
+    def get_cols(self, names):
+        new_cols = []
+        for name in names:
+            if name not in self.col_dict:
+                self.col_dict[name] = self.base_cols[self.col_counter]
+                self.update_counter()
+            new_cols.append(self.col_dict[name])
+        return new_cols
+
+    def update_counter(self):
+        self.col_counter += 1
+        if self.col_counter >= len(self.base_cols):
+            self.col_counter = 0
+
+
+if __name__ == '__main__':
+   main()
+
+

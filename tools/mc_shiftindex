@@ -1,0 +1,26 @@
+#!/usr/bin/env python3
+
+# Shift design indices
+
+import argparse
+import pandas as pd
+
+def main():
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('pf_path', help='Path to modcell output pareto front .csv file')
+    parser.add_argument('-s','--shift_value', help='Shift value', default=1, type=int)
+    default_output = "<input>_shift<shift_value>.csv"
+    parser.add_argument('-o','--output', help='output file name', default=default_output, type=str)
+    args = parser.parse_args()
+    if args.output == default_output:
+        args.output = "{}_shift{}.csv".format(args.pf_path[:-4], args.shift_value)
+
+    df = pd.read_csv(args.pf_path)
+    df['Solution index'] =  df['Solution index'].map(lambda x: x+ args.shift_value)
+    df.to_csv(args.output, index=False)
+    print("Output written to:", args.output)
+
+
+if __name__ == '__main__':
+   main()
+

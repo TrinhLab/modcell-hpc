@@ -1,0 +1,32 @@
+#!/usr/bin/env python3
+
+# Calculate compatibility and sort designs accordingly
+
+import argparse
+import pandas as pd
+from general import find_n_prods
+
+def main():
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('pf_path', help='Path to modcell output pareto front .csv file')
+    parser.add_argument('-t','--threshold', help='Compatibility threshold', default=0.5, type=float)
+    parser.add_argument('-n','--normalize', help='Normalize compatibility to the total number of products', default=False, type=lambda x: (str(x).lower() == 'true'))
+    default_output = "<input>_comp_<threshold>.csv"
+    parser.add_argument('-o','--output', help='output file name', default=default_output, type=str)
+    args = parser.parse_args()
+    if args.output == default_output:
+        args.output = "{}_comp_{}.csv".format(args.pf_path[:-4], str(args.threshold).replace('.', 'p'))
+    if args.normalize:
+        n = find_n_prods(args.pf_path)
+    else:
+        n = 1
+
+    df = pd.read_csv(args.pf_path)
+    cdf = df.loc[:,df.columns.str.contains("objective")] >= args.threshold
+    df['compatibility'] = cdf.sum(1)
+    df.sort_values('compatibility', ascending=False, inplace=True)
+    df.to_csv(args.output, index=False)
+
+if __name__ == '__main__':
+   main()
+

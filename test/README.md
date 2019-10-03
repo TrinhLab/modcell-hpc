@@ -12,8 +12,7 @@ These are integration tests checking:
 - Objective values computed by modcell-hpc can be reproduced independently (by matlab modcell2)
 - Known cases produce expected solutions
 
-Cases:
-- test_test_objectives : Check if `test_objectives.m` works as intended.
+Integration test:
 - 1 : Basic test with beta = 0
 - 2 : Basic test with beta > 0
 - 3 : Test reading from an initial population
@@ -24,5 +23,12 @@ Cases:
 - 8 : Read one initial population with MPI
 - 9 : Read multiple initial populations with MPI
 
+Test tests:
+- test_test_objectives : Check if `test_objectives.m` works as intended.
+
+Test io:
 - io_1 : tests csv2pop
 - io_2 : tests that pop2csv correctly identifies individuals that violate constraints, duplicates, and non-dominated individuals in a  .pop file
+
+# Known issues
+- `test_objectives.m` seems to be working incorrectly

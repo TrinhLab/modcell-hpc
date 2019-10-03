@@ -1,17 +1,12 @@
 TODO*
-notes
+notes/
 *.o
 __pycache__
-# Temporary
+/tools/tentative
 src/modcell
+# Temporary
 template/
 old/
-TIMES
-runs/
-test_test_objectives/
-rtest.sh
-testfiles/
 runs/
 glpk/
 bin/
-compile.sh

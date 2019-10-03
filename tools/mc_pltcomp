@@ -1,0 +1,63 @@
+#!/usr/bin/env python3
+
+# Plots compatibility distributions of pareto fronts in specified directory
+
+import argparse
+import glob
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+from general import setup_plot_look, setup_plot_size, find_n_prods
+
+
+def main():
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('pf_dir', help='Path to directory with modcell output pareto front .csv input files')
+    parser.add_argument('-t','--threshold', help='Compatibility threshold', default=0.5, type=float)
+    parser.add_argument('-n','--normalize', help='Normalize compatibility to the total number of products', default=False, type=lambda x: (str(x).lower() == 'true'))
+    parser.add_argument('-s','--swarm', help='add swarmplot on top', default=False, type=lambda x: (str(x).lower() == 'true'))
+    #parser.add_argument('-i2n','--id2name_path', help='Path to modcell output pareto front .csv input file', default=None)
+    #  Defaults
+    default_output = "comp_<threshold>.svg"
+    parser.add_argument('-o','--output', help='output file name', default=default_output, type=str)
+    parser.add_argument('-f','--font', help='Font name', default='Helvetica', type=str)
+    parser.add_argument('-w','--width', help='Figure dimensions (inches)', default=4, type=float)
+    parser.add_argument('-x','--height', help='Figure dimensions (inches)', default=3, type=float)
+    args = parser.parse_args()
+    if args.output == default_output:
+        args.output = "comp_{}.svg".format(str(args.threshold).replace('.', 'p'))
+
+    setup_plot_look(args)
+    setup_plot_size(args)
+
+    fnames = glob.glob("{}*.csv".format(args.pf_dir))
+    fnames.sort()
+    if args.normalize:
+        n = find_n_prods(fnames[0])
+    else:
+        n = 1
+    compats = [get_compat_dist(pf_path, args.threshold)/n for pf_path in fnames]
+
+    #plot
+    ax = sns.boxplot(data=compats, palette=sns.color_palette("pastel")[:4])
+    if args.swarm:
+        sns.swarmplot(data=compats, color=".25", size=3, ax=ax)
+    ax.set_xticklabels([fname[2:-4] for fname in fnames])
+    plt.xticks(rotation = 90)
+    plt.ylabel("Compatibility")
+    if args.normalize:
+        vals = ax.get_yticks()
+        ax.set_yticklabels(['{:,.0%}'.format(x) for x in vals])
+    plt.tight_layout()
+    plt.savefig(args.output)
+
+
+def get_compat_dist(pf_path, threshold):
+    df = pd.read_csv(pf_path)
+    isge = df[df.columns[df.columns.str.contains("objective")]] >= threshold
+    return isge.sum(1).values
+
+
+if __name__ == '__main__':
+   main()
+
