@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define LMAX 1000 /* memory block size for dynamica allocation, reallocation seems to have issues */
+#define LMAX 10000 /* memory block size for dynamica allocation, reallocation seems to have issues */
 
 const char *
 get_file_extension(const char *fspec)
