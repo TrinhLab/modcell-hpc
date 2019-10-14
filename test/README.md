@@ -19,9 +19,6 @@ Integration test:
 - 4 : Basic test with beta = 0 + MPI
 - 5 : Basic test with beta > 0 + MPI
 - 6 : MPI test random migration topology
-- 7 : MPI test migration policies
-- 8 : Read one initial population with MPI
-- 9 : Read multiple initial populations with MPI
 
 Test tests:
 - test_test_objectives : Check if `test_objectives.m` works as intended.
@@ -29,6 +26,9 @@ Test tests:
 Test io:
 - io_1 : tests csv2pop
 - io_2 : tests that pop2csv correctly identifies individuals that violate constraints, duplicates, and non-dominated individuals in a  .pop file
+
+Test module minimizer:
+- min_1 :
 
 # Known issues
 - `test_objectives.m` seems to be working incorrectly

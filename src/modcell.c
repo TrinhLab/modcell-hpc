@@ -65,7 +65,7 @@ static char doc[] ="Neccessary arguments:\n\t- PROBLEM_DIR: Path to problem dire
 static char args_doc[] = "PROBLEM_DIR OUTPUT_FILE";
 
 /* Keys for options without short-options. */
-#define OPT_ABORT  1            /* –abort */ //TODO: This is an example, maybe only the most frequent options should have a short-option
+#define OPT_MINIMIZE_MR  1            /* --minimize_mr */
 
 /* The options we understand. */
 static struct argp_option options[] = {
@@ -84,6 +84,7 @@ static struct argp_option options[] = {
   {"migration_policy",          'p', "INT",       0, "0: replace_bottom, the top individuals are sent and the bottom replaced, 1, :replace_sent, the top individuals are sent and replaced; 2, random, Random individuals are sent and replaced. Option 0 maintains the sent individuals in the original population, 1 or 2 do not." },
   {"max_run_time",              't', "INT",       0, "Wall-clock run time in seconds for the main MOEA loop (allow some extra time for IO)" },
   {"n_generations",             'n', "INT",       0, "Maximum number of generations" },
+  {"minimize_modules",               OPT_MINIMIZE_MR ,0, 0, "Run module reaction minimizer instead of MOEA"},
   { 0 }
 };
 
@@ -92,7 +93,7 @@ struct arguments
 {
   char *args[2];     /* arg1 and arg2 */
   char *objective_type, *initial_population;
-  int alpha, beta, seed, max_run_time, migration_interval, population_size, verbose, n_generations, migration_policy, migration_topology;
+  int alpha, beta, seed, max_run_time, migration_interval, population_size, verbose, n_generations, migration_policy, migration_topology, minimize_modules;
   float crossover_probability, mutation_probability, migration_fraction;
 };
 
@@ -152,6 +153,9 @@ parse_opt (int key, char *arg, struct argp_state *state)
       break;
     case 'n':
       arguments->n_generations = atoi(arg);
+      break;
+    case OPT_MINIMIZE_MR:
+      arguments->minimize_modules = 1;
       break;
 
     case ARGP_KEY_ARG:
@@ -502,6 +506,7 @@ main (int argc, char **argv)
     arguments.n_generations = 500;
     arguments.migration_policy = 0;
     arguments.migration_topology = 0;
+    arguments.minimize_modules = 0;
 
     argp_parse (&argp, argc, argv, 0, 0, &arguments);
 
@@ -538,7 +543,16 @@ main (int argc, char **argv)
     }
 
     /* Run */
-    run_moea(&mcp, initial_population);
+    if (arguments.minimize_modules)  {
+        printf("Performing module minimization. MOEA will NOT run.\n");
+            if (mpi_comm_size > 1) {
+                fprintf (stderr, "error: Module minimization does not run in parallel so invoke without MPI.\n");
+                exit(-1);
+            }
+        minimize_mr(&mcp, initial_population);
+    }
+    else
+        run_moea(&mcp, initial_population);
 
     /* Write ouput */
     char pop_path[256];

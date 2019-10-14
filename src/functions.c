@@ -15,6 +15,7 @@ void crossover(MCproblem *mcp, Individual *parent1, Individual *parent2, Individ
 void mutation(MCproblem *mcp, Individual *indv);
 void enforce_module_constraints(MCproblem *mcp, Individual *indv);
 void calculate_objectives(MCproblem *mcp, Individual *indv);
+void calculate_objective(MCproblem *mcp, Individual *indv, int k, int *change_bound);
 
 
 void
@@ -212,7 +213,7 @@ enforce_module_constraints(MCproblem *mcp, Individual *indv)
  * Notes:
  *      - Currently the objective type is specified as part of the input file, this method does not do any manipulation of the models to set the appropriate design objective.
  *      - Currently only computes wGCP.
- *      - TODO: Optimizations (perform them prior to calling this function?): Look up hash table of known solutions
+ *      - Optimization (perform them prior to calling this function?): Look up hash table of known solutions
  */
 void
 calculate_objectives(MCproblem *mcp, Individual *indv)
@@ -237,40 +238,53 @@ calculate_objectives(MCproblem *mcp, Individual *indv)
 
     /* Objective calculation */
     for (k=0; k < mcp->n_models; k++) {
-        lp = &(mcp->lps[k]);
-
-        /* Determine what bounds to change */
-        for (j=0; j < mcp->n_vars; j++) {
-            change_bound[j] = 0;
-            if ((lp->cand_col_idx[j] != NOT_CANDIDATE) && (indv->deletions[j] == DELETED_RXN)) {
-                change_bound[j] = 1; /* Reaction deleted in the chassis */
-                if(mcp->use_modules && (indv->modules[k*mcp->n_vars + j] == 1))
-                        change_bound[j] = 0; /* Reaction inserted back as module */
-            }
-        }
-
-        /* Block bounds */
-        for (j=0; j < mcp->n_vars; j++)
-            if(change_bound[j])
-	        glp_set_col_bnds(lp->P, lp->cand_col_idx[j], GLP_FX, 0, 0);
-
-        /* Calculate objectives */
-        if ((glp_simplex(lp->P, &param) == 0) && (glp_get_status(lp->P) == GLP_OPT)) /* Problem solved succesfully and solution status is optimal */
-            indv->objectives[k] = glp_get_col_prim(lp->P, lp->prod_col_idx)/lp->max_prod_growth;
-        else
-            indv->objectives[k] = 0; //TODO: Should it be set to UNKNOWN_OBJ (-1)? Is there anything that assumes positive objective values? Can help keep track of failed calc., although currently this information is not used.
-
-        /* Reset bounds */
-        for (j=0; j < mcp->n_vars; j++)
-            if(change_bound[j])
-	        glp_set_col_bnds(lp->P, lp->cand_col_idx[j], lp->cand_col_type[j], lp->cand_og_lb[j], lp->cand_og_ub[j]);
-
+        calculate_objective(mcp, indv, k, change_bound);
         /* Calculate penalty objectives (note that module reaction constraints are strictly enforced by genetic operators) */
         if (n_deletions > mcp->alpha)
             indv->penalty_objectives[k] = indv->objectives[k]/n_deletions;
         else
             indv->penalty_objectives[k] = indv->objectives[k];
     }
+
     free(change_bound);
 }
 
+/*
+ * Compute objective for network k
+ *
+ * Notes:
+ *      - change_bound is passed to reduce number of mallocs
+ */
+void calculate_objective(MCproblem *mcp, Individual *indv, int k, int *change_bound) {
+
+    LPproblem *lp;
+    int j;
+
+    lp = &(mcp->lps[k]);
+
+    /* Determine what bounds to change */
+    for (j=0; j < mcp->n_vars; j++) {
+        change_bound[j] = 0;
+        if ((lp->cand_col_idx[j] != NOT_CANDIDATE) && (indv->deletions[j] == DELETED_RXN)) {
+            change_bound[j] = 1; /* Reaction deleted in the chassis */
+            if(mcp->use_modules && (indv->modules[k*mcp->n_vars + j] == 1))
+                    change_bound[j] = 0; /* Reaction inserted back as module */
+        }
+    }
+
+    /* Block bounds */
+    for (j=0; j < mcp->n_vars; j++)
+        if(change_bound[j])
+	    glp_set_col_bnds(lp->P, lp->cand_col_idx[j], GLP_FX, 0, 0);
+
+    /* Calculate objectives */
+    if ((glp_simplex(lp->P, &param) == 0) && (glp_get_status(lp->P) == GLP_OPT)) /* Problem solved succesfully and solution status is optimal */
+        indv->objectives[k] = glp_get_col_prim(lp->P, lp->prod_col_idx)/lp->max_prod_growth;
+    else
+        indv->objectives[k] = 0; //TODO: Should it be set to UNKNOWN_OBJ (-1)? Is there anything that assumes positive objective values? Can help keep track of failed calc., although currently this information is not used.
+
+    /* Reset bounds */
+    for (j=0; j < mcp->n_vars; j++)
+        if(change_bound[j])
+	    glp_set_col_bnds(lp->P, lp->cand_col_idx[j], lp->cand_col_type[j], lp->cand_og_lb[j], lp->cand_og_ub[j]);
+}
