@@ -54,7 +54,7 @@ extern int mpi_pe, mpi_comm_size;
 /* Function definitions */
 
 /* CLI */
-const char *argp_program_version = "ModCell-HPC 1.0";
+const char *argp_program_version = MODCELL_V_STRING; /* This variable is set by compiler */
 const char *argp_program_bug_address = "https://github.com/trinhlab/modcell-hpc/issues";
 
 /* Program documentation. */
@@ -481,6 +481,7 @@ read_population(MCproblem *mcp, Population *pop, const char *population_path)
 int
 main (int argc, char **argv)
 {
+    printf("Modcell version: %s\n", MODCELL_V_STRING);
 
     /* Parse  input */
     struct arguments arguments;
