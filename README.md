@@ -1,6 +1,6 @@
 (add logo)
 # ModCell-HPC
-This is a libre version of the ModCell2 multi-objective strain design method for optimized performance. Additionally modcell-hpc:
+ModCell-HCP is an implementation of the ModCell2 multi-objective strain design method for optimized performance to deal with many-objective problems. Additionally, modcell-hpc:
 - Does not depend on proprietary programs such as Matlab to run, which among other advantages allows you to run the program on any HPC resources.
 - It has ~1000 lines of source code distributed across  5 `.c` files and the only external dependency is the glpk libary. This makes the program easy to understand and modify.
 - Follows the unix philosophy thus modcell-hpc performs a well defined task and uses text files as input and output interfaces, this makes programming extensions to prepare the input or analyze the output very simple.
@@ -37,6 +37,9 @@ You can use scripts here or in [modcell-hpc-results](https://github.com/TrinhLab
 - __cases__ Input files that include metabolic networks and candidate reactions.
 - __test__  Programatic tests to ensure intended functionality.
 
+## Minimizing module reactions
+The formulation of the modcell multi-objective optimization problem allows _module reactions_ that while satisfying the imposed constraints, do not help increase the objective for a given production network. These are denoted as futile module reactions and can be removed from an output population file by running `modcell` with the `--minimize_modules` flag. See `/test/min_1/test.sh` for an example.
+
 ## Compiling
 You can use the provided Makefile. The following dependencies are needed:
 
@@ -57,18 +60,18 @@ Run within `modcell-hpc/src`:
 To statically link glpk you probably need to compile it locally (unless your installation includes static libraries which is not common). A nice thing about this is that compilation flags can be tuned. The steps are as follows:
 
 1. Obtain glpk:
-	- wget ftp://ftp.gnu.org/gnu/glpk/glpk-4.65.tar.gz
+	- `wget ftp://ftp.gnu.org/gnu/glpk/glpk-4.65.tar.gz`
 	Verify download (optional):
-		- wget ftp://ftp.gnu.org/gnu/glpk/glpk-4.65.tar.gz.sig
-		- gpg --recv-key 0xD17BF2305981E818 # Can be determined from running gpg glpk-4.65.tar.gz.sig , obviously you should check the key and make sure is still valid
-		- gpg  glpk-4.65.tar.gz.sig
+		- `wget ftp://ftp.gnu.org/gnu/glpk/glpk-4.65.tar.gz.sig`
+		- `gpg --recv-key 0xD17BF2305981E818 # Can be determined from running gpg glpk-4.65.tar.gz.sig , obviously you should check the key and make sure is still valid`
+		- `gpg glpk-4.65.tar.gz.sig`
 
 2. extract tarball and cd into glpk-X-YY:
-	- tar -xzvf glpk-4.65.tar.gz
-	- cd glpk-4.65
-4. ./configure
-5. make clean && make CFLAGS="-O3"
-6. The desired file is found under glpk-X-YY/src/.libs/libglpk.a
+	- `tar -xzvf glpk-4.65.tar.gz`
+	- `cd glpk-4.65`
+4. `./configure`
+5. `make clean && make CFLAGS="-O3"`
+6. The desired file is found under `glpk-X-YY/src/.libs/libglpk.a`
 
 ## Notes
 

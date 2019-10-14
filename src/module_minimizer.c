@@ -19,6 +19,7 @@ minimize_mr(MCproblem *mcp, Population *parent_population)
     for (int i=0; i < mcp->population_size; i++) {
         calculate_objectives(mcp, &(parent_population->indv[i])); /* Determine objectives for individual, since these are not parsed from .pop file */
         copy_individual(mcp, &(parent_population->indv[i]), &(test_population->indv[i]));
+        if (mcp->verbose) printf("Individual:%d\t",i);
         minimize_mr_indv(mcp, &(parent_population->indv[i]), &(test_population->indv[i]));
     }
 
@@ -28,13 +29,12 @@ minimize_mr(MCproblem *mcp, Population *parent_population)
 /* Minimize modules of an individual
  * Notes:
  *      - This method ignores penalty function for alpha.
- *      - TODO: Add verbose (e.g., indv 1: original mr (sum of all modules) :  new  mr:)
  */
 void
 minimize_mr_indv(MCproblem *mcp, Individual *indv, Individual *tindv)
 {
 
-    int j,k;
+    int j,k,original_modules=0,new_modules=0;
     int *change_bound = malloc(mcp->n_vars * sizeof(int));
 
 
@@ -51,10 +51,15 @@ minimize_mr_indv(MCproblem *mcp, Individual *indv, Individual *tindv)
         }
         /* Update final individual */
         for (j=0; j < mcp->n_vars; j++) {
+            if (mcp->verbose) {
+                original_modules+=indv->modules[k*mcp->n_vars + j];
+                new_modules+=tindv->modules[k*mcp->n_vars + j];
+            }
             indv->modules[k*mcp->n_vars + j]  = tindv->modules[k*mcp->n_vars + j];
+        }
         indv->objectives[k] = tindv->objectives[k];
         indv->penalty_objectives[k] = tindv->objectives[k]; /* Note penalty function is ignored */
-        }
     }
+    if (mcp->verbose) printf("Original-modules:%d\tNew-modules:%d\n",original_modules, new_modules);
     free(change_bound);
 }

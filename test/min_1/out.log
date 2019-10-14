@@ -1,0 +1,86 @@
+Mon 14 Oct 2019 02:45:15 PM EDT
+Output written to:  /home/sg/wrk/s/matlab/modcell-hpc/test/min_1/out.pop
+Modcell version: 07b0924d9f2c6b6b955454131129cab6876719fc
+Comm size: 1.
+Reading problem data from '/home/sg/wrk/s/matlab/modcell-hpc/cases/ecoli-core/ac.mps'...
+Problem: ac
+Objective: COST
+73 rows, 95 columns, 362 non-zeros
+424 records were read
+One free row was removed
+Constructing initial basis...
+Size of triangular part is 63
+Reading problem data from '/home/sg/wrk/s/matlab/modcell-hpc/cases/ecoli-core/lac__D.mps'...
+Problem: lac__D
+Objective: COST
+73 rows, 95 columns, 362 non-zeros
+424 records were read
+One free row was removed
+Constructing initial basis...
+Size of triangular part is 63
+Reading problem data from '/home/sg/wrk/s/matlab/modcell-hpc/cases/ecoli-core/ibutoh.mps'...
+Problem: ibutoh
+Objective: COST
+79 rows, 102 columns, 392 non-zeros
+455 records were read
+One free row was removed
+Constructing initial basis...
+Size of triangular part is 69
+Reading problem data from '/home/sg/wrk/s/matlab/modcell-hpc/cases/ecoli-core/etoh_pd.mps'...
+Problem: etoh_pd
+Objective: COST
+73 rows, 96 columns, 366 non-zeros
+427 records were read
+One free row was removed
+Constructing initial basis...
+Size of triangular part is 63
+Reading problem data from '/home/sg/wrk/s/matlab/modcell-hpc/cases/ecoli-core/succ.mps'...
+Problem: succ
+Objective: COST
+73 rows, 96 columns, 367 non-zeros
+429 records were read
+One free row was removed
+Constructing initial basis...
+Size of triangular part is 63
+Reading problem data from '/home/sg/wrk/s/matlab/modcell-hpc/cases/ecoli-core/etoh.mps'...
+Problem: etoh
+Objective: COST
+73 rows, 95 columns, 362 non-zeros
+424 records were read
+One free row was removed
+Constructing initial basis...
+Size of triangular part is 63
+Reading problem data from '/home/sg/wrk/s/matlab/modcell-hpc/cases/ecoli-core/pyr.mps'...
+Problem: pyr
+Objective: COST
+73 rows, 95 columns, 362 non-zeros
+424 records were read
+One free row was removed
+Constructing initial basis...
+Size of triangular part is 63
+(PE=0) Reading initial population (path: /home/sg/wrk/s/matlab/modcell-hpc/test/min_1/out.pop)...done
+Performing module minimization. MOEA will NOT run.
+Individual:0	Original-modules:5	New-modules:0
+Individual:1	Original-modules:9	New-modules:2
+Individual:2	Original-modules:3	New-modules:0
+Individual:3	Original-modules:5	New-modules:3
+Individual:4	Original-modules:3	New-modules:1
+Individual:5	Original-modules:5	New-modules:0
+Individual:6	Original-modules:3	New-modules:1
+Individual:7	Original-modules:4	New-modules:1
+Individual:8	Original-modules:3	New-modules:1
+Individual:9	Original-modules:4	New-modules:1
+Individual:10	Original-modules:5	New-modules:1
+Individual:11	Original-modules:5	New-modules:1
+Individual:12	Original-modules:5	New-modules:3
+Individual:13	Original-modules:4	New-modules:0
+Output population written to: /home/sg/wrk/s/matlab/modcell-hpc/test/min_1/min_out.pop
+Barrier reached, all processes exiting...
+Designs that meet alpha=5:	 13/14
+Unique solutions:		 7/13
+Non-dominated solutions:	 6/7
+Assert output--------------------------------
+Expected solutions:	 6
+Computed solutions:	 6
+Expected checksum:	 f5830e94fa8d5e2f804dafe92a388d3ce48eb26c7cda57ff4fc3efb56b5fe1c9
+Computed checksum:	 f5830e94fa8d5e2f804dafe92a388d3ce48eb26c7cda57ff4fc3efb56b5fe1c9
