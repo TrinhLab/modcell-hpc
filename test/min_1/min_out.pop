@@ -33,7 +33,7 @@ G6PDH262
 GLUDy67
 THD220
 #MODULES
-ac,GLUDy67,THD220
+ac
 lac__D
 ibutoh
 etoh_pd
@@ -41,7 +41,7 @@ succ
 etoh
 pyr
 #OBJECTIVES
-ac,0.013662
+ac,0.012937
 lac__D,0.940656
 ibutoh,0.000000
 etoh_pd,0.905714
@@ -88,10 +88,10 @@ succ
 etoh
 pyr
 #OBJECTIVES
-ac,0.766051
-lac__D,0.094317
+ac,0.948978
+lac__D,0.829551
 ibutoh,0.000000
-etoh_pd,0.099292
+etoh_pd,0.764640
 succ,0.567172
 etoh,0.050991
 pyr,0.000000
@@ -111,7 +111,7 @@ etoh
 pyr
 #OBJECTIVES
 ac,0.935165
-lac__D,0.007122
+lac__D,0.922902
 ibutoh,0.000000
 etoh_pd,0.091754
 succ,0.079321
@@ -159,7 +159,7 @@ pyr
 ac,0.000000
 lac__D,0.000000
 ibutoh,0.000000
-etoh_pd,0.404408
+etoh_pd,0.497756
 succ,0.577871
 etoh,0.404408
 pyr,0.000000
@@ -179,7 +179,7 @@ succ
 etoh
 pyr
 #OBJECTIVES
-ac,0.879149
+ac,0.954824
 lac__D,0.938990
 ibutoh,0.000000
 etoh_pd,0.903506
@@ -202,7 +202,7 @@ succ
 etoh
 pyr
 #OBJECTIVES
-ac,0.879149
+ac,0.954824
 lac__D,0.938990
 ibutoh,0.000000
 etoh_pd,0.903506
@@ -225,7 +225,7 @@ succ
 etoh
 pyr
 #OBJECTIVES
-ac,0.879149
+ac,0.954824
 lac__D,0.938990
 ibutoh,0.000000
 etoh_pd,0.903506
@@ -248,7 +248,7 @@ succ
 etoh
 pyr
 #OBJECTIVES
-ac,0.879149
+ac,0.954824
 lac__D,0.938990
 ibutoh,0.000000
 etoh_pd,0.903506
@@ -271,7 +271,7 @@ succ
 etoh
 pyr
 #OBJECTIVES
-ac,0.879149
+ac,0.954824
 lac__D,0.938990
 ibutoh,0.000000
 etoh_pd,0.903506
@@ -294,10 +294,10 @@ succ
 etoh
 pyr
 #OBJECTIVES
-ac,0.789106
-lac__D,0.169782
+ac,0.955080
+lac__D,0.938990
 ibutoh,0.000000
-etoh_pd,0.186612
+etoh_pd,0.903506
 succ,0.000000
 etoh,0.098172
 pyr,0.000000

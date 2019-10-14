@@ -23,10 +23,10 @@ eval "${MODCELLHPC_PATH}/io/pop2csv.py $problem_path $minimized_pop -o $output_c
 
 # Assert expected output:
 printf "Assert output--------------------------------\n"
-printf "Expected solutions:\t 6\n"
+printf "Expected solutions:\t 7\n"
 rawlines=$(wc -l < "$output_csv")
 lines=$((rawlines-1))
 printf "Computed solutions:\t %d\n" "$lines"
-printf "Expected checksum:\t %s\n" "f5830e94fa8d5e2f804dafe92a388d3ce48eb26c7cda57ff4fc3efb56b5fe1c9"
+printf "Expected checksum:\t %s\n" "6eb28b37edac7515e931ea83ef71e0ae236beabf204f0cc19d5041a84c971059"
 # if equal means ouput is identical, otherwise output could still be correct but changed due to different row order
 printf "Computed checksum:\t %s\n" $(sha256sum "$output_csv" | awk '{print $1}')

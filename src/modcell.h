@@ -25,7 +25,7 @@
 #define MAX_MODULES 200 	/* A value above any practical beta expected, used for array allocation. FIXME: This should be done dynamically*/
 #define LP_TIME_LIMIT_MILISEC 10000 /* Ensures GLPK does not get stuck trying to solve an LP */
 #define LP_MSG_LEV GLP_MSG_OFF 	/* GLP output, options are: GLP_MSG_ERR  (will sometimes indicate that an LP could not be solved due to numerical issues), GLP_MSG_ALL (usefull for debuggin), or GLP_MSG_OFF (to avoid output)*/
-#define OBJ_TOL 0.0001 		/* Tolerance value to consider two objectives different */
+#define OBJ_TOL 0.015 		/* Tolerance value to consider two objectives different. Currently only look at two decimal digits, the 0.005 in the last place is for rounding */
 
 /* Parameters */
 #define PRINT_INTERVAL 10 	/* Generations interval when info is printed */

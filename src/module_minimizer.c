@@ -8,8 +8,8 @@
 void minimize_mr(MCproblem *mcp, Population *parent_population);
 void minimize_mr_indv(MCproblem *mcp, Individual *indv, Individual *tindv);
 
-/* Main method
- */
+
+/* Main method */
 void
 minimize_mr(MCproblem *mcp, Population *parent_population)
 {
@@ -36,20 +36,26 @@ minimize_mr_indv(MCproblem *mcp, Individual *indv, Individual *tindv)
 
     int j,k,original_modules=0,new_modules=0;
     int *change_bound = malloc(mcp->n_vars * sizeof(int));
-
-
+    double final_objective;
     /* Minimize modules for each objective independently */
     for (k=0; k < mcp->n_models; k++) {
         /* Go through each module and drop it, if objective deteriorates add it back and continue, otherwise keep it as dropped */
+        final_objective = indv->objectives[k];
         for (j=0; j < mcp->n_vars; j++) {
             if (indv->modules[k*mcp->n_vars + j] == 1) {
                 tindv->modules[k*mcp->n_vars + j] = 0;
                 calculate_objective(mcp, tindv, k, change_bound);
-                if(tindv->objectives[k] + OBJ_TOL < indv->objectives[k])
+                if(tindv->objectives[k] + OBJ_TOL < indv->objectives[k]) {
                     tindv->modules[k*mcp->n_vars + j] = 1;
+                }
+                else
+                    final_objective = tindv->objectives[k]; // Module was dropped so update objective
             }
         }
-        /* Update final individual */
+        /* Update final individual objective */
+        indv->objectives[k] = final_objective;
+        indv->penalty_objectives[k] = final_objective; /* Note penalty function is ignored */
+        /* Update final individual module */
         for (j=0; j < mcp->n_vars; j++) {
             if (mcp->verbose) {
                 original_modules+=indv->modules[k*mcp->n_vars + j];
@@ -57,9 +63,8 @@ minimize_mr_indv(MCproblem *mcp, Individual *indv, Individual *tindv)
             }
             indv->modules[k*mcp->n_vars + j]  = tindv->modules[k*mcp->n_vars + j];
         }
-        indv->objectives[k] = tindv->objectives[k];
-        indv->penalty_objectives[k] = tindv->objectives[k]; /* Note penalty function is ignored */
     }
     if (mcp->verbose) printf("Original-modules:%d\tNew-modules:%d\n",original_modules, new_modules);
     free(change_bound);
 }
+
