@@ -22,7 +22,7 @@ This tool and instructions are for unix-like OSs (e.g., Linux, MacOS, BSD), if y
 The input files correspond to LP problems for each production network (in `.mps` format) and information about candidates (IDs of reactions that can be deleted). These can be generated with the assistance of [ModCell's Matlab implementation](https://github.com/TrinhLab/ModCell2), but that is not a necessity.
 
 ### Output files
-The output of the main method corresponds to a plain text files with information about each individual in the Population (design variables, design objectives, etc). This file can be converted into a table that only preserves Pareto optimal solutions and is useful for further analysis using the program `io/pop2csv.py`. The resulting table can be analyzed with the help the small programs provided in [modcell-hpc-results](https://github.com/TrinhLab/modcell-hpc-results).
+The output of the main method corresponds to a plain text files with information about each individual in the Population (design variables, design objectives, etc). This file can be converted into a table that only preserves Pareto optimal solutions and is useful for further analysis using the program `./io/pop2csv.py`. The resulting table can be analyzed with the help the small programs provided in `./tools`
 
 ### Running modcell-hpc
 Run the `modcell` binary (either the released version or compile it your self as described below), the only runtime dependenci is openmpi. For necessary arguments and available options run `modcell --help`.
@@ -37,8 +37,12 @@ You can use scripts here or in [modcell-hpc-results](https://github.com/TrinhLab
 - __cases__ Input files that include metabolic networks and candidate reactions.
 - __test__  Programatic tests to ensure intended functionality.
 
-## Minimizing module reactions
-The formulation of the modcell multi-objective optimization problem allows _module reactions_ that while satisfying the imposed constraints, do not help increase the objective for a given production network. These are denoted as futile module reactions and can be removed from an output population file by running `modcell` with the `--minimize_modules` flag. See `/test/min_1/test.sh` for an example.
+## Filtering solutions
+ The `.csv` file produced by `./io/pop2csv.py` noted above will remove duplicated, non-Pareto optimal, and solutions that violate alpha constraints. However, if module reactions are used, the output can still be improved further:
+
+- __Minimizing module reactions__: The formulation of the modcell multi-objective optimization problem allows _module reactions_ that while satisfying the imposed constraints, do not help increase the objective for a given production network. These are denoted as futile module reactions and can be removed from an output population file by running `modcell` with the `--minimize_modules` flag. See `./test/min_1/test.sh` for an example.
+
+- __Coalescing module reactions__: Solutions with the same reaction deletions but different module reactions can be combiend into a superior solution. For further explanation and to perform this action check `./tools/mc_coalesce_modules`. See `./test/tools_1/test.sh` for an example.
 
 ## Compiling
 You can use the provided Makefile. The following dependencies are needed:

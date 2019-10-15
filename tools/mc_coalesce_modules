@@ -1,0 +1,83 @@
+#!/usr/bin/env python3
+
+"""
+Combines several designs with the same reaction deletions but different module reactions into a better one.
+
+
+Notes:
+    - Alternative solutions are ignored.
+
+
+Explanation:
+
+Consider the following non-dominated designs:
+Deletions 	M1 	M2 	O1 	O2
+A,B,C		A		0.5	0
+A,B,C			B	0	0.5
+
+They both have the same deletions but independently found good module reactions, in such sceneraio the following design would dominate both them:
+Deletions 	M1 	M2 	O1 	O2
+A,B,C		A	B	0.5	0.5
+
+
+How to identify them?
+Given that the designs have the same reaction deletions, then for each objective they will have a superior module configuration (there might be alternatives where two different modules lead to the same objective, but this is very unlikely). So each cluster of designs with the same deletions, can be coalesced into one design.
+
+- Find a cluster with the same deletions
+- For each module, inspect module reactions and associated objective, select the best (unique) case.
+- Craft coalesced design by keeping reaction deletions and best modules.
+"""
+
+import argparse
+import pandas as pd
+
+def main():
+    # Parse arguments
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('pf_path', help='Path to modcell output pareto front .csv file')
+    default_output = "<pf_path>_coal.csv"
+    parser.add_argument('-o','--output', help='output file name', default=default_output, type=str)
+    args = parser.parse_args()
+    if args.output == default_output:
+        args.output = f"{args.pf_path[:-4]}_coal.csv"
+
+    # Load data
+    df = pd.read_csv(args.pf_path, index_col="Solution index")
+    odf = pd.DataFrame(columns=df.columns)
+
+    module_ids = [i.replace('(objective)','') for i in df.columns[df.columns.str.contains("objective")]]
+
+    # Avoid issues with nan
+    for module in module_ids:
+        df[f"{module}(objective)"] = df[f"{module}(objective)"].fillna(0)
+
+    # Main loop
+    for idx, row in df.iterrows():
+        deletions = row['Deletion_id']
+        if not any(deletions == odf['Deletion_id']):
+            orow = row
+            l_group_members = deletions == df['Deletion_id']
+            if sum(l_group_members) > 1: # We have a reaction group
+                orow = row
+                for module in module_ids:
+                    objectives = df.loc[l_group_members, f"{module}(objective)" ]
+                    modules = df.loc[l_group_members, f"{module}(module)" ]
+
+                    max_idx = objectives.idxmax() # Returns just one, even if max is repeated.
+                    orow[f"{module}(objective)"] = objectives[max_idx]
+                    orow[f"{module}(module)"] = modules[max_idx]
+
+            odf = odf.append(orow)
+
+    # Reset indices
+    odf = odf.reset_index()
+    odf.index.name = "Solution index"
+
+    # Output
+    odf.to_csv(args.output)
+    print(f"Coalesced/original designs: {odf.shape[0]}/{df.shape[0]}")
+
+
+
+if __name__ == '__main__':
+   main()
