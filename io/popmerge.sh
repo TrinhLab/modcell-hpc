@@ -24,6 +24,9 @@ echo "" > temp
 for fullfile in "${target}_"* ; do
 	cat "$fullfile" >> temp
 done
-#cat "$target_"* | grep -Ev "#ENDFILE|${md_pattern}" | sed -e "\$a#ENDFILE"  > "$target"
 grep -Ev "#ENDFILE|${md_pattern}" temp | sed -e "\$a#ENDFILE"  > "$target" && rm temp
 grep -E $md_pattern "${target}_0" | cat - "$target" > temp && mv temp "$target"
+
+# Update metadata: (#Optimization: Do this on the metadata only (md_pattern above) instead of the whole file)
+population_size=$(grep -c "#INDIVIDUAL" < "$target")
+sed -i "s/population_size=.*/population_size=$population_size/" "$target"

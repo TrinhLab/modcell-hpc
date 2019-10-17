@@ -11,7 +11,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
 import squarify # This is my fork that allows padding
-from general import setup_plot_look, setup_plot_size, square_plot
+from general import setup_plot_look, square_plot
 
 
 def main():
@@ -37,7 +37,6 @@ def main():
         args.output = "module_{}_comp_{}.svg".format(args.pf_path[:-4], str(args.threshold).replace('.', 'p'))
 
     setup_plot_look(args)
-    setup_plot_size(args)
 
     df = pd.read_csv(args.pf_path)
     # Loop through columns of the dataframe below but filter by compatibility

@@ -1,0 +1,4 @@
+Solution index,Deletion_id,etoh(module),prod1(module),succ(module),prod2(module),etoh(objective),prod1(objective),succ(objective),prod2(objective)
+0,"ACKr, FRD7, GLUDy, LDH_D, PYK",,,,,0,0,0.5,0.4
+1,"ACKr, ALCD2x, G6PDH2r, GLUDy, THD2",ALCD2x,,,,0.5,0,0,0
+2,"ACKr, ALCD2x, G6PDH2r, GLUDy, THD2",,THD2,,,0,0,0,0.3

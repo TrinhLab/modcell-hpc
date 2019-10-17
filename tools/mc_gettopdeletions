@@ -1,0 +1,42 @@
+#!/usr/bin/env python3
+
+""" Generates table with most deleted reactions: id|name|formula|frequency """
+
+import argparse
+import pandas as pd
+import collections
+
+def main():
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('pf_path', help='Path to modcell output pareto front .csv input file')
+    parser.add_argument('rxn_path', help='Path to tsv file with id|name|formula for all reactions. You can use mc_help_getrxnlist to generate it')
+    default_output = "<pf_path>_topdeletions.tsv"
+    parser.add_argument('-o','--output', help='output file name', default=default_output, type=str)
+    args = parser.parse_args()
+    if args.output == default_output:
+        args.output = f"{args.pf_path[:-4]}_topdeletions.csv"
+
+    df = pd.read_csv(args.pf_path)
+    rdf = pd.read_csv(args.rxn_path, sep='\t', index_col='id')
+
+    rxns = []
+    for idx, value in df['Deletion_id'].items():
+        rxns.extend(value.split(', '))
+
+    rxnc = collections.Counter(rxns)
+
+    cdf = pd.DataFrame.from_dict({'id': [k for k,v in rxnc.items()], 'counts': [v for k,v in rxnc.items()]})
+    cdf = cdf.set_index('id')
+    odf = cdf.join(rdf)
+
+    # Format
+    odf['counts'] = odf['counts']/df.shape[0]# Divide by total number of designs
+    odf['counts'] = round(odf['counts']*100, 1)
+    odf = odf.sort_values(by=['counts'], ascending=False)
+
+    # Write
+    odf.to_csv(args.output)
+    print(f"Output written to: {args.output}")
+
+if __name__ == '__main__':
+   main()

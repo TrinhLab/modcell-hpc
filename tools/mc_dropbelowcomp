@@ -1,0 +1,35 @@
+#!/usr/bin/env python3
+
+""" Drops products that are not compatible in any design
+"""
+
+import argparse
+import pandas as pd
+
+def main():
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('pf_path', help='Path to modcell output pareto front .csv input file')
+    parser.add_argument('-t','--threshold', help='Compatibility threshold', default=0.5, type=float)
+
+    default_output = "<input>_compa_<threshold>.csv"
+    parser.add_argument('-o','--output', help='output file name', default=default_output, type=str)
+    args = parser.parse_args()
+
+    if args.output == default_output:
+        args.output = "{}_compa_{}.csv".format(args.pf_path[:-4], str(args.threshold).replace('.', 'p'))
+
+    df = pd.read_csv(args.pf_path)
+
+    cdf = df.loc[:,df.columns.str.contains("objective")] >= args.threshold
+    remove_module_ids = [i.replace('(objective)','') for i in cdf.columns[cdf.sum(0) == 0]]
+
+    odf =  df.drop(axis=1, columns=[f"{id}(objective)" for id in remove_module_ids])
+    odf =  odf.drop(axis=1, columns=[f"{id}(module)" for id in remove_module_ids])
+    print(f"Dropped {len(remove_module_ids)}/{cdf.shape[1]} modules: {remove_module_ids}")
+
+    odf.to_csv(args.output, index=False)
+    print(f"Output written to: {args.output}")
+
+
+if __name__ == '__main__':
+   main()

@@ -1,0 +1,17 @@
+#!/bin/sh
+# run with -h flag for info
+
+set -e
+
+if  [ "$1" == "-h" ];then
+	echo "Parses the output of mc_setcover to identify unique designs"
+	echo "usage: $0 input_file" && exit
+fi
+
+if [ "$#" != "1" ]; then
+	echo "invalid input, run: $0 -h"
+else
+	input_file=$1
+fi
+
+sed -En 's:\[([0-9, ]*)\].*:\1:p' $input_file | tr ',' '\n' | sed 's: ::' | sort | uniq

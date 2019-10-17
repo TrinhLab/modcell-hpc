@@ -70,7 +70,7 @@ def main():
             odf = odf.append(orow)
 
     # Reset indices
-    odf = odf.reset_index()
+    odf = odf.reset_index(drop=True)
     odf.index.name = "Solution index"
 
     # Output

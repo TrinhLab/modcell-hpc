@@ -10,7 +10,7 @@ def main():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('pf_path', help='Path to modcell output pareto front .csv file')
     parser.add_argument('-t','--threshold', help='Compatibility threshold', default=0.5, type=float)
-    parser.add_argument('-n','--normalize', help='Normalize compatibility to the total number of products', default=False, type=lambda x: (str(x).lower() == 'true'))
+    parser.add_argument('-n','--normalize', help='Normalize compatibility to the total number of products',  action='store_true')
     default_output = "<input>_comp_<threshold>.csv"
     parser.add_argument('-o','--output', help='output file name', default=default_output, type=str)
     args = parser.parse_args()

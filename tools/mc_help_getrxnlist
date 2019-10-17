@@ -1,0 +1,31 @@
+#!/usr/bin/env python3
+
+""" Extracts a ID|Name|formula For all reactions in a cobra model """
+
+import argparse
+import cobra
+
+def main():
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('model_path', help='Path to cobra model. Format will be determined from the file extension')
+    parser.add_argument('output_path', help='Path to output file')
+    args = parser.parse_args()
+
+    ext = args.model_path.split('.')[-1]
+    if ext == 'mat':
+        model = cobra.io.load_matlab_model(args.model_path)
+    elif ext == 'json':
+        model =cobra.io.load_json_model(args.model_path)
+    elif ext in ['xml', 'sbml']:
+        model = cobra.io.load_sbml_model(args.model_path)
+    else:
+        ValueError(f"Error: Extenstion \'{ext}\' not suported")
+
+    with open(args.output_path, 'w') as f:
+        f.write('id\tname\tformula\n')
+        for rxn in model.reactions:
+            f.write(f'{rxn.id}\t{rxn.name}\t{rxn.reaction}\n')
+
+
+if __name__ == '__main__':
+   main()
