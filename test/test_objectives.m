@@ -46,15 +46,15 @@ T = readtable(output_file_path);
 PF = zeros(length(T.Deletion_id),length(prodnet.prod_id));
 design_vars = [];
 for i = 1:length(T.SolutionIndex)
-    
+
     %% Parse deletions
     deletions = parse_list(T.Deletion_id{i});
-    
+
     y = false(1,length(prodnet.cand_ind));
     [~,model_del_ind] = intersect(prodnet.parent_model.rxns, deletions,'stable');
     [~,cand_del_ind] = intersect(prodnet.cand_ind,model_del_ind,'stable');
     y(cand_del_ind) = true;
-    
+
     %% Parse module reactions
     Z = false(length(prodnet.prod_id), length(prodnet.cand_ind));
     var_module_id = T.Properties.VariableNames(contains(T.Properties.VariableNames, '_module'));
@@ -62,7 +62,7 @@ for i = 1:length(T.SolutionIndex)
     for k = 1:length(prodnet.prod_id)
         if ~isempty(intersect(module_prod_id, prodnet.prod_id{k}))
             modules = T{i,[prodnet.prod_id{k},'_module_']};
-            if ~isempty(modules) || isnan(modules)
+            if check_empty(modules)
                 module_rxn = {};
             else
                 module_rxn = parse_list(T{i,[prodnet.prod_id{k},'_module_']}{1});
@@ -72,7 +72,7 @@ for i = 1:length(T.SolutionIndex)
             Z(k, cand_del_ind) = true;
         end
     end
-    
+
     %% Compute Pareto front
     prodnet.set_module_and_deleted_variables(Z, y)
     PF(i,:) = prodnet.calc_design_objectives(design_objective);
@@ -97,12 +97,25 @@ end
 end
 
 function out_prod_id = safe_prod_id(prod_id)
-% Matlab tables can deal with numbers in ids..
+% Matlab tables can't deal with numbers in ids..
 out_prod_id = prod_id;
 for k=1:length(prod_id)
     %out_prod_id{k} = strrep(out_prod_id{k}, '_', 'U');
     if regexp(prod_id{k}, '^\d')
         out_prod_id{k} = ['z', prod_id{k}];
+    end
+end
+end
+
+function is_empty = check_empty(modules)
+% Matlab sucks (NaN value in table cannot be easily switched by empty
+% strings)
+is_empty = 0;
+if isempty(modules)
+    is_empty =1 ;
+else
+    try
+        is_empty = isnan(modules);
     end
 end
 end

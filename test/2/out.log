@@ -1,4 +1,5 @@
-Wed 02 Oct 2019 05:17:01 PM EDT
+Thu 21 Nov 2019 03:16:21 PM EST
+Modcell version: 45cde813291cba933c49189108cd9caed80c1c97
 Comm size: 1.
 Reading problem data from '/home/sg/wrk/s/matlab/modcell-hpc/cases/ecoli-core/ac.mps'...
 Problem: ac
@@ -64,8 +65,8 @@ PE: 0	 Generation:40	 Time:2.5s
 PE: 0	 Generation:50	 Time:3.1s
 PE: 0	 Generation:60	 Time:3.8s
 PE: 0	 Generation:70	 Time:4.4s
-PE: 0	 Generation:80	 Time:5.0s
-PE: 0	 Generation:90	 Time:5.4s
+PE: 0	 Generation:80	 Time:4.9s
+PE: 0	 Generation:90	 Time:5.3s
 PE: 0	 Generation:100	 Time:5.8s
 PE: 0	 Generation limit reached 	 Time:5.8s
 Barrier reached, writting populations...
@@ -88,25 +89,6 @@ For product information, visit www.mathworks.com.
 The original names are saved in the VariableDescriptions property.] 
 [Warning: Variable names were modified to make them valid MATLAB identifiers.
 The original names are saved in the VariableDescriptions property.] 
-Sol idx:1 	 Obj:etoh 	 In obj.: 0.87 	 Calc. obj.: 0.91	 In-Out: -0.04
-Sol idx:1 	 Obj:etoh_pdc 	 In obj.: 0.90 	 Calc. obj.: 0.91	 In-Out: -0.01
-Sol idx:1 	 Obj:ac 	 In obj.: 0.02 	 Calc. obj.: 0.01	 In-Out: 0.00
-Sol idx:3 	 Obj:etoh_pdc 	 In obj.: 0.76 	 Calc. obj.: 0.10	 In-Out: 0.67
-Sol idx:3 	 Obj:lac__D 	 In obj.: 0.83 	 Calc. obj.: 0.09	 In-Out: 0.74
-Sol idx:3 	 Obj:ac 	 In obj.: 0.95 	 Calc. obj.: 0.77	 In-Out: 0.18
-Sol idx:4 	 Obj:lac__D 	 In obj.: 0.92 	 Calc. obj.: 0.01	 In-Out: 0.92
-Sol idx:6 	 Obj:etoh_pdc 	 In obj.: 0.50 	 Calc. obj.: 0.40	 In-Out: 0.09
-Sol idx:7 	 Obj:etoh 	 In obj.: 0.43 	 Calc. obj.: 0.51	 In-Out: -0.07
-Sol idx:7 	 Obj:ac 	 In obj.: 0.95 	 Calc. obj.: 0.88	 In-Out: 0.08
-Sol idx:8 	 Obj:etoh 	 In obj.: 0.43 	 Calc. obj.: 0.51	 In-Out: -0.07
-Sol idx:8 	 Obj:ac 	 In obj.: 0.95 	 Calc. obj.: 0.88	 In-Out: 0.08
-Sol idx:9 	 Obj:etoh 	 In obj.: 0.43 	 Calc. obj.: 0.51	 In-Out: -0.07
-Sol idx:9 	 Obj:ac 	 In obj.: 0.95 	 Calc. obj.: 0.88	 In-Out: 0.08
-Sol idx:10 	 Obj:etoh 	 In obj.: 0.43 	 Calc. obj.: 0.51	 In-Out: -0.07
-Sol idx:10 	 Obj:ac 	 In obj.: 0.95 	 Calc. obj.: 0.88	 In-Out: 0.08
-Sol idx:11 	 Obj:etoh 	 In obj.: 0.43 	 Calc. obj.: 0.51	 In-Out: -0.07
-Sol idx:11 	 Obj:ac 	 In obj.: 0.95 	 Calc. obj.: 0.88	 In-Out: 0.08
-Sol idx:12 	 Obj:etoh_pdc 	 In obj.: 0.90 	 Calc. obj.: 0.19	 In-Out: 0.72
-Sol idx:12 	 Obj:lac__D 	 In obj.: 0.94 	 Calc. obj.: 0.17	 In-Out: 0.77
-Sol idx:12 	 Obj:ac 	 In obj.: 0.96 	 Calc. obj.: 0.79	 In-Out: 0.17
+No issues found!
+
 >> 
