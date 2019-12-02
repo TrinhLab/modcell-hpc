@@ -10,3 +10,6 @@ Notation:
 - `mc_setcover` depends on `pyomo` (`pip install pyomo`) and an optimization solver (usually this will be installed at the system level, e.g. in Arch Linux `pacman -S glpk`).
 - I don't usually run these on a virtualenv but I have included `requirements.txt` since I have experienced cobratoolbox breaking compatibility.
 
+
+## Notes
+- I am trying to move away from csv towards tsv without generating too much incosistency.

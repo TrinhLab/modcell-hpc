@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 
 # Formats output table into more readable form:
-# solution idx | deletions | Module_rxns | compatible products |
-#   5          | R1, R2, R5 | prod1 (R2) , prod4 (R3, R5) , ...|
+# Solution index | Deletion_id | module_rxns                      | compatible_products | unique_compatible_products
+#   5            | R1, R2, R5  | prod1 (R2) , prod3 (R3, R5)      | prod1, prod2, prod3 | prod3
 
+# The unique_compatible_products is the the set of compatible products in the current design minus the set of compatible products in every other design. (TODO:not implemented yet)
 # Potential features to add:
 # - Add an option to use produt names instead of ids
-# - Condense compatible objectives? prod1 (0.4), prod2 (0.7)
 
 import argparse
 import pandas as pd
@@ -16,11 +16,11 @@ def main():
     parser.add_argument('pf_path', help='Path to modcell output pareto front .csv input file')
     parser.add_argument('-s', '--simple', help='Only keep interesting columns in the output', default=True, type=lambda x: (str(x).lower() == 'true'))
     parser.add_argument('-t','--threshold', help='Compatibility threshold', default=0.5, type=float)
-    default_output = "<inpt_path>_format_t<compatibility threshold>.csv"
+    default_output = "<inpt_path>_format_t<compatibility threshold>.tsv"
     parser.add_argument('-o','--output', help='output file name', default=default_output, type=str)
     args = parser.parse_args()
     if args.output == default_output:
-        args.output = "{}_format_t{}.csv".format(args.pf_path.replace('.csv',''), str(args.threshold).replace('.', 'p'))
+        args.output = "{}_format_t{}.tsv".format(args.pf_path.replace('.csv',''), str(args.threshold).replace('.', 'p'))
 
     df = pd.read_csv(args.pf_path)
 
@@ -29,20 +29,20 @@ def main():
                 for col_id,rxn_id in row.iteritems()
                 if ('module' in col_id) and (isinstance(rxn_id, str))]
 
-    df['Module_rxns'] = [", ".join(map_modules(row)) for idx,row in df.iterrows()]
+    df['module_rxns'] = [", ".join(map_modules(row)) for idx,row in df.iterrows()]
 
     def map_objectives(row, args):
         return [col_id.replace('(objective)','')
                 for col_id, obj_val in row.iteritems()
                 if ('objective' in col_id) and (obj_val >= args.threshold)]
 
-    df['Compatible_products'] = [", ".join(map_objectives(row, args)) for idx,row in df.iterrows()]
+    df['compatible_products'] = [", ".join(map_objectives(row, args)) for idx,row in df.iterrows()]
 
     if args.simple:
-        #df = df[df.columns.drop(list(df.filter(regex='module|objective')))] # Drop module and objective columns
-        df = df[["Solution index", 'Deletion_id', 'Module_rxns', 'Compatible_products']]
+        df = df[["Solution index", 'Deletion_id', 'module_rxns', 'compatible_products']]
 
-    df.to_csv(args.output, index=False)
+    df.to_csv(args.output, index=False, sep='\t')
+    print(f"Output written to: {args.output}")
 
 
 if __name__ == '__main__':
