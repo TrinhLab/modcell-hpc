@@ -53,6 +53,8 @@ You can use the provided Makefile. The following dependencies are needed:
 ### Compilation examples
 Run within `modcell-hpc/src`:
 
+	- Compile with dynamic link (**Required** flag if you do not compile GLPK as explained below).
+		- `make link=dynamic`
 	- Compile with optimize flag:
 		- `make flags=optimize`
 	- Compile with optimize flag and static linking (will increase executable size, but remove the need for glpk installation, might also be a bit faster):

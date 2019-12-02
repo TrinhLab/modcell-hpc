@@ -1,7 +1,8 @@
 CC=mpicc
-LIBS = -lglpk
+LIBS = ../bin/libglpk.a -lm
 MODCELL_V_STRING := $(shell git rev-parse HEAD | sed 's:\(.*\):\x27"\1"\x27:')
-CFLAGS = -O3 -DMODCELL_V_STRING=$(MODCELL_V_STRING)
+CFLAGS = -O3 -DMODCELL_V_STRING=$(MODCELL_V_STRING) -Wall
+
 
 ifeq ($(flags), develop)
 	CFLAGS = -Wall -Wpedantic -g -Wextra -Wno-sign-compare -DMODCELL_V_STRING=$(MODCELL_V_STRING)
