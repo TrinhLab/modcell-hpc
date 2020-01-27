@@ -15,7 +15,7 @@ def main():
     parser.add_argument('-a','--annot', help='Include numbers in cells', default=False)
     parser.add_argument('-w','--width', help='Figure dimensions (inches)', default=5, type=float)
     parser.add_argument('-x','--height', help='Figure dimensions (inches)', default=5, type=float)
-    parser.add_argument('-f','--font', help='Font name', default='Helvetica', type=str)
+    parser.add_argument('-f','--font', help='Font name', default='Arial', type=str)
     parser.add_argument('-fs','--font_size', help='font-size', default=12, type=str)
     args = parser.parse_args()
 

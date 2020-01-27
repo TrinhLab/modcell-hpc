@@ -20,7 +20,7 @@ def main():
     #  Defaults
     default_output = "comp_<threshold>.svg"
     parser.add_argument('-o','--output', help='output file name', default=default_output, type=str)
-    parser.add_argument('-f','--font', help='Font name', default='Helvetica', type=str)
+    parser.add_argument('-f','--font', help='Font name', default='Arial', type=str)
     parser.add_argument('-fs','--font_size', help='font-size', default=12, type=int)
     parser.add_argument('-w','--width', help='Figure dimensions (inches)', default=3, type=float)
     parser.add_argument('-x','--height', help='Figure dimensions (inches)', default=3, type=float)
