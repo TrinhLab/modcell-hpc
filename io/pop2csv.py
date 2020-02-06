@@ -66,6 +66,7 @@ def main():
                 continue
             if line == "#DELETIONS":
                 in_deletions = True
+                in_modules = False
                 continue
             if line == "#MODULES":
                 in_deletions = False
@@ -73,6 +74,7 @@ def main():
                 continue
             if line == "#OBJECTIVES":
                 in_modules = False
+                in_deletions = False
                 in_objectives = True
                 continue
             if line == "#ENDFILE":
@@ -82,13 +84,13 @@ def main():
             if in_deletions:
                 indv['Deletion_id'].append(r_map[line])
 
-            if in_modules:
+            elif in_modules:
                 ml = line.split(',')
                 model_id = m_map[ml[0]]
                 module_rxns = ml[1:]
                 indv["{}(module)".format(model_id)] = ', '.join([r_map[rid] for rid in module_rxns])
 
-            if in_objectives:
+            elif in_objectives:
                 ml = line.split(',')
                 model_id = m_map[ml[0]]
                 objective_value = ml[1]
