@@ -12,7 +12,7 @@ def main():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('pf_path', help='Path to modcell output pareto front .csv input file')
     parser.add_argument('-i2n','--id2name_path', help='Path with map to convert product ids to names. The map is a csv file with headers: id,name', default=None)
-    parser.add_argument('-a','--annot', help='Include numbers in cells', default=False)
+    parser.add_argument('-a','--annot', help='Include numbers in cells', dest='annot', action='store_true')
     parser.add_argument('-w','--width', help='Figure dimensions (inches)', default=5, type=float)
     parser.add_argument('-x','--height', help='Figure dimensions (inches)', default=5, type=float)
     parser.add_argument('-f','--font', help='Font name', default='Arial', type=str)

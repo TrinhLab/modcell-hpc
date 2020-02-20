@@ -27,6 +27,7 @@ def main():
     parser.add_argument('-f2n','--file2name', help= 'Two column tsv file with no headers that maps from file name to desired label name', default='', type=str)
     default_x_order = '[0,1,2,...]'
     parser.add_argument('-a', '--x_order', help='List to re-order x axis , e.g. [1,2,3,0] or \"[1, 2, 3 , 0]\"', type=str, default=default_x_order)
+    parser.add_argument('-c','--colors', help='Number of colors to use', default=4, type=int)
     args = parser.parse_args()
     if args.output == default_output:
         args.output = "comp_{}.svg".format(str(args.threshold).replace('.', 'p'))
@@ -61,7 +62,7 @@ def main():
         compats = [compats_r[i] for i in x_order]
         x_labels = [x_labels_r[i] for i in x_order]
 
-    ax = sns.boxplot(data=compats, palette=sns.color_palette("pastel")[:4])
+    ax = sns.boxplot(data=compats, palette=sns.color_palette("pastel")[:args.colors])
     if args.swarm:
         sns.swarmplot(data=compats, color=".25", size=3, ax=ax)
 
